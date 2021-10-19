@@ -26,6 +26,7 @@ const (
 )
 
 func main() {
+
 	listenAddr := ":9000"
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
 
@@ -53,6 +54,7 @@ func main() {
 	if err != nil && err != http.ErrServerClosed {
 		logger.Fatal(err)
 	}
+
 }
 
 // Utility function for logging
