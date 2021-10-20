@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/dedis/livos/controller"
-	bolt "go.etcd.io/bbolt"
 )
 
 type key int
@@ -27,6 +26,7 @@ const (
 )
 
 func main() {
+
 	listenAddr := ":9000"
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
 
@@ -54,23 +54,6 @@ func main() {
 	if err != nil && err != http.ErrServerClosed {
 		logger.Fatal(err)
 	}
-
-	//lauch datatbase
-	db, err := bolt.Open("db2", 0666, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	//update database
-	db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucket([]byte("MyBucket"))
-		err2 := b.Put([]byte("answer"), []byte("42"))
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
-		}
-		return err2
-	})
 }
 
 // Utility function for logging
