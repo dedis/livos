@@ -2,8 +2,12 @@ package controller
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"net/http"
+	"os"
+	"os/signal"
+	//"github.com/dedis/livos/storage/bbolt"
 )
 
 // NewController ...
@@ -31,4 +35,23 @@ func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (c Controller) HandleQuit(w http.ResponseWriter, req *http.Request) {
+	//action
+	stop := make(chan os.Signal)
+	signal.Notify(stop, os.Interrupt)
+
+	<-stop
+
+	fmt.Fprintf(w, "shutting down ...\n")
+
+	//fmt.Fprintf(w, "Server is shut down")
+	//ctx, cancel := context.WithCancel(context.Background())
+	//if cn, ok := w.(http.CloseNotifier); ok {
+	//go func(done <-chan struct{}, closed <-chan bool) {
+	//	cancel()
+	//}(ctx.Done(), cn.CloseNotify())
+	//}
+
 }
