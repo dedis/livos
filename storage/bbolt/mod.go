@@ -1,13 +1,13 @@
-package storage
+package bbolt
 
 //the storage implementation using bbolt
 
 import (
 	"bytes"
 
+	"github.com/dedis/livos/storage"
 	"go.etcd.io/bbolt"
 	"golang.org/x/xerrors"
-	//"github.com/dedis/livos/storage"
 )
 
 // BoltDB is an adapter of the storage database using bboltdb.
@@ -18,7 +18,7 @@ type boltDB struct {
 }
 
 // New opens a new database to the given file.
-func New(path string) (DB, error) {
+func New(path string) (storage.DB, error) {
 	db, err := bbolt.Open(path, 0666, &bbolt.Options{})
 	if err != nil {
 		return nil, xerrors.Errorf("failed to open db: %v", err)
@@ -33,7 +33,7 @@ func New(path string) (DB, error) {
 
 // View implements storage.DB. It executes the read-only transaction in the context
 // of the database.
-func (db boltDB) View(fn func(ReadableTx) error) error {
+func (db boltDB) View(fn func(storage.ReadableTx) error) error {
 	return db.bolt.View(func(txn *bbolt.Tx) error {
 		return fn(boltTx{txn: txn})
 	})
@@ -41,7 +41,7 @@ func (db boltDB) View(fn func(ReadableTx) error) error {
 
 // Update implements kv.DB. It executes the writable transaction in the context
 // of the database.
-func (db boltDB) Update(fn func(WritableTx) error) error {
+func (db boltDB) Update(fn func(storage.WritableTx) error) error {
 	return db.bolt.Update(func(txn *bbolt.Tx) error {
 		return fn(boltTx{txn: txn})
 	})
@@ -63,7 +63,7 @@ type boltTx struct {
 
 // GetBucket implements kv.ReadableTx. It returns the bucket with the given name
 // or nil if it does not exist.
-func (tx boltTx) GetBucket(name []byte) Bucket {
+func (tx boltTx) GetBucket(name []byte) storage.Bucket {
 	bucket := tx.txn.Bucket(name)
 	if bucket == nil {
 		return nil
@@ -74,7 +74,7 @@ func (tx boltTx) GetBucket(name []byte) Bucket {
 
 // GetBucketOrCreate implements kv.WritableTx. It creates the bucket if it does
 // not exist and then return it.
-func (tx boltTx) GetBucketOrCreate(name []byte) (Bucket, error) {
+func (tx boltTx) GetBucketOrCreate(name []byte) (storage.Bucket, error) {
 	bucket, err := tx.txn.CreateBucketIfNotExists(name)
 	if err != nil {
 		return nil, xerrors.Errorf("create bucket failed: %v", err)

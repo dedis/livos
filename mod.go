@@ -10,15 +10,17 @@ import (
 	"os"
 	"time"
 
-	"github.com/dedis/livos/controller"
+	"github.com/dedis/livos/web/controller"
+	//"github.com/dedis/livos/storage"
+	//"github.com/dedis/livos/voting"
 )
 
 type key int
 
-//go:embed index.html
+//go:embed web/index.html
 var content embed.FS
 
-//go:embed static
+//go:embed web/static
 var static embed.FS
 
 const (
@@ -26,6 +28,12 @@ const (
 )
 
 func main() {
+
+	//creer s=db := storage
+
+	//VotingSystem(db)
+
+	//controller(vs)
 
 	listenAddr := ":9000"
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
