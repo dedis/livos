@@ -10,16 +10,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/dedis/livos/controller"
+	"github.com/dedis/livos/web/controller"
 )
 
 type key int
 
 //go:embed index.html
-var siteweb embed.FS
 var content embed.FS
 
-//go:embed static
+//go:embed homepage.html
+var contenthomepage embed.FS
+
+//go:embed web/static
 var static embed.FS
 
 const (
@@ -38,12 +40,13 @@ func main() {
 	}
 
 	ctrl := controller.NewController(content)
+	ctrl2 := controller.NewController(contenthomepage)
 
 	mux.HandleFunc("/", ctrl.HandleHome)
+	mux.HandleFunc("/homepage", ctrl2.HandleHomePage)
 
 	// serve assets
-	mux.Handle("/static/", http.FileServer(http.FS(static)))¨
-	mux.Handle("/siteweb/", http.FileServer(http.FS(siteweb)))¨
+	mux.Handle("/static/", http.FileServer(http.FS(static)))
 
 	// create connection
 	ln, err := net.Listen("tcp", listenAddr)
