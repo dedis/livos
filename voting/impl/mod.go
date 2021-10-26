@@ -27,7 +27,17 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 	return vi
 }
 
-func CastVote(votingID, userID string, choice voting.Choice) {
+func (vs VotingSystem) ListVotings() []string {
+	listeDeVotes := make([]string, len(vs.VotingInstancesList))
+	for key := range vs.VotingInstancesList {
+		listeDeVotes = append(listeDeVotes, key)
+	}
+	return listeDeVotes
+
+}
+
+func (vi VotingInstance) CastVote(userID string, choice voting.Choice) {
+	vi.Votes[userID] = choice
 	//listVote.GetVoting(votingID).db.update(userID, Choice)
 }
 
