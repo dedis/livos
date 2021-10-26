@@ -68,7 +68,7 @@ func main() {
 	votes := make(map[string]voting.Choice)
 	votingSystem.Create("001", votingConfig, "open", votes)
 
-	fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
+	//fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
 
 	//ctrl2 := controller.NewController(contenthomepage)
 

@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"fmt"
+
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 )
@@ -27,17 +29,55 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 	return vi
 }
 
+func (vs VotingSystem) Delete(id string) {
+	vi := vs.VotingInstancesList[id]
+	if vi.Status == "open" {
+		//vi.Status = "close"
+		fmt.Println("Can't delete the votingInsance because it is still open")
+	} else {
+		delete(vs.VotingInstancesList, id)
+	}
+}
+
 func CastVote(votingID, userID string, choice voting.Choice) {
 	//listVote.GetVoting(votingID).db.update(userID, Choice)
 }
 
-func CloseVoting(votingID string) {
-	//listVote.GetVoting(votingID).close()
+func (vi VotingInstance) CloseVoting(id string) {
+	vi.SetStatus("close")
 }
 
-func GetVoting(votingID string) VotingInstance {
-	// return listVote.get(votingID)
-	return VotingInstance{}
+func (vi *VotingInstance) SetStatus(status string) {
+	vi.Status = status
+}
+
+func (vi *VotingInstance) GetStatus(status string) string {
+	return vi.Status
+}
+
+//mieux de garder pointeur ?
+func (vi VotingInstance) GetConfig() voting.VotingConfig {
+	return vi.Config
+}
+
+func (vi VotingInstance) GetResults() map[string]float32 {
+	results := make(map[string]float32, len(vi.Votes))
+	counter := 0
+	var yesPower float32 = 0
+	var noPower float32 = 0
+	for _, v := range vi.Votes {
+		yesPower += v.MyChoice["yes"].Percentage
+		noPower += v.MyChoice["no"].Percentage
+		counter++
+	}
+	results["yes"] = yesPower / float32(counter)
+	results["no"] = noPower / float32(counter)
+
+	return results
+}
+
+func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
+	return vs.VotingInstancesList[id]
 }
 
 //creation of a voting system, passing db and map as arguments
