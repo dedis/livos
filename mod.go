@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/dedis/livos/storage/bbolt"
+	"github.com/dedis/livos/voting"
+	"github.com/dedis/livos/voting/impl"
 	"github.com/dedis/livos/web/controller"
 )
 
@@ -20,7 +22,7 @@ type key int
 var content embed.FS
 
 //go:embed homepage.html
-var contenthomepage embed.FS
+//var contenthomepage embed.FS
 
 //go:embed web/static
 var static embed.FS
@@ -31,14 +33,6 @@ const (
 
 func main() {
 
-	//creation of the database
-	db, err := bbolt.New("/storage/database.db")
-
-	//creation du voting system
-	//votingSystem :=
-
-	//controller(vs)
-
 	listenAddr := ":9000"
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
 
@@ -48,11 +42,38 @@ func main() {
 		ErrorLog: logger,
 	}
 
-	ctrl := controller.NewController(content)
-	ctrl2 := controller.NewController(contenthomepage)
+	//creation of the database
+	db, err := bbolt.New("database.db")
+	if err != nil {
+		logger.Fatalf("failed to create the database : %v", err)
+		return
+	}
+
+	//creation of voting system
+	vil := make(map[string]impl.VotingInstance)
+	votingSystem := impl.NewVotingSystem(db, vil)
+
+	//creation of controller (for the web interactions)
+	ctrl := controller.NewController(content, votingSystem)
+
+	voters := make([]string, 3)
+	voters = append(voters, "Noemien", "Guillaume", "Etienne")
+	//fmt.Println(voters)
+
+	title := "VoteRoom1"
+	description := "Do you want fries every day at the restaurant?"
+
+	candidats := make([]string, 3)
+	votingConfig := impl.NewVotingConfig(voters, title, description, candidats)
+	votes := make(map[string]voting.Choice)
+	votingSystem.Create("001", votingConfig, "open", votes)
+
+	fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
+
+	//ctrl2 := controller.NewController(contenthomepage)
 
 	mux.HandleFunc("/", ctrl.HandleHome)
-	mux.HandleFunc("/homepage", ctrl2.HandleHomePage)
+	//mux.HandleFunc("/homepage", ctrl2.HandleHomePage)
 
 	// serve assets
 	mux.Handle("/static/", http.FileServer(http.FS(static)))

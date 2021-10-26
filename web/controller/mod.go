@@ -7,19 +7,23 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	//"github.com/dedis/livos/storage/bbolt"
+
+	//"github.com/dedis/livos/storage"
+	"github.com/dedis/livos/voting/impl"
 )
 
 // NewController ...
-func NewController(homeHTML embed.FS) Controller {
+func NewController(homeHTML embed.FS, vs impl.VotingSystem) Controller {
 	return Controller{
 		homeHTML: homeHTML,
+		vs:       vs,
 	}
 }
 
 // Controller ...
 type Controller struct {
 	homeHTML embed.FS
+	vs       impl.VotingSystem
 }
 
 // HandleHome ...

@@ -10,6 +10,8 @@ type VotingSystem interface {
 	Create(config VotingConfig) VotingInstance
 
 	Delete(votingID string)
+
+	//override the method print?
 }
 
 type VotingInstance interface {
@@ -20,6 +22,8 @@ type VotingInstance interface {
 	CloseVoting()
 
 	GetResults() Results
+
+	//override the method print?
 }
 
 type VotingConfig struct {
