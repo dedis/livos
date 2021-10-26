@@ -10,9 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/dedis/livos/storage/bbolt"
 	"github.com/dedis/livos/web/controller"
-	//"github.com/dedis/livos/storage"
-	//"github.com/dedis/livos/voting"
 )
 
 type key int
@@ -29,9 +28,11 @@ const (
 
 func main() {
 
-	//creer s=db := storage
+	//creation of the database
+	db, err := bbolt.New("/storage/database.db")
 
-	//VotingSystem(db)
+	//creation du voting system
+	//votingSystem :=
 
 	//controller(vs)
 
