@@ -16,8 +16,11 @@ import (
 
 type key int
 
-//go:embed web/index.html
+//go:embed index.html
 var content embed.FS
+
+//go:embed homepage.html
+var contenthomepage embed.FS
 
 //go:embed web/static
 var static embed.FS
@@ -46,8 +49,11 @@ func main() {
 	}
 
 	ctrl := controller.NewController(content)
+	ctrl2 := controller.NewController(contenthomepage)
 
 	mux.HandleFunc("/", ctrl.HandleHome)
+	mux.HandleFunc("/homepage", ctrl2.HandleHomePage)
+
 	// serve assets
 	mux.Handle("/static/", http.FileServer(http.FS(static)))
 
@@ -64,6 +70,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	mux.HandleFunc("/quitserver", ctrl.HandleQuit)
 }
 
 // Utility function for logging
