@@ -62,14 +62,38 @@ func main() {
 
 	title := "VoteRoom1"
 	description := "Do you want fries every day at the restaurant?"
-
 	candidats := make([]string, 3)
 	votingConfig := impl.NewVotingConfig(voters, title, description, candidats)
 	votes := make(map[string]voting.Choice)
 	votingSystem.Create("001", votingConfig, "open", votes)
-	fmt.Println("Test de listVoting", votingSystem.ListVotings())
-
+	//fmt.Println("Test de listVoting", votingSystem.ListVotings())
 	//fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
+
+	var vi = votingSystem.VotingInstancesList["001"]
+
+	deleg := make(map[string]voting.Liquid)
+	yesChoice := make(map[string]voting.Liquid)
+	noChoice := make(map[string]voting.Liquid)
+	midChoice := make(map[string]voting.Liquid)
+
+	liq100 := impl.NewLiquid(100)
+	liq50 := impl.NewLiquid(50)
+	liqid0 := impl.NewLiquid(0)
+
+	yesChoice["yes"] = liq100
+	yesChoice["no"] = liqid0
+	noChoice["no"] = liq100
+	noChoice["yes"] = liqid0
+	midChoice["no"] = liq50
+	midChoice["yes"] = liq50
+	choiceNoemien := impl.NewChoice(deleg, yesChoice, 0)
+	choiceGuillaume := impl.NewChoice(deleg, noChoice, 0)
+	choiceEtienne := impl.NewChoice(deleg, midChoice, 0)
+	vi.CastVote("Noemien", choiceNoemien)
+	vi.CastVote("Guillaume", choiceGuillaume)
+	vi.CastVote("Etienne", choiceEtienne)
+
+	fmt.Println("RESULTS OF THE VOTE ====> ", vi.GetResults())
 
 	//ctrl2 := controller.NewController(contenthomepage)
 

@@ -9,43 +9,20 @@ import (
 
 //the voting implementation
 
-// how to use the stuct defined in the upper mod.go file ?
+type VotingInstance struct {
+	//voting instance's id
+	Id string
 
-//listVote is map[string]Voting, containing all the voting sessions
+	//parameters of the Voting
+	Config voting.VotingConfig
 
-//creation of a voting instance
-func (vs VotingSystem) Create(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) VotingInstance {
-	//create the object votingInstance
-	var vi = VotingInstance{
-		Id:     id,
-		Config: config,
-		Status: status,
-		Votes:  votes,
-	}
+	// open / closed
+	Status string
 
-	//adding vi to the list of vi's of the voting system
-	vs.VotingInstancesList[id] = vi
+	// Votes contains the choice of each voter, references by a userID
+	Votes map[string]voting.Choice
 
-	return vi
-}
-
-func (vs VotingSystem) Delete(id string) {
-	vi := vs.VotingInstancesList[id]
-	if vi.Status == "open" {
-		//vi.Status = "close"
-		fmt.Println("Can't delete the votingInsance because it is still open")
-	} else {
-		delete(vs.VotingInstancesList, id)
-	}
-}
-
-func (vs VotingSystem) ListVotings() []string {
-	listeDeVotes := make([]string, len(vs.VotingInstancesList))
-	for key := range vs.VotingInstancesList {
-		listeDeVotes = append(listeDeVotes, key)
-	}
-	return listeDeVotes
-
+	//db.socket personnalisé pour chacun ?
 }
 
 func (vi VotingInstance) CastVote(userID string, choice voting.Choice) {
@@ -85,8 +62,12 @@ func (vi VotingInstance) GetResults() map[string]float32 {
 	return results
 }
 
-func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
-	return vs.VotingInstancesList[id]
+type VotingSystem struct {
+	//contain all the votingInstances mapped to their stringID
+	VotingInstancesList map[string]VotingInstance
+
+	//database
+	Database storage.DB
 }
 
 //creation of a voting system, passing db and map as arguments
@@ -97,28 +78,43 @@ func NewVotingSystem(db storage.DB, vil map[string]VotingInstance) VotingSystem 
 	}
 }
 
-type VotingInstance struct {
-	//voting instance's id
-	Id string
+//creation of a voting instance
+func (vs VotingSystem) Create(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) VotingInstance {
+	//create the object votingInstance
+	var vi = VotingInstance{
+		Id:     id,
+		Config: config,
+		Status: status,
+		Votes:  votes,
+	}
 
-	//parameters of the Voting
-	Config voting.VotingConfig
+	//adding vi to the list of vi's of the voting system
+	vs.VotingInstancesList[id] = vi
 
-	// open / closed
-	Status string
-
-	// Votes contains the choice of each voter, references by a userID
-	Votes map[string]voting.Choice
-
-	//db.socket personnalisé pour chacun ?
+	return vi
 }
 
-type VotingSystem struct {
-	//contain all the votingInstances mapped to their stringID
-	VotingInstancesList map[string]VotingInstance
+func (vs VotingSystem) Delete(id string) {
+	vi := vs.VotingInstancesList[id]
+	if vi.Status == "open" {
+		//vi.Status = "close"
+		fmt.Println("Can't delete the votingInsance because it is still open")
+	} else {
+		delete(vs.VotingInstancesList, id)
+	}
+}
 
-	//database
-	Database storage.DB
+func (vs VotingSystem) ListVotings() []string {
+	listeDeVotes := make([]string, len(vs.VotingInstancesList))
+	for key := range vs.VotingInstancesList {
+		listeDeVotes = append(listeDeVotes, key)
+	}
+	return listeDeVotes
+
+}
+
+func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
+	return vs.VotingInstancesList[id]
 }
 
 func NewVotingConfig(voters []string, title string, desc string, cand []string) voting.VotingConfig {
@@ -127,5 +123,19 @@ func NewVotingConfig(voters []string, title string, desc string, cand []string) 
 		Title:       title,
 		Description: desc,
 		Candidates:  cand,
+	}
+}
+
+func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, vp float32) voting.Choice {
+	return voting.Choice{
+		DelegatedTo: deleg,
+		MyChoice:    choice,
+		VotingPower: vp,
+	}
+}
+
+func NewLiquid(p float32) voting.Liquid {
+	return voting.Liquid{
+		Percentage: p,
 	}
 }
