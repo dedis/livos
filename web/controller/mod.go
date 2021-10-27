@@ -13,9 +13,10 @@ import (
 )
 
 // NewController ...
-func NewController(homeHTML embed.FS, vs impl.VotingSystem) Controller {
+func NewController(homeHTML embed.FS, homepage embed.FS, vs impl.VotingSystem) Controller {
 	return Controller{
 		homeHTML: homeHTML,
+		homepage: homepage,
 		vs:       vs,
 	}
 }
@@ -23,11 +24,13 @@ func NewController(homeHTML embed.FS, vs impl.VotingSystem) Controller {
 // Controller ...
 type Controller struct {
 	homeHTML embed.FS
+	homepage embed.FS
 	vs       impl.VotingSystem
 }
 
 // HandleHome ...
 func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
+
 	t, err := template.ParseFS(c.homeHTML, "index.html")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
@@ -53,13 +56,12 @@ func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
-	t, err := template.ParseFS(c.homeHTML, "homepage.html")
+	t2, err := template.ParseFS(c.homepage, "homepage.html")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	err = t.Execute(w, nil)
+	err = t2.Execute(w, nil)
 	if err != nil {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
