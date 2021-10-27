@@ -64,5 +64,4 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
