@@ -64,7 +64,6 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	// id := req.URL.Query().Get("id")
 	// fmt.Fprintln(w, "URL :::::::: ", req.URL)
 	// if id == "" {
@@ -73,9 +72,15 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 	// }
 
 	//creating a button for all the differents voting instances created
+
 	for _, v := range c.vs.VotingInstancesList {
 		var s string = "<input type=\"button\" name=\"RoomID\" value=" + "\"" + v.Id + "\"" + " onclick=\"self.location.href='/homepage/" + v.Id + "'\" >"
 		w.Write([]byte(s))
 	}
+	//if err != nil {
+	// Handle error here via logging and then return
+	//} else if req.Method != "POST" {
+	//	http.Redirect(w, req, "/homepage/"+ids, 301)
+	//}
 
 }
