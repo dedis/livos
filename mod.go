@@ -67,6 +67,7 @@ func main() {
 	votingConfig := impl.NewVotingConfig(voters, title, description, candidats)
 	votes := make(map[string]voting.Choice)
 	votingSystem.Create("001", votingConfig, "open", votes)
+	votingSystem.Create("002", votingConfig, "close", votes)
 
 	//fmt.Println("Test de listVoting", votingSystem.CastVote())
 
@@ -116,8 +117,6 @@ func main() {
 	if err != nil && err != http.ErrServerClosed {
 		logger.Fatal(err)
 	}
-
-	mux.HandleFunc("/quitserver", ctrl.HandleQuit)
 }
 
 // Utility function for logging
