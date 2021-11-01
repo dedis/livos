@@ -24,11 +24,11 @@ var content embed.FS
 //go:embed web/homepage.html
 var contenthomepage embed.FS
 
-//go:embed web/homepage/001.html
-var content001 embed.FS
-
 //go:embed web/static
 var static embed.FS
+
+//go:embed web/views
+var views embed.FS
 
 const (
 	requestIDKey key = 0
@@ -57,7 +57,7 @@ func main() {
 	votingSystem := impl.NewVotingSystem(db, vil)
 
 	//creation of controller (for the web interactions)
-	ctrl := controller.NewController(content, contenthomepage, content001, votingSystem)
+	ctrl := controller.NewController(content, contenthomepage, views, votingSystem)
 
 	voters := make([]string, 3)
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
@@ -103,7 +103,7 @@ func main() {
 
 	mux.HandleFunc("/", ctrl.HandleHome)
 	mux.HandleFunc("/homepage", ctrl.HandleHomePage)
-	mux.HandleFunc("/homepage/001", ctrl.Handle001)
+	mux.HandleFunc("/election", ctrl.HandleShowElection)
 
 	// serve assets
 	mux.Handle("/static/", http.FileServer(http.FS(static)))

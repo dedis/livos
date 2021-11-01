@@ -12,11 +12,11 @@ import (
 )
 
 // NewController ...
-func NewController(homeHTML embed.FS, homepage embed.FS, content001 embed.FS, vs impl.VotingSystem) Controller {
+func NewController(homeHTML embed.FS, homepage embed.FS, views embed.FS, vs impl.VotingSystem) Controller {
 	return Controller{
 		homeHTML: homeHTML,
 		homepage: homepage,
-		room001:  content001,
+		views:    views,
 		vs:       vs,
 	}
 }
@@ -25,12 +25,17 @@ func NewController(homeHTML embed.FS, homepage embed.FS, content001 embed.FS, vs
 type Controller struct {
 	homeHTML embed.FS
 	homepage embed.FS
-	room001  embed.FS
+	views    embed.FS
 	vs       impl.VotingSystem
 }
 
 // HandleHome ...
 func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
+
+	if req.URL.Path != "/" {
+		http.Error(w, "Not found.", http.StatusNotFound)
+		return
+	}
 
 	t, err := template.ParseFS(c.homeHTML, "web/index.html")
 	if err != nil {
@@ -57,12 +62,19 @@ func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
+
 	t2, err := template.ParseFS(c.homepage, "web/homepage.html")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = t2.Execute(w, nil)
+
+	data := struct {
+		Title             string
+		VotingInstanceTab map[string]impl.VotingInstance
+	}{Title: "TestTitle", VotingInstanceTab: c.vs.VotingInstancesList}
+
+	err = t2.Execute(w, data)
 	if err != nil {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -81,25 +93,41 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(s))
 	}
 
-	// c.vs.Database.Update(func(tx *bolt.Tx) error {
-	// 	b, err := tx.CreateBucketIfNotExists([]byte("testingBucket"))
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return b.Put([]byte("2015-01-01"), []byte("My New Year post"))
-	// })
-
 }
 
-func (c Controller) Handle001(w http.ResponseWriter, req *http.Request) {
+func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request) {
 
-	t, err := template.ParseFS(c.room001, "web/homepage/001.html")
+	t, err := template.ParseFS(c.views, "web/views/election.html")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = t.Execute(w, nil)
+	err = req.ParseForm()
+	if err != nil {
+		//error
+		return
+	}
+
+	id := req.Form.Get("id")
+	if id == "" {
+		http.Error(w, "failed to get id: ", http.StatusInternalServerError)
+		return
+	}
+
+	election, found := c.vs.VotingInstancesList[id]
+	if !found {
+		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Election impl.VotingInstance
+	}{
+		Election: election,
+	}
+
+	err = t.Execute(w, data)
 	if err != nil {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
