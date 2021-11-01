@@ -14,6 +14,7 @@
   </head>
   <body>
       <h1>Welcome on the homepage, you are in</h1>
-      
+      {{.Title}}
+      {{range $key, $value := .VotingInstanceTab}} <p>{{$key}} {{$value.Status}}</p> {{end}}
   </body>
 </html>
