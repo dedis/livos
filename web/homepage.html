@@ -8,13 +8,15 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" type="css" href="static/style.css">
 
     <title>Livos</title>
   </head>
   <body>
       <h1>Welcome on the homepage, you are in</h1>
       {{.Title}}
-      {{range $key, $value := .VotingInstanceTab}} <p>{{$key}} {{$value.Status}}</p> {{end}}
+      {{range $key, $value := .VotingInstanceTab}} 
+      <span><input type="button" name="login" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+      <p>{{$key}} {{$value.Status}}</p> {{end}}
   </body>
 </html>
