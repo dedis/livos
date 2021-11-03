@@ -5,6 +5,7 @@ import (
 
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
+	"golang.org/x/xerrors"
 )
 
 //the voting implementation
@@ -46,6 +47,7 @@ func (vi VotingInstance) GetConfig() voting.VotingConfig {
 	return vi.Config
 }
 
+//Give the result of the choices of the voting instance in the form: map[no:50 yes:50]
 func (vi VotingInstance) GetResults() map[string]float32 {
 	results := make(map[string]float32, len(vi.Votes))
 	counter := 0
@@ -94,6 +96,7 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 	return vi
 }
 
+//allows to delete a VotingSystem
 func (vs VotingSystem) Delete(id string) {
 	vi := vs.VotingInstancesList[id]
 	if vi.Status == "open" {
@@ -104,26 +107,35 @@ func (vs VotingSystem) Delete(id string) {
 	}
 }
 
+//Return a list of all the voting instance
 func (vs VotingSystem) ListVotings() []string {
 	listeDeVotes := make([]string, len(vs.VotingInstancesList))
 	for key := range vs.VotingInstancesList {
-		listeDeVotes = append(listeDeVotes, key)
+		if vs.VotingInstancesList[key].Status == "open" {
+			listeDeVotes = append(listeDeVotes, key)
+		}
 	}
 	return listeDeVotes
 
 }
 
+//Do we need to make a check to see if the id is null or letters or in fact
+//doesn't belong to the list of ids
 func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
 	return vs.VotingInstancesList[id]
 }
 
-func NewVotingConfig(voters []string, title string, desc string, cand []string) voting.VotingConfig {
+func NewVotingConfig(voters []string, title string, desc string, cand []string) (voting.VotingConfig, error) {
+	if title == "" {
+		return voting.VotingConfig{}, xerrors.Errorf("title is empty")
+	}
+
 	return voting.VotingConfig{
 		Voters:      voters,
 		Title:       title,
 		Description: desc,
 		Candidates:  cand,
-	}
+	}, nil
 }
 
 func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, vp float32) voting.Choice {

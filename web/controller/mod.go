@@ -8,6 +8,7 @@ import (
 
 	//"github.com/dedis/livos/storage"
 
+	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
 )
 
@@ -79,20 +80,12 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// id := req.URL.Query().Get("id")
-	// fmt.Fprintln(w, "URL :::::::: ", req.URL)
-	// if id == "" {
-	// 	http.Error(w, "The id query parameter is missing", http.StatusBadRequest)
-	// 	return
-	// }
 
 	//creating a button for all the differents voting instances created
-	//if err != nil {
-	// Handle error here via logging and then return
-	//} else if req.Method != "POST" {
-	//	http.Redirect(w, req, "/homepage/"+ids, 301)
-	//}
-
+	// for _, v := range c.vs.VotingInstancesList {
+	// 	var s string = "<input type=\"button\" name=\"RoomID\" value=" + "\"" + v.Id + "\"" + " onclick=\"self.location.href='/homepage/" + v.Id + "'\" >"
+	// 	w.Write([]byte(s))
+	// }
 }
 
 func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request) {
@@ -121,10 +114,20 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	deleg := make(map[string]voting.Liquid)
+	yesChoice := make(map[string]voting.Liquid)
+	liq100 := impl.NewLiquid(100)
+	yesChoice["yes"] = liq100
+	choiceGuillaume := impl.NewChoice(deleg, yesChoice, 0)
+
 	data := struct {
 		Election impl.VotingInstance
+		id       string
+		Choice   voting.Choice
 	}{
 		Election: election,
+		id:       id,
+		Choice:   choiceGuillaume,
 	}
 
 	err = t.Execute(w, data)
@@ -133,15 +136,15 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	status := c.vs.VotingInstancesList["001"].Status
-	title := c.vs.VotingInstancesList["001"].Config.Title
-	description := c.vs.VotingInstancesList["001"].Config.Description
-	voters := c.vs.VotingInstancesList["001"].Config.Voters
-	w.Write([]byte("Current status : " + status))
-	w.Write([]byte("<br>Title : " + title))
-	w.Write([]byte("<br>Description : " + description))
-	w.Write([]byte("<br>List of voters : "))
-	for _, v := range voters {
-		w.Write([]byte(v))
-	}
+	// status := c.vs.VotingInstancesList["001"].Status
+	// title := c.vs.VotingInstancesList["001"].Config.Title
+	// description := c.vs.VotingInstancesList["001"].Config.Description
+	// voters := c.vs.VotingInstancesList["001"].Config.Voters
+	// w.Write([]byte("Current status : " + status))
+	// w.Write([]byte("<br>Title : " + title))
+	// w.Write([]byte("<br>Description : " + description))
+	// w.Write([]byte("<br>List of voters : "))
+	// for _, v := range voters {
+	// 	w.Write([]byte(v))
+	// }
 }
