@@ -51,6 +51,9 @@ type Choice struct {
 	// power, or is empty if there is a delegation
 	MyChoice map[string]Liquid
 
+	// Number of delegation power received
+	DelegatedFrom int
+
 	// VotingPower contains how many voting percentage is left ?
 	VotingPower float32
 }

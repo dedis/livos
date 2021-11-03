@@ -71,9 +71,12 @@ func TestGetResults(t *testing.T) {
 	noChoice := make(map[string]voting.Liquid)
 	midChoice := make(map[string]voting.Liquid)
 
-	liq100 := impl.NewLiquid(100)
-	liq50 := impl.NewLiquid(50)
-	liqid0 := impl.NewLiquid(0)
+	liq100, err100 := impl.NewLiquid(100)
+	liq50, err50 := impl.NewLiquid(50)
+	liqid0, err0 := impl.NewLiquid(0)
+	if (err100 != nil) || (err50 != nil) || (err0 != nil) {
+		t.Error("Creation of liquid is incorrect.")
+	}
 
 	yesChoice["yes"] = liq100
 	yesChoice["no"] = liqid0
@@ -81,9 +84,12 @@ func TestGetResults(t *testing.T) {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceNoemien := impl.NewChoice(deleg, yesChoice, 0)
-	choiceGuillaume := impl.NewChoice(deleg, noChoice, 0)
-	choiceEtienne := impl.NewChoice(deleg, midChoice, 0)
+	choiceNoemien, errN := impl.NewChoice(deleg, yesChoice, 0, 0)
+	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 0)
+	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 0)
+	if (errN != nil) || (errG != nil) || (errE != nil) {
+		t.Error("Choices creation not correct.")
+	}
 	vi.CastVote("Noemien", choiceNoemien)
 	vi.CastVote("Guillaume", choiceGuillaume)
 	vi.CastVote("Etienne", choiceEtienne)

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strings"
 
 	//"github.com/dedis/livos/storage"
-
 	"github.com/dedis/livos/voting/impl"
+	//"honnef.co/go/js/dom"
 )
 
 // NewController ...
@@ -33,7 +34,7 @@ type Controller struct {
 func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 
 	if req.URL.Path != "/" {
-		http.Error(w, "Not found.", http.StatusNotFound)
+		http.Error(w, "Not found the path.", http.StatusNotFound)
 		return
 	}
 
@@ -50,7 +51,6 @@ func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 	}
 
 	//req.Form.Get(election//)
-
 	name := req.FormValue("username")
 	description := req.FormValue("description")
 	roomID := req.FormValue("roomID")
@@ -72,7 +72,7 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 	data := struct {
 		Title             string
 		VotingInstanceTab map[string]impl.VotingInstance
-	}{Title: "TestTitle", VotingInstanceTab: c.vs.VotingInstancesList}
+	}{Title: "HomePage", VotingInstanceTab: c.vs.VotingInstancesList}
 
 	err = t2.Execute(w, data)
 	if err != nil {
@@ -80,11 +80,59 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//creating a button for all the differents voting instances created
-	// for _, v := range c.vs.VotingInstancesList {
-	// 	var s string = "<input type=\"button\" name=\"RoomID\" value=" + "\"" + v.Id + "\"" + " onclick=\"self.location.href='/homepage/" + v.Id + "'\" >"
-	// 	w.Write([]byte(s))
-	// }
+	// d := dom.GetWindow().Document()
+
+	// button := d.GetElementByID("create")
+
+	// button.AddEventListener("click", false, func(event dom.Event) {
+	// 	fmt.Println("CLICKCLICK")
+	// })
+
+	if req.Method == "POST" {
+		title := req.PostFormValue("title")
+		if title == "" {
+			http.Error(w, "failed to get title: ", http.StatusInternalServerError)
+			return
+		}
+		id := req.FormValue("id")
+		if id == "" {
+			http.Error(w, "failed to get id: ", http.StatusInternalServerError)
+			return
+		}
+		status := req.FormValue("status")
+		if status == "" {
+			http.Error(w, "failed to get status: ", http.StatusInternalServerError)
+			return
+		}
+		description := req.FormValue("desc")
+		if description == "" {
+			http.Error(w, "failed to get description: ", http.StatusInternalServerError)
+			return
+		}
+		voterList := req.FormValue("votersList")
+		if voterList == "" {
+			http.Error(w, "failed to get list of voters: ", http.StatusInternalServerError)
+			return
+		}
+		voterListParsed := strings.Split(voterList, ",")
+		candidats := req.FormValue("candidates")
+		if candidats == "" {
+			http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
+			return
+		}
+		candidatesParsed := strings.Split(candidats, ",")
+
+		fmt.Fprintln(w, "TEST DE PRINT POUR VOIR SI RECUP VALUE FONCTIONNE")
+		fmt.Fprintln(w, "Title = \n", title)
+		fmt.Fprintln(w, "Description = \n", description)
+		fmt.Fprintln(w, "Status = \n", status)
+		fmt.Fprintln(w, "id = \n", id)
+		fmt.Fprintln(w, "List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
+		fmt.Fprintln(w, "List of candidates = \n", candidatesParsed[0])
+	}
+
+	//recup les donnes form.get
+	//listener .. Create() creer la votinginstance
 }
 
 func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request) {
@@ -97,7 +145,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 
 	err = req.ParseForm()
 	if err != nil {
-		//error
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -126,16 +174,4 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// status := c.vs.VotingInstancesList["001"].Status
-	// title := c.vs.VotingInstancesList["001"].Config.Title
-	// description := c.vs.VotingInstancesList["001"].Config.Description
-	// voters := c.vs.VotingInstancesList["001"].Config.Voters
-	// w.Write([]byte("Current status : " + status))
-	// w.Write([]byte("<br>Title : " + title))
-	// w.Write([]byte("<br>Description : " + description))
-	// w.Write([]byte("<br>List of voters : "))
-	// for _, v := range voters {
-	// 	w.Write([]byte(v))
-	// }
 }

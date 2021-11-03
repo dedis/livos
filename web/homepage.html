@@ -15,6 +15,53 @@
   <body>
       <h1>Welcome on the homepage, you are in</h1>
       {{.Title}}
-      {{range $key, $value := .VotingInstanceTab}} <p>{{$key}} {{$value.Status}}</p> {{end}}
+      {{range $key, $value := .VotingInstanceTab}} <p>
+        {{$key}} {{$value.Status}}
+        <span><input type="button" name="login" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+      </p> {{end}}
+
+      <div id="formulaire">
+        <form method="post" class="form-example" >
+
+          <div class="form-example">
+            <label for="title">Title: </label>
+            <input type="text" name="title" id="title" required>
+          </div>
+
+          <div class="form-example">
+            <label for="id">Id of the room: </label>
+            <input type="number" name="id" id="id" required>
+          </div>
+
+          <div class="form-example">
+            <label for="status">Select a status :</label>
+            <input type="radio" name="status" id="open" value="open" checked>
+            <label for="open">Open</label>
+            <input type="radio" name="status" id="close" value="close" checked>
+            <label for="open">Close</label>
+          </div>
+
+          <div class="form-example">
+            <label for="desc">Description: </label>
+            <textarea type="textarea" name="desc" id="desc" rows="5" cols="30" maxlength="150" placeholder="#Description" required></textarea>
+          </div>
+
+          <div class="form-example">
+            <label for="votersList">Voters List: </label>
+            <textarea type="textarea" name="votersList" id="votersList" rows="3" cols="30" maxlength="150" placeholder="#Voter1, Voter2, Voter3..."></textarea>
+          </div>
+
+          <div class="form-example">
+            <label for="candidates">Candidates List: </label>
+            <textarea type="textarea" name="candidates" id="candidates" rows="3" cols="30" maxlength="150" placeholder="#Candidate1, Candidate2..." required></textarea>
+          </div>
+
+          <div class="form-example">
+            <input type="submit" name="create" id="create" value="Create">
+          </div>
+
+        </form>
+
+      </div>
   </body>
 </html>
