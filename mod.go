@@ -65,12 +65,14 @@ func main() {
 
 	title := "VoteRoom1"
 	description := "Do you want fries every day at the restaurant?"
+	description2 := "Do you want free vacations (365 days a year) ?"
 
 	candidats := make([]string, 3)
 	votingConfig := impl.NewVotingConfig(voters, title, description, candidats)
+	votingConfig2 := impl.NewVotingConfig(voters, "VoteRoom2", description2, candidats)
 	votes := make(map[string]voting.Choice)
 	votingSystem.Create("001", votingConfig, "open", votes)
-	votingSystem.Create("002", votingConfig, "close", votes)
+	votingSystem.Create("002", votingConfig2, "close", votes)
 
 	//fmt.Println("Test de listVoting", votingSystem.CastVote())
 	//fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
