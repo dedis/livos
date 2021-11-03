@@ -1,14 +1,14 @@
 package impl
 
 import (
-	"fmt"
-
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
 )
 
 //the voting implementation
+
+const PERCENTAGE = 100
 
 type VotingInstance struct {
 	//voting instance's id
@@ -26,16 +26,24 @@ type VotingInstance struct {
 	//db.socket personnalisé pour chacun ?
 }
 
-func (vi VotingInstance) CastVote(userID string, choice voting.Choice) {
+func (vi VotingInstance) CastVote(userID string, choice voting.Choice) error {
+	if vi.Status == "close" {
+		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
+	}
 	vi.Votes[userID] = choice
+	return nil
 }
 
 func (vi VotingInstance) CloseVoting() {
 	vi.SetStatus("close")
 }
 
-func (vi *VotingInstance) SetStatus(status string) {
+func (vi *VotingInstance) SetStatus(status string) error {
+	if (status != "open") || (status != "close") {
+		return xerrors.Errorf("The status is incorrect. Should be either 'open' or 'close'. Was: %s", status)
+	}
 	vi.Status = status
+	return nil
 }
 
 func (vi *VotingInstance) GetStatus() string {
@@ -81,7 +89,18 @@ func NewVotingSystem(db storage.DB, vil map[string]VotingInstance) VotingSystem 
 }
 
 //creation of a voting instance
-func (vs VotingSystem) Create(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) VotingInstance {
+func (vs VotingSystem) Create(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (VotingInstance, error) {
+
+	//check if id is null
+	if id == "" {
+		return VotingInstance{}, xerrors.Errorf("The id is empty.")
+	}
+
+	//check if status is open or close only
+	if (status != "open") || (status != "close") {
+		return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
+	}
+
 	//create the object votingInstance
 	var vi = VotingInstance{
 		Id:     id,
@@ -93,18 +112,19 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 	//adding vi to the list of vi's of the voting system
 	vs.VotingInstancesList[id] = vi
 
-	return vi
+	return vi, nil
 }
 
-//allows to delete a VotingSystem
-func (vs VotingSystem) Delete(id string) {
+func (vs VotingSystem) Delete(id string) error {
+
 	vi := vs.VotingInstancesList[id]
 	if vi.Status == "open" {
 		//vi.Status = "close"
-		fmt.Println("Can't delete the votingInsance because it is still open")
+		return xerrors.Errorf("Can't delete the votingInsance because it is still open")
 	} else {
 		delete(vs.VotingInstancesList, id)
 	}
+	return nil
 }
 
 //Return a list of all the voting instance
@@ -116,7 +136,6 @@ func (vs VotingSystem) ListVotings() []string {
 		}
 	}
 	return listeDeVotes
-
 }
 
 //Do we need to make a check to see if the id is null or letters or in fact
@@ -138,16 +157,41 @@ func NewVotingConfig(voters []string, title string, desc string, cand []string) 
 	}, nil
 }
 
-func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, vp float32) voting.Choice {
-	return voting.Choice{
-		DelegatedTo: deleg,
-		MyChoice:    choice,
-		VotingPower: vp,
+func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, delegFrom int, votingPower float32) (voting.Choice, error) {
+	if delegFrom < 0 {
+		return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
 	}
+
+	if votingPower > (float32(delegFrom)+1)*PERCENTAGE {
+		return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
+	}
+
+	//check that the sum overall votes is less or equal to the voting power
+	var sum float32 = 0
+	for _, value := range deleg {
+		sum += value.Percentage
+	}
+	for _, value := range choice {
+		sum += value.Percentage
+	}
+	if sum > (votingPower + float32(delegFrom)*PERCENTAGE) {
+		return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
+	}
+
+	return voting.Choice{
+		DelegatedTo:   deleg,
+		MyChoice:      choice,
+		DelegatedFrom: delegFrom,
+		VotingPower:   votingPower,
+	}, nil
 }
 
-func NewLiquid(p float32) voting.Liquid {
+func NewLiquid(p float32) (voting.Liquid, error) {
+	if p > 100 {
+		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be less than %d", p, PERCENTAGE)
+	}
+
 	return voting.Liquid{
 		Percentage: p,
-	}
+	}, nil
 }
