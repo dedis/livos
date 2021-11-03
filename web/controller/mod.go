@@ -80,19 +80,11 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// id := req.URL.Query().Get("id")
-	// fmt.Fprintln(w, "URL :::::::: ", req.URL)
-	// if id == "" {
-	// 	http.Error(w, "The id query parameter is missing", http.StatusBadRequest)
-	// 	return
-	// }
-
 	//creating a button for all the differents voting instances created
-	for _, v := range c.vs.VotingInstancesList {
-		var s string = "<input type=\"button\" name=\"RoomID\" value=" + "\"" + v.Id + "\"" + " onclick=\"self.location.href='/homepage/" + v.Id + "'\" >"
-		w.Write([]byte(s))
-	}
-
+	// for _, v := range c.vs.VotingInstancesList {
+	// 	var s string = "<input type=\"button\" name=\"RoomID\" value=" + "\"" + v.Id + "\"" + " onclick=\"self.location.href='/homepage/" + v.Id + "'\" >"
+	// 	w.Write([]byte(s))
+	// }
 }
 
 func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request) {
@@ -123,8 +115,10 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 
 	data := struct {
 		Election impl.VotingInstance
+		id       string
 	}{
 		Election: election,
+		id:       id,
 	}
 
 	err = t.Execute(w, data)
@@ -133,15 +127,15 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	status := c.vs.VotingInstancesList["001"].Status
-	title := c.vs.VotingInstancesList["001"].Config.Title
-	description := c.vs.VotingInstancesList["001"].Config.Description
-	voters := c.vs.VotingInstancesList["001"].Config.Voters
-	w.Write([]byte("Current status : " + status))
-	w.Write([]byte("<br>Title : " + title))
-	w.Write([]byte("<br>Description : " + description))
-	w.Write([]byte("<br>List of voters : "))
-	for _, v := range voters {
-		w.Write([]byte(v))
-	}
+	// status := c.vs.VotingInstancesList["001"].Status
+	// title := c.vs.VotingInstancesList["001"].Config.Title
+	// description := c.vs.VotingInstancesList["001"].Config.Description
+	// voters := c.vs.VotingInstancesList["001"].Config.Voters
+	// w.Write([]byte("Current status : " + status))
+	// w.Write([]byte("<br>Title : " + title))
+	// w.Write([]byte("<br>Description : " + description))
+	// w.Write([]byte("<br>List of voters : "))
+	// for _, v := range voters {
+	// 	w.Write([]byte(v))
+	// }
 }

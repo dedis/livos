@@ -29,7 +29,7 @@ func (vi VotingInstance) CastVote(userID string, choice voting.Choice) {
 	vi.Votes[userID] = choice
 }
 
-func (vi VotingInstance) CloseVoting(id string) {
+func (vi VotingInstance) CloseVoting() {
 	vi.SetStatus("close")
 }
 
@@ -37,7 +37,7 @@ func (vi *VotingInstance) SetStatus(status string) {
 	vi.Status = status
 }
 
-func (vi *VotingInstance) GetStatus(status string) string {
+func (vi *VotingInstance) GetStatus() string {
 	return vi.Status
 }
 

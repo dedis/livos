@@ -13,7 +13,17 @@
     <title>Livos</title>
   </head>
   <body>
-      <h1>Welcome in the election : {{.Election.Id}}</h1>
-      
+      <h1>Welcome in the election number : {{.Election.Id}}</h1>
+      <h2>Votation Question : {{.Election.Config.Description}}</h2>
+      <h4>
+        List of voters : <br>
+        {{range .Election.Config.Voters}} <p>
+          {{.}}
+        </p> {{end}}
+      </h4>
+
+      <span><input type="button" name="OUI" value="YES" onclick="" ></span>
+
+
   </body>
 </html>
