@@ -63,7 +63,7 @@ func TestCloseVoting(t *testing.T) {
 		t.Errorf("Cannot create VotingConfig")
 	}
 	VoteSystem.Create("Session01", voteConfig, "open", votes)
-	VoteSystem.VotingInstancesList["Session01"].SetStatus("close")
+	VoteSystem.VotingInstancesList["Session01"].CloseVoting()
 	status := VoteSystem.VotingInstancesList["Session01"].Status
 	if status != "close" {
 		t.Errorf("CloseVoting was incorrect, got: %s, want %s", status, "close")
@@ -90,7 +90,6 @@ func TestGetResults(t *testing.T) {
 	if (err100 != nil) || (err50 != nil) || (err0 != nil) {
 		t.Error("Creation of liquid is incorrect.")
 	}
-
 	yesChoice["yes"] = liq100
 	yesChoice["no"] = liqid0
 	noChoice["no"] = liq100
