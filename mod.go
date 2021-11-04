@@ -79,6 +79,8 @@ func main() {
 
 	var vi = votingSystem.VotingInstancesList["001"]
 
+	fmt.Println("VI:", vi)
+
 	deleg := make(map[string]voting.Liquid)
 	yesChoice := make(map[string]voting.Liquid)
 	noChoice := make(map[string]voting.Liquid)
@@ -97,9 +99,9 @@ func main() {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceNoemien, errN := impl.NewChoice(deleg, yesChoice, 0, 0)
-	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 0)
-	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 0)
+	choiceNoemien, errN := impl.NewChoice(deleg, yesChoice, 0, 100)
+	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 100)
+	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 100)
 	if (errN != nil) || (errG != nil) || (errE != nil) {
 		logger.Fatalf("Choices creation incorrect.")
 	}

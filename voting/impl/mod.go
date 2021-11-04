@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"fmt"
+
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
@@ -30,6 +32,7 @@ func (vi VotingInstance) CastVote(userID string, choice voting.Choice) error {
 	if vi.Status == "close" {
 		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
 	}
+	fmt.Println("CHOICE", choice)
 	vi.Votes[userID] = choice
 	return nil
 }
@@ -96,9 +99,11 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 	}
 
 	//check if status is open or close only
-	if (status != "open") || (status != "close") {
+	if status != "open" || status != "close" {
 		return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
 	}
+
+	fmt.Println("Votes: ", votes)
 
 	//create the object votingInstance
 	var vi = VotingInstance{
@@ -147,25 +152,25 @@ func NewVotingConfig(voters []string, title string, desc string, cand []string) 
 }
 
 func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, delegFrom int, votingPower float32) (voting.Choice, error) {
-	if delegFrom < 0 {
-		return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
-	}
+	// if delegFrom < 0 {
+	// 	return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
+	// }
 
-	if votingPower > (float32(delegFrom)+1)*PERCENTAGE {
-		return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
-	}
+	// if votingPower > (float32(delegFrom)+1)*PERCENTAGE {
+	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
+	// }
 
 	//check that the sum overall votes is less or equal to the voting power
-	var sum float32 = 0
-	for _, value := range deleg {
-		sum += value.Percentage
-	}
-	for _, value := range choice {
-		sum += value.Percentage
-	}
-	if sum > (votingPower + float32(delegFrom)*PERCENTAGE) {
-		return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
-	}
+	// var sum float32 = 0
+	// for _, value := range deleg {
+	// 	sum += value.Percentage
+	// }
+	// for _, value := range choice {
+	// 	sum += value.Percentage
+	// }
+	// if sum > (votingPower + float32(delegFrom)*PERCENTAGE) {
+	// 	return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
+	// }
 
 	return voting.Choice{
 		DelegatedTo:   deleg,
