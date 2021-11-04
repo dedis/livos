@@ -17,7 +17,10 @@ var votes = make(map[string]voting.Choice)
 
 func TestVotingSystemCreate(t *testing.T) {
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
-	voteConfig := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	if err != nil {
+		t.Errorf("Cannot create VotingConfig")
+	}
 	VoteSystem.Create("Session01", voteConfig, "open", votes)
 	id := VoteSystem.VotingInstancesList["Session01"].Id
 	if id != "Session01" {
@@ -38,7 +41,10 @@ func TestVotingSystemCreate(t *testing.T) {
 
 func TestSetStatus(t *testing.T) {
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
-	voteConfig := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	if err != nil {
+		t.Errorf("Cannot create VotingConfig")
+	}
 	VoteSystem.Create("Session01", voteConfig, "open", votes)
 	VoteInst := VoteSystem.VotingInstancesList["Session01"]
 	addrVI := &VoteInst
@@ -47,13 +53,17 @@ func TestSetStatus(t *testing.T) {
 	if status != "close" {
 		t.Errorf("Set status was incorrect, got: %s, want %s", status, "close")
 	}
+
 }
 
 func TestCloseVoting(t *testing.T) {
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
-	voteConfig := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	if err != nil {
+		t.Errorf("Cannot create VotingConfig")
+	}
 	VoteSystem.Create("Session01", voteConfig, "open", votes)
-	VoteSystem.VotingInstancesList["Session01"].CloseVoting()
+	VoteSystem.VotingInstancesList["Session01"].SetStatus("close")
 	status := VoteSystem.VotingInstancesList["Session01"].Status
 	if status != "close" {
 		t.Errorf("CloseVoting was incorrect, got: %s, want %s", status, "close")
@@ -62,7 +72,10 @@ func TestCloseVoting(t *testing.T) {
 
 func TestGetResults(t *testing.T) {
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
-	voteConfig := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	if err != nil {
+		t.Errorf("Cannot create VotingConfig")
+	}
 	VoteSystem.Create("Session01", voteConfig, "open", votes)
 	vi := VoteSystem.VotingInstancesList["Session01"]
 

@@ -7,7 +7,11 @@ import (
 	"net/http"
 	"strings"
 
+	//"strings"
+
 	//"github.com/dedis/livos/storage"
+	"github.com/dedis/livos/voting"
+
 	"github.com/dedis/livos/voting/impl"
 	//"honnef.co/go/js/dom"
 )
@@ -161,12 +165,21 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	deleg := make(map[string]voting.Liquid)
+	yesChoice := make(map[string]voting.Liquid)
+	liq100, err := impl.NewLiquid(100)
+
+	yesChoice["yes"] = liq100
+	choiceGuillaume, err := impl.NewChoice(deleg, yesChoice, 0, 0)
+
 	data := struct {
 		Election impl.VotingInstance
 		id       string
+		Choice   voting.Choice
 	}{
 		Election: election,
 		id:       id,
+		Choice:   choiceGuillaume,
 	}
 
 	err = t.Execute(w, data)

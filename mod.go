@@ -68,8 +68,8 @@ func main() {
 	description2 := "Do you want free vacations (365 days a year) ?"
 
 	candidats := make([]string, 3)
-	votingConfig := impl.NewVotingConfig(voters, title, description, candidats)
-	votingConfig2 := impl.NewVotingConfig(voters, "VoteRoom2", description2, candidats)
+	votingConfig, err := impl.NewVotingConfig(voters, title, description, candidats)
+	votingConfig2, err := impl.NewVotingConfig(voters, "VoteRoom2", description2, candidats)
 	votes := make(map[string]voting.Choice)
 	votingSystem.Create("001", votingConfig, "open", votes)
 	votingSystem.Create("002", votingConfig2, "close", votes)

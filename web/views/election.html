@@ -21,8 +21,14 @@
           {{.}}
         </p> {{end}}
       </h4>
-
-      <span><input type="button" name="OUI" value="YES" onclick="" ></span>
+    
+      <span><input type="button" name="YES" value="YES" onclick= "test('Guillaume', '{{.Election.Choice}}')"></span>
+      <script>
+      //  test(string, choice){
+      //  {{$.Election.VotingInstance.CastVote(string, choice)}};
+      //}
+      </script>
+      
 
 
   </body>
