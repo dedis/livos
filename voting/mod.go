@@ -7,7 +7,7 @@ type VotingSystem interface {
 
 	GetVotingInstance(votingID string) VotingInstance
 
-	Create(config VotingConfig) VotingInstance
+	CreateAndAdd(config VotingConfig) VotingInstance
 
 	Delete(votingID string)
 

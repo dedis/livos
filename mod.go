@@ -77,8 +77,9 @@ func main() {
 		logger.Fatal("NewVotingConfig is incorrect")
 	}
 	votes := make(map[string]*voting.Choice)
+	votes2 := make(map[string]*voting.Choice)
 	votingSystem.CreateAndAdd("001", votingConfig, "open", votes)
-	votingSystem.CreateAndAdd("002", votingConfig2, "close", votes)
+	votingSystem.CreateAndAdd("002", votingConfig2, "close", votes2)
 
 	//fmt.Println("Test de listVoting", votingSystem.CastVote())
 	fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
@@ -105,7 +106,7 @@ func main() {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceNoemien, errN := impl.NewChoice(deleg, yesChoice, 0, 100)
+	choiceNoemien, errN := impl.NewChoice(deleg, noChoice, 0, 100)
 	fmt.Println("CHOICE NOEMIEN: ", choiceNoemien)
 	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 100)
 	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 100)
@@ -123,6 +124,8 @@ func main() {
 	mux.HandleFunc("/", ctrl.HandleHome)
 	mux.HandleFunc("/homepage", ctrl.HandleHomePage)
 	mux.HandleFunc("/election", ctrl.HandleShowElection)
+	mux.HandleFunc("/results", ctrl.HandleShowResults)
+	mux.HandleFunc("/manage", ctrl.HandleManageVoting)
 
 	// serve assets
 	mux.Handle("/web/static/", http.FileServer(http.FS(static)))
