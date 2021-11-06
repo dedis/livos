@@ -55,10 +55,10 @@ type Choice struct {
 	DelegatedFrom int
 
 	// VotingPower contains how many voting percentage is left ?
-	VotingPower float32
+	VotingPower float64
 }
 
 //for liquidity and delegation
 type Liquid struct {
-	Percentage float32
+	Percentage float64
 }

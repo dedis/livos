@@ -1,8 +1,6 @@
 package impl
 
 import (
-	"fmt"
-
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
@@ -32,21 +30,17 @@ func (vi *VotingInstance) CastVote(userID string, choice voting.Choice) error {
 	if vi.Status == "close" {
 		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
 	}
-	fmt.Println("CHOICE", choice)
-	fmt.Println("userID", userID)
-	fmt.Println("vi:", *vi)
-	vi.Votes[userID] = &voting.Choice{}
 	vi.Votes[userID] = &choice
 	return nil
 }
 
-func (vi VotingInstance) CloseVoting() {
+func (vi *VotingInstance) CloseVoting() {
 	vi.SetStatus("close")
 }
 
 func (vi *VotingInstance) SetStatus(status string) error {
-	if (status != "open") || (status != "close") {
-		return xerrors.Errorf("The status is incorrect. Should be either 'open' or 'close'. Was: %s", status)
+	if !(status == "open") && !(status == "close") {
+		return xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
 	}
 	vi.Status = status
 	return nil
@@ -62,18 +56,18 @@ func (vi VotingInstance) GetConfig() voting.VotingConfig {
 }
 
 //Give the result of the choices of the voting instance in the form: map[no:50 yes:50]
-func (vi VotingInstance) GetResults() map[string]float32 {
-	results := make(map[string]float32, len(vi.Votes))
+func (vi VotingInstance) GetResults() map[string]float64 {
+	results := make(map[string]float64, len(vi.Votes))
 	counter := 0
-	var yesPower float32 = 0
-	var noPower float32 = 0
+	var yesPower float64 = 0
+	var noPower float64 = 0
 	for _, v := range vi.Votes {
 		yesPower += v.MyChoice["yes"].Percentage
 		noPower += v.MyChoice["no"].Percentage
 		counter++
 	}
-	results["yes"] = yesPower / float32(counter)
-	results["no"] = noPower / float32(counter)
+	results["yes"] = yesPower / float64(counter)
+	results["no"] = noPower / float64(counter)
 
 	return results
 }
@@ -103,9 +97,9 @@ func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, statu
 	}
 
 	//check if status is open or close only
-	// if status != "open" || status != "close" {
-	// 	return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
-	// }
+	if !(status == "open") && !(status == "close") {
+		return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
+	}
 
 	//fmt.Println("Votes: ", votes)
 
@@ -168,24 +162,24 @@ func NewVotingConfig(voters []string, title string, desc string, cand []string) 
 	}, nil
 }
 
-func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, delegFrom int, votingPower float32) (voting.Choice, error) {
+func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, delegFrom int, votingPower float64) (voting.Choice, error) {
 	if delegFrom < 0 {
 		return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
 	}
 
-	if votingPower > (float32(delegFrom)+1)*PERCENTAGE {
+	if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
 		return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
 	}
 
 	//check that the sum overall votes is less or equal to the voting power
-	var sum float32 = 0
+	var sum float64 = 0
 	for _, value := range deleg {
 		sum += value.Percentage
 	}
 	for _, value := range choice {
 		sum += value.Percentage
 	}
-	if sum > (votingPower + float32(delegFrom)*PERCENTAGE) {
+	if sum > (votingPower + float64(delegFrom)*PERCENTAGE) {
 		return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
 	}
 
@@ -197,7 +191,7 @@ func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, 
 	}, nil
 }
 
-func NewLiquid(p float32) (voting.Liquid, error) {
+func NewLiquid(p float64) (voting.Liquid, error) {
 	if p > 100 {
 		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be less than %d", p, PERCENTAGE)
 	}
