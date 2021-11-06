@@ -23,17 +23,20 @@ type VotingInstance struct {
 	Status string
 
 	// Votes contains the choice of each voter, references by a userID
-	Votes map[string]voting.Choice
+	Votes map[string]*voting.Choice
 
 	//db.socket personnalisé pour chacun ?
 }
 
-func (vi VotingInstance) CastVote(userID string, choice voting.Choice) error {
+func (vi *VotingInstance) CastVote(userID string, choice voting.Choice) error {
 	if vi.Status == "close" {
 		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
 	}
 	fmt.Println("CHOICE", choice)
-	vi.Votes[userID] = choice
+	fmt.Println("userID", userID)
+	fmt.Println("vi:", *vi)
+	vi.Votes[userID] = &voting.Choice{}
+	vi.Votes[userID] = &choice
 	return nil
 }
 
@@ -41,7 +44,7 @@ func (vi VotingInstance) CloseVoting() {
 	vi.SetStatus("close")
 }
 
-func (vi VotingInstance) SetStatus(status string) error {
+func (vi *VotingInstance) SetStatus(status string) error {
 	if (status != "open") || (status != "close") {
 		return xerrors.Errorf("The status is incorrect. Should be either 'open' or 'close'. Was: %s", status)
 	}
@@ -77,14 +80,14 @@ func (vi VotingInstance) GetResults() map[string]float32 {
 
 type VotingSystem struct {
 	//contain all the votingInstances mapped to their stringID
-	VotingInstancesList map[string]VotingInstance
+	VotingInstancesList map[string]*VotingInstance
 
 	//database
 	Database storage.DB
 }
 
 //creation of a voting system, passing db and map as arguments
-func NewVotingSystem(db storage.DB, vil map[string]VotingInstance) VotingSystem {
+func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem {
 	return VotingSystem{
 		Database:            db,
 		VotingInstancesList: vil,
@@ -92,7 +95,7 @@ func NewVotingSystem(db storage.DB, vil map[string]VotingInstance) VotingSystem 
 }
 
 //creation of a voting instance
-func (vs VotingSystem) Create(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (VotingInstance, error) {
+func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]*voting.Choice) (VotingInstance, error) {
 
 	//check if id is null
 	if id == "" {
@@ -100,11 +103,11 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 	}
 
 	//check if status is open or close only
-	if status != "open" || status != "close" {
-		return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
-	}
+	// if status != "open" || status != "close" {
+	// 	return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
+	// }
 
-	fmt.Println("Votes: ", votes)
+	//fmt.Println("Votes: ", votes)
 
 	//create the object votingInstance
 	var vi = VotingInstance{
@@ -114,10 +117,13 @@ func (vs VotingSystem) Create(id string, config voting.VotingConfig, status stri
 		Votes:  votes,
 	}
 
-	//adding vi to the list of vi's of the voting system
-	vs.VotingInstancesList[id] = vi
+	p := &vi
+	*p = vi
 
-	return vi, nil
+	//adding vi to the list of vi's of the voting system
+	vs.VotingInstancesList[id] = p
+
+	return *p, nil
 }
 
 func (vs VotingSystem) Delete(id string) error {
@@ -146,7 +152,7 @@ func (vs VotingSystem) ListVotings() []string {
 //Do we need to make a check to see if the id is null or letters or in fact
 //doesn't belong to the list of ids
 func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
-	return vs.VotingInstancesList[id]
+	return *vs.VotingInstancesList[id]
 }
 
 func NewVotingConfig(voters []string, title string, desc string, cand []string) (voting.VotingConfig, error) {
@@ -163,25 +169,25 @@ func NewVotingConfig(voters []string, title string, desc string, cand []string) 
 }
 
 func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, delegFrom int, votingPower float32) (voting.Choice, error) {
-	// if delegFrom < 0 {
-	// 	return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
-	// }
+	if delegFrom < 0 {
+		return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
+	}
 
-	// if votingPower > (float32(delegFrom)+1)*PERCENTAGE {
-	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
-	// }
+	if votingPower > (float32(delegFrom)+1)*PERCENTAGE {
+		return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
+	}
 
 	//check that the sum overall votes is less or equal to the voting power
-	// var sum float32 = 0
-	// for _, value := range deleg {
-	// 	sum += value.Percentage
-	// }
-	// for _, value := range choice {
-	// 	sum += value.Percentage
-	// }
-	// if sum > (votingPower + float32(delegFrom)*PERCENTAGE) {
-	// 	return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
-	// }
+	var sum float32 = 0
+	for _, value := range deleg {
+		sum += value.Percentage
+	}
+	for _, value := range choice {
+		sum += value.Percentage
+	}
+	if sum > (votingPower + float32(delegFrom)*PERCENTAGE) {
+		return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
+	}
 
 	return voting.Choice{
 		DelegatedTo:   deleg,
