@@ -53,7 +53,7 @@ func main() {
 	}
 
 	//creation of voting system
-	vil := make(map[string]impl.VotingInstance)
+	vil := make(map[string]*impl.VotingInstance)
 	votingSystem := impl.NewVotingSystem(db, vil)
 
 	//creation of controller (for the web interactions)
@@ -69,15 +69,23 @@ func main() {
 
 	candidats := make([]string, 3)
 	votingConfig, err := impl.NewVotingConfig(voters, title, description, candidats)
+	if err != nil {
+		logger.Fatal("NewVotingConfig is incorrect")
+	}
 	votingConfig2, err := impl.NewVotingConfig(voters, "VoteRoom2", description2, candidats)
-	votes := make(map[string]voting.Choice)
-	votingSystem.Create("001", votingConfig, "open", votes)
-	votingSystem.Create("002", votingConfig2, "close", votes)
+	if err != nil {
+		logger.Fatal("NewVotingConfig is incorrect")
+	}
+	votes := make(map[string]*voting.Choice)
+	votingSystem.CreateAndAdd("001", votingConfig, "open", votes)
+	votingSystem.CreateAndAdd("002", votingConfig2, "close", votes)
 
 	//fmt.Println("Test de listVoting", votingSystem.CastVote())
-	//fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
+	fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
 
-	var vi = votingSystem.VotingInstancesList["001"]
+	var vi = *votingSystem.VotingInstancesList["001"]
+
+	fmt.Println("VI:", vi)
 
 	deleg := make(map[string]voting.Liquid)
 	yesChoice := make(map[string]voting.Liquid)
@@ -97,9 +105,12 @@ func main() {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceNoemien, errN := impl.NewChoice(deleg, yesChoice, 0, 0)
-	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 0)
-	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 0)
+	choiceNoemien, errN := impl.NewChoice(deleg, yesChoice, 0, 100)
+	fmt.Println("CHOICE NOEMIEN: ", choiceNoemien)
+	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 100)
+	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 100)
+	fmt.Println("CHOICE Guigui: ", choiceGuillaume)
+	fmt.Println("CHOICE etien: ", choiceEtienne)
 	if (errN != nil) || (errG != nil) || (errE != nil) {
 		logger.Fatalf("Choices creation incorrect.")
 	}
@@ -114,7 +125,7 @@ func main() {
 	mux.HandleFunc("/election", ctrl.HandleShowElection)
 
 	// serve assets
-	mux.Handle("/static/", http.FileServer(http.FS(static)))
+	mux.Handle("/web/static/", http.FileServer(http.FS(static)))
 
 	// create connection
 	ln, err := net.Listen("tcp", listenAddr)

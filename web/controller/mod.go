@@ -67,6 +67,12 @@ func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 
 func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	t2, err := template.ParseFS(c.homepage, "web/homepage.html")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
@@ -75,24 +81,11 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 
 	data := struct {
 		Title             string
-		VotingInstanceTab map[string]impl.VotingInstance
+		VotingInstanceTab map[string]*impl.VotingInstance
 	}{Title: "HomePage", VotingInstanceTab: c.vs.VotingInstancesList}
 
-	err = t2.Execute(w, data)
-	if err != nil {
-		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// d := dom.GetWindow().Document()
-
-	// button := d.GetElementByID("create")
-
-	// button.AddEventListener("click", false, func(event dom.Event) {
-	// 	fmt.Println("CLICKCLICK")
-	// })
-
 	if req.Method == "POST" {
+
 		title := req.PostFormValue("title")
 		if title == "" {
 			http.Error(w, "failed to get title: ", http.StatusInternalServerError)
@@ -126,13 +119,29 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		}
 		candidatesParsed := strings.Split(candidats, ",")
 
-		fmt.Fprintln(w, "TEST DE PRINT POUR VOIR SI RECUP VALUE FONCTIONNE")
-		fmt.Fprintln(w, "Title = \n", title)
-		fmt.Fprintln(w, "Description = \n", description)
-		fmt.Fprintln(w, "Status = \n", status)
-		fmt.Fprintln(w, "id = \n", id)
-		fmt.Fprintln(w, "List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
-		fmt.Fprintln(w, "List of candidates = \n", candidatesParsed[0])
+		// fmt.Fprintln(w, "TEST DE PRINT POUR VOIR SI RECUP VALUE FONCTIONNE")
+		fmt.Println("Title = \n", title)
+		// fmt.Fprintln(w, "Description = \n", description)
+		// fmt.Fprintln(w, "Status = \n", status)
+		// fmt.Fprintln(w, "id = \n", id)
+		//fmt.Println("List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
+		//fmt.Println("List of candidates = \n", candidatesParsed[0])
+
+		votingConfig, err := impl.NewVotingConfig(voterListParsed, title, description, candidatesParsed)
+		if err != nil {
+			http.Error(w, "NewVotingConfig is incorrect", http.StatusInternalServerError)
+		}
+
+		votes := make(map[string]*voting.Choice)
+		c.vs.CreateAndAdd(id, votingConfig, status, votes)
+
+		http.Redirect(w, req, "/homepage", http.StatusSeeOther)
+	}
+
+	err = t2.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	//recup les donnes form.get
@@ -159,7 +168,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	election, found := c.vs.VotingInstancesList[id]
+	electionAdd, found := c.vs.VotingInstancesList[id]
 	if !found {
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
@@ -168,16 +177,22 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 	deleg := make(map[string]voting.Liquid)
 	yesChoice := make(map[string]voting.Liquid)
 	liq100, err := impl.NewLiquid(100)
+	if err != nil {
+		http.Error(w, "Liquid creation incorrect", http.StatusInternalServerError)
+	}
 
 	yesChoice["yes"] = liq100
-	choiceGuillaume, err := impl.NewChoice(deleg, yesChoice, 0, 0)
+	choiceGuillaume, err := impl.NewChoice(deleg, yesChoice, 0, 100)
+	if err != nil {
+		http.Error(w, "Choice creation incorrect", http.StatusInternalServerError)
+	}
 
 	data := struct {
 		Election impl.VotingInstance
 		id       string
 		Choice   voting.Choice
 	}{
-		Election: election,
+		Election: *electionAdd,
 		id:       id,
 		Choice:   choiceGuillaume,
 	}
