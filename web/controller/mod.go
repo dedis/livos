@@ -124,8 +124,16 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		// fmt.Fprintln(w, "Description = \n", description)
 		// fmt.Fprintln(w, "Status = \n", status)
 		// fmt.Fprintln(w, "id = \n", id)
-		fmt.Println("List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
-		fmt.Println("List of candidates = \n", candidatesParsed[0])
+		//fmt.Println("List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
+		//fmt.Println("List of candidates = \n", candidatesParsed[0])
+
+		votingConfig, err := impl.NewVotingConfig(voterListParsed, title, description, candidatesParsed)
+		if err != nil {
+			http.Error(w, "NewVotingConfig is incorrect", http.StatusInternalServerError)
+		}
+
+		votes := make(map[string]*voting.Choice)
+		c.vs.CreateAndAdd(id, votingConfig, status, votes)
 
 		http.Redirect(w, req, "/homepage", http.StatusSeeOther)
 	}
