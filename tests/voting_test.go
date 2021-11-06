@@ -5,7 +5,7 @@ import (
 
 	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
-	//"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/require"
 	//"github.com/dedis/livos/storage/bbolt"
 	//"github.com/dedis/livos/storage.DB"
 )
@@ -18,66 +18,51 @@ var votes = make(map[string]*voting.Choice)
 
 func TestVotingSystemCreate(t *testing.T) {
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
+	voteConfig, err := impl.NewVotingConfig(voters, "VotingTitle", "Quick description", candidats)
+	require.Equal(t, err, nil, "Cannot create VotingConfig")
+
+	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
+	id := VoteSystem.VotingInstancesList["Session01"].Id
+	require.Equal(t, id, "Session01", "The id of the votingInstance just created is incorrect, got: %s, want %s.", id, "Session01")
+
+	status := VoteSystem.VotingInstancesList["Session01"].Status
+	require.Equal(t, status, "open", "The status of the votingInstance just created is incorrect, got: %s, want %s.", status, "open")
+
+	config := VoteSystem.VotingInstancesList["Session01"].Config
+	require.Equal(t, config.Title, "TestVotingTitle", "The config title of the votingInstance just created is incorrect, got: %s, want %s.", config.Title, "TestVotingTitle")
+
+	require.Equal(t, config.Description != "Quick description", "The config description of the votingInstance just created is incorrect, got: %s, want %s.", config.Description, "Quick description")
+}
+
+func TestSetStatus(t *testing.T) {
+	voters = append(voters, "Noemien", "Guillaume", "Etienne")
+	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	require.Equal(t, err, nil, "Cannot create VotingConfig")
+
+	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
+
+	addVoteInst := VoteSystem.VotingInstancesList["Session01"]
+	addVoteInst.SetStatus("close")
+
+	require.Equal(t, addVoteInst.Status, "close", "Set status was incorrect, got: %s, want %s", addVoteInst.Status, "close")
+
+}
+
+/* func TestCloseVoting(t *testing.T) {
+	voters = append(voters, "Noemien", "Guillaume", "Etienne")
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	if err != nil {
 		t.Errorf("Cannot create VotingConfig")
 	}
-
 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
-	id := VoteSystem.VotingInstancesList["Session01"].Id
-	if id != "Session01" {
-		t.Errorf("The id of the votingInstance just created is incorrect, got: %s, want %s.", id, "Session01")
-	}
-
-	require.Equal(t, 3, 3)
-	//require.Error(t, )
-
+	VoteSystem.VotingInstancesList["Session01"].CloseVoting()
 	status := VoteSystem.VotingInstancesList["Session01"].Status
-	if status != "open" {
-		t.Errorf("The status of the votingInstance just created is incorrect, got: %s, want %s.", status, "open")
+	if status != "close" {
+		t.Errorf("CloseVoting was incorrect, got: %s, want %s", status, "close")
 	}
+} */
 
-	config := VoteSystem.VotingInstancesList["Session01"].Config
-	if config.Title != "TestVotingTitle" {
-		t.Errorf("The config title of the votingInstance just created is incorrect, got: %s, want %s.", config.Title, "TestVotingTitle")
-	}
-
-	if config.Description != "Quick description" {
-		t.Errorf("The config description of the votingInstance just created is incorrect, got: %s, want %s.", config.Description, "Quick description")
-	}
-}
-
-// func TestSetStatus(t *testing.T) {
-// 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
-// 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
-// 	if err != nil {
-// 		t.Errorf("Cannot create VotingConfig")
-// 	}
-// 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
-
-// 	addVoteInst := VoteSystem.VotingInstancesList["Session01"]
-
-// 	if addVoteInst.Status != "close" {
-// 		t.Errorf("Set status was incorrect, got: %s, want %s", addVoteInst.Status, "close")
-// 	}
-
-// }
-
-// func TestCloseVoting(t *testing.T) {
-// 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
-// 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
-// 	if err != nil {
-// 		t.Errorf("Cannot create VotingConfig")
-// 	}
-// 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
-// 	VoteSystem.VotingInstancesList["Session01"].SetStatus("close")
-// 	status := VoteSystem.VotingInstancesList["Session01"].Status
-// 	if status != "close" {
-// 		t.Errorf("CloseVoting was incorrect, got: %s, want %s", status, "close")
-// 	}
-// }
-
-func TestGetResults(t *testing.T) {
+/* func TestGetResults(t *testing.T) {
 	voters = append(voters, "Noemien", "Guillaume", "Etienne")
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	if err != nil {
@@ -120,4 +105,4 @@ func TestGetResults(t *testing.T) {
 	if propNo != 50. {
 		t.Errorf("No proportion is incorrect, got: %f, want: %f.", propNo, 50.)
 	}
-}
+} */
