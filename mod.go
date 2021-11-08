@@ -30,6 +30,9 @@ var static embed.FS
 //go:embed web/views
 var views embed.FS
 
+//go:embed web/images
+var image embed.FS
+
 const (
 	requestIDKey key = 0
 )
@@ -129,6 +132,7 @@ func main() {
 
 	// serve assets
 	mux.Handle("/web/static/", http.FileServer(http.FS(static)))
+	mux.Handle("/web/images/", http.FileServer(http.FS(image)))
 
 	// create connection
 	ln, err := net.Listen("tcp", listenAddr)

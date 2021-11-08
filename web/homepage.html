@@ -5,25 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <link rel="stylesheet" href="/web/static/style.css">
+    <link rel="stylesheet" href="/web/static/homepage.css">
 
-    <title>Livos</title>
+    <title>Livos Accueil</title>
   </head>
   <body>
       <h1>Welcome on the homepage, you are in</h1>
-      {{.Title}}
-      {{range $key, $value := .VotingInstanceTabOpen}} <p>
-        {{$key}} {{$value.Status}}
-        <span><input type="button" name="room" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
-        <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
-      </p> {{end}}
 
-      {{range $key, $value := .VotingInstanceTabClose}} <p>
-        {{$key}} {{$value.Status}}
-        <span><input type="button" name="room" value={{$value.Status}} onclick="self.location.href='/results?id='+'{{$key}}'" ></span> 
-        <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
-      </p> {{end}}
+      <div id="header-left">
+        <div id="logo">
+          <!--<img src="images/LivosLogo.PNG">-->
+        </div>
+  
+        <div id="side-text">
+          <h2>Livos</h2>
+        </div>
+      </div>
+      <div id="tache-fond">
+        <img src="/web/images/tache-bg.png">
+      </div>
+      <div id="tache-fond2">
+        <img src="/web/images/tache-bg.png">
+      </div>
+  
+      <div id="voting-session">
+        <div id="text-voting-session">
+          <h1>Voting Session</h1>
+        </div>
+        
+        <div id="list">
+          <div class="vote" id="panelsYesVotes">
+            {{range $key, $value := .VotingInstanceTabOpen}} <p>
+              
+              <span><input type="button" class= "button" name="login" value={{$value.Status}} width="300px" heigth="300px" style="background: url(/web/images/Vote_resized.jpg)" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+              
+              <!-- <a href="/election?id='+'{{$key}}" ><input type="image" src="/web/images/Vote_resized.jpg" width="150px" heigth="150px"></a> -->
+              <div class="description-vote">
+                <h5>{{$value.Config.Description}}</h5>
+              </div>
+            </p> {{end}}
+          </div>
+          <div class="title-vote" id="voteYes">
+            {{range $key, $value := .VotingInstanceTabOpen}} <p>
+              <h3>Vote {{$key}} :{{$value.Status}}</h3>
+            </p> {{end}}
+          </div>
+          <div class="parambutton" id="param">
+            {{range $key, $value := .VotingInstanceTabOpen}} <p>
+            <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+            </p> {{end}}
+          </div>
 
+          
+          <div class="vote" id="panelsNoVotes">
+            {{range $key, $value := .VotingInstanceTabClose}} <p>
+              <a href="/results?id='+'{{$key}}"><img src="/web/images/Vote_resized.jpg" width="150px" heigth="150px"></a>
+              <div class="description-vote">
+                <h5>{{$value.Config.Description}}</h5>
+              </div>
+            </p> {{end}}
+          </div>
+          <div class="title-vote" id="voteNo">
+            {{range $key, $value := .VotingInstanceTabClose}} <p>
+              <h3>Vote {{$key}} : {{$value.Status}}</h3>
+            </p> {{end}} 
+          </div>
+          <div class="parambutton" id="param">
+            {{range $key, $value := .VotingInstanceTabClose}} <p>
+              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+            </p>{{end}}
+          </div>
+        </div>
+      </div>
+      <!-- FORMULAIRE CSS PAS ENCORE FAIT-->
       <div id="formulaire">
         <form method="post" class="form-example" >
 

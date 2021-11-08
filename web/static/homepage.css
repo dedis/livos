@@ -1,0 +1,219 @@
+*{
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+	user-select: none;
+	}
+/* 	goutte bleu 1 : #52b9ff
+	goutte bleu 2 : #45adf9
+	goutte bleu 3 : #287cc2
+	goutte rose : 	#f31ebf
+	goutte orange : #e99941
+	bleu  tache : #84C8F6
+
+	background color : #E9E9E9 (ancien : #D7F5F4)
+	
+	// 
+		pour le placement des objets : 
+			- position : absolute
+			- top : un pourcentage / nb de pixels
+			- left : pareil
+
+			- display: flex;
+			- justify-content: center;
+			- align-items: center;
+	//
+
+*/
+html,body{
+		width: 100%;
+		height: 100%;
+	}
+body{
+	background-color: #E9E9E9;
+	position: absolute;
+	font-family: "optiamwayregular", Arial, sans-serif;
+	font-weight: normal;
+	color: black;
+	text-align: center;
+	overflow: hidden;
+
+}
+
+#header-left{
+	width: 200px;
+	height: 100px;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	top: 0;
+	left: 0;
+}
+#logo{
+	width: 70px;
+	height :70px;
+	background-image: url(/web/images/LivosLogo.png);
+	background-size: cover;
+	background-position: center center;
+	background-repeat:no-repeat;
+	position: absolute;
+	top: calc(50% - 35px);
+	left:10%;
+}
+#side-text{
+	width: 100px;
+	height :100px;
+	font-size: 1.4em;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	top: calc(50%  - 50px);
+	left: 50%;
+}
+
+#tache-fond{
+	width: 500px;
+	height: 500px;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	left: 80%;
+}
+#tache-fond2{
+	width: 500px;
+	height: 500px;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	left: 0;
+	top: 55%;
+	transform: rotate(180deg);
+}
+
+#voting-session{
+	width: 50%;
+	height: 100%;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	left: 50%;
+}
+#text-voting-session{
+	width: 100%;
+	height: 90%;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: top;
+}
+#list{
+	width: 100%;
+	height: 80%;
+	position: absolute;
+}
+.vote{
+	width: 0px;
+	height: 0px;
+	overflow: hidden;
+	position:absolute;
+	border: 2px solid #D69D1B;
+	border-color: rgba(214, 157,27, 0);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	animation: illustrations 0.7s; 
+	animation-delay: 0.5s;
+	opacity:1;
+	animation-fill-mode: both;
+	border-radius: 18%;
+}
+
+#formulaire{
+	position: absolute;
+	display: flex;
+	justify-content: left;
+	align-items: left;
+    top: 20%;
+}
+
+@keyframes illustrations{
+		to{
+			width: 150px;
+			height: 150px;
+		}
+	}
+.vote:hover > a{
+		filter:grayscale(1) brightness(0.25);
+		transition: transform 0.7s;
+		transform: scale(1.1);
+}
+.vote:hover > .description-vote{
+	opacity: 1;
+}
+.title-vote{
+	width: 150px;
+	height: 25px;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-self: bottom;
+	opacity: 0;
+	animation: title 0.7s; 
+	animation-delay: 1s;
+	animation-fill-mode: both;
+}
+@keyframes title{
+		to{
+			opacity: 1;
+		}
+	}
+#voteYes{
+	top: calc(10% + 160px);
+	left: calc(25% - 75px);
+}
+
+#voteNo{
+	top: calc(60% + 160px);
+	left: calc(25% - 75px);
+}
+
+#param{
+    top: 50%;
+	left: 25%;
+}
+
+.description-vote{
+		position:absolute;
+		width: 100%;
+		height: 100%;
+		color: rgb(0, 0, 0);
+		display:flex;
+		justify-content: center;
+		align-items: center;
+		opacity:0;
+	}
+#panelsYesVotes{
+	left: calc(25% - 75px);
+	top: 10%;
+}
+
+#panelsNoVotes{
+	left: calc(25% - 75px);
+	top: 60%;
+}
+
+.button {
+    border: none;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }

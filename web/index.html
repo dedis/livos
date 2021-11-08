@@ -10,7 +10,55 @@
     <title>Livos</title>
   </head>
   <body>
-    <div class="center">
+
+    <div id="header-left">
+      <div id="logo">
+        <!-- <img src="/images/LivosLogo.PNG"> -->
+      </div>
+
+      <div id="side-text">
+        <h2>Livos</h2>
+      </div>
+    </div>
+
+    <div id="tache-fond">
+      <img src="/web/images/tache-bg.png">
+    </div>
+    <div id="tache-fond2">
+      <img src="/web/images/tache-bg.png">
+    </div>
+
+    <div id="login">
+      <div id="text-login">
+        <h2>Login</h2>
+      </div>
+      <div id="formulaire">
+        <form class="form-example">
+
+          <div class="form-example">
+            <label for="roomID">RoomID: </label>
+            <input name="roomID" id="roomID" type="number" value = ""><br>
+          </div>
+
+          <div class="form-example">
+            <label for="username">Username: </label>
+            <input name="username" id="username" type="text" value = "" required><br>
+          </div>
+
+          <div class="form-example">
+            <label for="desc">Description: </label>
+            <textarea type="textarea" name="desc" id="desc" rows="5" cols="30" maxlength="150" placeholder="#description" ></textarea>
+          </div>
+          <div class="form-example">
+            <input type="button" name="login" value="Login" onclick="self.location.href='/homepage'" >
+          </div>
+
+        </form>
+    
+      </div>
+    </div>
+
+   <!--  <div class="center">
       <h1>Login</h1> 
       <form method="post">
           <label>RoomID</label><input name="roomID" type="number" value = ""><br>
@@ -18,7 +66,7 @@
           <label>Description</label><input name="description" type="text" value = "">
           <input type="button" name="login" value="Login" onclick="self.location.href='/homepage'" >
       </form>
-    </div>
+    </div> -->
     
   </body>
 </html>
