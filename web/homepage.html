@@ -12,9 +12,16 @@
   <body>
       <h1>Welcome on the homepage, you are in</h1>
       {{.Title}}
-      {{range $key, $value := .VotingInstanceTab}} <p>
+      {{range $key, $value := .VotingInstanceTabOpen}} <p>
         {{$key}} {{$value.Status}}
-        <span><input type="button" name="login" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+        <span><input type="button" name="room" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+        <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+      </p> {{end}}
+
+      {{range $key, $value := .VotingInstanceTabClose}} <p>
+        {{$key}} {{$value.Status}}
+        <span><input type="button" name="room" value={{$value.Status}} onclick="self.location.href='/results?id='+'{{$key}}'" ></span> 
+        <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
       </p> {{end}}
 
       <div id="formulaire">

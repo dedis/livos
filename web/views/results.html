@@ -10,14 +10,15 @@
     <title>Livos</title>
   </head>
   <body>
-      <h1>Welcome in the election number : {{.Election.Id}}</h1>
+      <h1>Welcome in the  results of the election number : {{.Election.Id}}.</h1>
       <h2>Votation Question : {{.Election.Config.Description}}</h2>
       <h4>
-        List of voters : <br>
-        {{range .Election.Config.Voters}} <p>
-          {{.}}
+        Results of the votes: <br>
+        {{range $key, $value := .Results}} <p>
+            {{$key}} {{$value}}
         </p> {{end}}
       </h4>
+
 
   </body>
 </html>

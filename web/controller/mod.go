@@ -74,10 +74,27 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	VotingInstanceTabOpen := make(map[string]*impl.VotingInstance)
+	VotingInstanceTabClose := make(map[string]*impl.VotingInstance)
+
+	for key, value := range c.vs.VotingInstancesList {
+		if value.Status == "open" {
+			VotingInstanceTabOpen[key] = value
+		} else {
+			VotingInstanceTabClose[key] = value
+		}
+
+	}
+
 	data := struct {
-		Title             string
-		VotingInstanceTab map[string]*impl.VotingInstance
-	}{Title: "HomePage", VotingInstanceTab: c.vs.VotingInstancesList}
+		Title                  string
+		VotingInstanceTab      map[string]*impl.VotingInstance
+		VotingInstanceTabOpen  map[string]*impl.VotingInstance
+		VotingInstanceTabClose map[string]*impl.VotingInstance
+	}{Title: "HomePage",
+		VotingInstanceTab:      c.vs.VotingInstancesList,
+		VotingInstanceTabOpen:  VotingInstanceTabOpen,
+		VotingInstanceTabClose: VotingInstanceTabClose}
 
 	if req.Method == "POST" {
 
@@ -197,4 +214,122 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (c Controller) HandleShowResults(w http.ResponseWriter, req *http.Request) {
+
+	t, err := template.ParseFS(c.views, "web/views/results.html")
+	if err != nil {
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id := req.Form.Get("id")
+	if id == "" {
+		http.Error(w, "failed to get id: ", http.StatusInternalServerError)
+		return
+	}
+
+	electionAdd, found := c.vs.VotingInstancesList[id]
+	if !found {
+		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("ELECTION ADD object: ", *electionAdd)
+
+	data := struct {
+		Election impl.VotingInstance
+		id       string
+		Results  map[string]float64
+	}{
+		Election: *electionAdd,
+		id:       id,
+		Results:  electionAdd.GetResults(),
+	}
+
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request) {
+
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t, err := template.ParseFS(c.views, "web/views/manage.html")
+	if err != nil {
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id := req.Form.Get("id")
+	if id == "" {
+		http.Error(w, "failed to get id: ", http.StatusInternalServerError)
+		return
+	}
+
+	electionAdd, found := c.vs.VotingInstancesList[id]
+	if !found {
+		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Election impl.VotingInstance
+		id       string
+	}{
+		Election: *electionAdd,
+		id:       id,
+	}
+
+	if req.Method == "POST" {
+
+		title := req.PostFormValue("title")
+		if title != "" {
+			c.vs.VotingInstancesList[id].Config.Title = title
+		}
+		status := req.FormValue("status")
+		c.vs.VotingInstancesList[id].SetStatus(status)
+
+		description := req.FormValue("desc")
+		if description != "" {
+			c.vs.VotingInstancesList[id].Config.Description = description
+		}
+
+		voterList := req.FormValue("votersList")
+		voterListParsed := strings.Split(voterList, ",")
+		if voterList != "" {
+			c.vs.VotingInstancesList[id].Config.Voters = voterListParsed
+		}
+
+		candidats := req.FormValue("candidates")
+		candidatesParsed := strings.Split(candidats, ",")
+		if candidats != "" {
+			c.vs.VotingInstancesList[id].Config.Candidates = candidatesParsed
+
+		}
+
+		http.Redirect(w, req, "/homepage", http.StatusSeeOther)
+
+	}
+
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }

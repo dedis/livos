@@ -56,7 +56,7 @@ func (vi VotingInstance) GetConfig() voting.VotingConfig {
 }
 
 //Give the result of the choices of the voting instance in the form: map[no:50 yes:50]
-func (vi VotingInstance) GetResults() map[string]float64 {
+func (vi *VotingInstance) GetResults() map[string]float64 {
 	results := make(map[string]float64, len(vi.Votes))
 	counter := 0
 	var yesPower float64 = 0
