@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <link rel="stylesheet" href="/web/static/style.css">
+    <link rel="stylesheet" href="/web/static/manage.css">
 
     <title>Livos</title>
   </head>
   <body>
-      <h1>Welcome in the parameters of the election number : {{.Election.Id}}.</h1>
-      <h2>Votation Question : {{.Election.Config.Description}}</h2>
-     
+      <h2>Welcome in the parameters of the election number : {{.Election.Id}}.</h2>
+      <h3>Votation Question : {{.Election.Config.Description}}</h3>
+
+      <div id="logo">
+        <!-- <img src="/images/LivosLogoComplet.png"> -->
+      </div>
+
       <div id="formulaire">
         <form method="post" class="form-example" >
 
@@ -45,13 +49,11 @@
           </div>
 
           <div class="form-example">
+            <div class="button"></div>
             <input type="submit" name="create" id="create" value="Create">
           </div>
 
         </form>
-
-
-
-
+      </div>  
   </body>
 </html>
