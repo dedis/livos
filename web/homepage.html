@@ -34,25 +34,31 @@
         </div>
         
         <div id="list">
-          <div class="vote" id="panelsYesVotes">
+          
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              
-              <span><input type="button" class= "button" name="login" value={{$value.Status}} width="300px" heigth="300px" style="background: url(/web/images/Vote_resized.jpg)" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
-              
-              <!-- <a href="/election?id='+'{{$key}}" ><input type="image" src="/web/images/Vote_resized.jpg" width="150px" heigth="150px"></a> -->
-              <div class="description-vote">
-                <h5>{{$value.Config.Description}}</h5>
-              </div>
+              <div class="vote" id="panelsYesVotes'+'{{$key}}">
+<!--                 <a><input type="button" class= "button" name="login" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></a>-->              
+ <!--   
+                  <form formaction="/election?id='+'{{$key}}">
+                    <input type="image" src="/web/images/Vote_resized.jpg" alt="Vote_resized" width="75" height="75">
+                  </form> -->
+                <a href="/election?id='+'{{$key}}"> <img src="/web/images/Vote_resized.jpg" alt="Vote_resized" width="150px" heigth="150px"></a>                
+                <div class="description-vote">
+                  <h5>{{$value.Config.Description}}</h5>
+                </div>
+              </div>       
+<!--               <a><input type="button" class= "button" name="login" value={{$value.Status}} width="300px" heigth="300px" style="background: url(/web/images/Vote_resized.jpg)" onclick="self.location.href='/election?id='+'{{$key}}'" ></a>-->              
+<!--               <span><input type="image" class= "button" name="login" value={{$value.Status}} width="300px" heigth="300px" src=/web/images/Vote_resized.jpg formaction="/election?id='+'{{$key}}" ></span>-->
             </p> {{end}}
-          </div>
           <div class="title-vote" id="voteYes">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
               <h3>Vote {{$key}} :{{$value.Status}}</h3>
             </p> {{end}}
           </div>
-          <div class="parambutton" id="param">
+          <div class="parambutton" id="paramYes">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
-            <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+              <span><input type="button" name="param" value="Room: {{$key}}" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
             </p> {{end}}
           </div>
 
@@ -70,9 +76,10 @@
               <h3>Vote {{$key}} : {{$value.Status}}</h3>
             </p> {{end}} 
           </div>
-          <div class="parambutton" id="param">
+          <div class="parambutton" id="paramNo">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
               <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+              <span><input type="button" name="param" value="Room {{$key}}" onclick="self.location.href='/results?id='+'{{$key}}'" ></span>
             </p>{{end}}
           </div>
         </div>
