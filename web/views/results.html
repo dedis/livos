@@ -12,6 +12,11 @@
   <body>
       <h1>Welcome in the  results of the election number : {{.Election.Id}}.</h1>
       <h2>Votation Question : {{.Election.Config.Description}}</h2>
+      
+      <div id="logo">
+        <!-- <img src="/images/LivosLogoComplet.png"> -->
+      </div>
+      
       <h4>
         Results of the votes: <br>
         {{range $key, $value := .Results}} <p>

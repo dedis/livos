@@ -56,15 +56,14 @@ body{
 	left: 0;
 }
 #logo{
-	width: 70px;
-	height :70px;
-	background-image: url(/web/images/LivosLogo.png);
-	background-size: cover;
-	background-position: center center;
-	background-repeat:no-repeat;
+	width: 255px;
+	height :81px;
+	background-image: url(/web/images/LivosLogoComplet.png);
+	background-size:cover;
+	background-position: left top;
 	position: absolute;
-	top: calc(50% - 35px);
-	left:10%;
+	top:  3px;
+	left: 3px;
 }
 #side-text{
 	width: 100px;

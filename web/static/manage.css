@@ -39,6 +39,16 @@
         overflow: hidden;
     
     }
+    #header-left{
+        width: 200px;
+        height: 100px;
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        top: 0;
+        left: 0;
+    }
     #logo{
         width: 255px;
         height :81px;
@@ -49,28 +59,7 @@
         top:  3px;
         left: 3px;
     }
-    #tache-fond{
-        width: 500px;
-        height: 500px;
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        left: 80%;
-    }
-    #tache-fond2{
-        width: 500px;
-        height: 500px;
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        left: 0;
-        top: 55%;
-        transform: rotate(180deg);
-    }
-    
-    #login{
+    #formulaire{
         width: 500px;
         height: 500px;
         position: absolute;
@@ -78,21 +67,8 @@
         justify-content: center;
         align-items: center;
         top: calc(50%  - 250px);
-          left: calc(50% - 250px);
-    
+        left: calc(50% - 250px);
     }
-    #text-login{
-        width: 20%;
-        height: 10%;
-        position: absolute;
-    
-        top: 0;
-        left: calc(50% - 50px);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    
     form {
         width  : 100%;
         height : 90%;
@@ -110,32 +86,30 @@
         display: table;
         padding-top: 10%;
     }
-    
     div.form-example {
         display: table-row;
     }
     label {
         padding-bottom: 10px;
-        display: flex;
+        display: inline-block;
         justify-content: center;
-        align-items: center;
+        align-items:center;
     }
     textarea{
         resize: none;
     }
     
-    button{
+    #button{
         height: 40px;
         width: 100px;
         background-color: white;
         color: black;
         font-size: 16px;
         text-align: center;
-        text-decoration: none;
         display: inline-block;
-        border-radius: 18px;
-        border: 2px solid grey;
-        box-shadow:3px 3px 3px grey ;
+        border-radius: 30px;
+        border: 2px groove rgb(136, 170, 184);
+        box-shadow:5px 5px 5px grey ;
     }
     
     
