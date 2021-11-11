@@ -230,7 +230,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
 		} else {
-			temp, err := strconv.ParseFloat(YesChoice, 64)
+			temp, err := strconv.ParseFloat(NoChoice, 64)
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
@@ -240,6 +240,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			}
 		}
 
+		fmt.Fprint(w, "this is the yes liquid", liquidYes.Percentage)
 		deleg := make(map[string]voting.Liquid)
 		choice := make(map[string]voting.Liquid)
 		choice["yes"] = liquidYes
