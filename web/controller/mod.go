@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
 	"strings"
 
 	//"strings"
@@ -83,7 +84,6 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		} else {
 			VotingInstanceTabClose[key] = value
 		}
-
 	}
 
 	data := struct {
@@ -186,27 +186,84 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	deleg := make(map[string]voting.Liquid)
-	yesChoice := make(map[string]voting.Liquid)
-	liq100, err := impl.NewLiquid(100)
-	if err != nil {
-		http.Error(w, "Liquid creation incorrect", http.StatusInternalServerError)
-	}
+	isVoterValid := false
+	isPowerYesValid := false
+	isPowerNoValid := false
 
-	yesChoice["yes"] = liq100
-	choiceGuillaume, err := impl.NewChoice(deleg, yesChoice, 0, 100)
-	if err != nil {
-		http.Error(w, "Choice creation incorrect", http.StatusInternalServerError)
+	liquidYes := voting.Liquid{}
+	liquidNo := voting.Liquid{}
+	if req.Method == "POST" {
+
+		voter := req.PostFormValue("voter")
+		if voter == "" {
+			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
+			return
+		}
+
+		for _, object := range (*electionAdd).Config.Voters {
+			if object == voter {
+				isVoterValid = true
+			}
+		}
+
+		YesChoice := req.PostFormValue("Yes% ")
+		if YesChoice == "" {
+			liquidYes, err = impl.NewLiquid(0)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		} else {
+			temp, err := strconv.ParseFloat(YesChoice, 64)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+			liquidYes, err = impl.NewLiquid(temp)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		}
+
+		NoChoice := req.PostFormValue("No% ")
+		if NoChoice == "" {
+			liquidNo, err = impl.NewLiquid(0)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		} else {
+			temp, err := strconv.ParseFloat(YesChoice, 64)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+			liquidNo, err = impl.NewLiquid(temp)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		}
+
+		deleg := make(map[string]voting.Liquid)
+		choice := make(map[string]voting.Liquid)
+		choice["yes"] = liquidYes
+		choice["no"] = liquidNo
+		choiceUser, err := impl.NewChoice(deleg, choice, 0, 100)
+		if err != nil {
+			http.Error(w, "Choice creation incorrect", http.StatusInternalServerError)
+		}
+		isPowerYesValid = liquidYes.Percentage >= 0. && liquidYes.Percentage <= 100.
+		isPowerNoValid = liquidNo.Percentage >= 0. && liquidNo.Percentage <= 100.
+
+		if isVoterValid && isPowerNoValid && isPowerYesValid {
+			electionAdd.CastVote(voter, choiceUser)
+		}
+
+		http.Redirect(w, req, "/election?id="+id, http.StatusSeeOther)
 	}
 
 	data := struct {
 		Election impl.VotingInstance
 		id       string
-		Choice   voting.Choice
 	}{
 		Election: *electionAdd,
 		id:       id,
-		Choice:   choiceGuillaume,
 	}
 
 	err = t.Execute(w, data)
@@ -214,6 +271,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 }
 
 func (c Controller) HandleShowResults(w http.ResponseWriter, req *http.Request) {
