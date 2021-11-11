@@ -30,21 +30,15 @@
         
         <div id="list">
           
-            {{range $key, $value := .VotingInstanceTabOpen}} <p>
+            <!-- {{range $key, $value := .VotingInstanceTabOpen}} <p>
               <div class="vote" id="panelsYesVotes'+'{{$key}}">
-<!--                 <a><input type="button" class= "button" name="login" value={{$value.Status}} onclick="self.location.href='/election?id='+'{{$key}}'" ></a>-->              
- <!--   
-                  <form formaction="/election?id='+'{{$key}}">
-                    <input type="image" src="/web/images/Vote_resized.jpg" alt="Vote_resized" width="75" height="75">
-                  </form> -->
+            
                 <a href="/election?id='+'{{$key}}"> <img src="/web/images/Vote_resized.jpg" alt="Vote_resized" width="150px" heigth="150px"></a>                
                 <div class="description-vote">
                   <h5>{{$value.Config.Description}}</h5>
                 </div>
-              </div>       
-<!--               <a><input type="button" class= "button" name="login" value={{$value.Status}} width="300px" heigth="300px" style="background: url(/web/images/Vote_resized.jpg)" onclick="self.location.href='/election?id='+'{{$key}}'" ></a>-->              
-<!--               <span><input type="image" class= "button" name="login" value={{$value.Status}} width="300px" heigth="300px" src=/web/images/Vote_resized.jpg formaction="/election?id='+'{{$key}}" ></span>-->
-            </p> {{end}}
+              </div> 
+            </p> {{end}}  -->
           <div class="title-vote" id="voteYes">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
               <h3>Vote {{$key}} :{{$value.Status}}</h3>
@@ -58,14 +52,14 @@
           </div>
 
           
-          <div class="vote" id="panelsNoVotes">
+         <!--  <div class="vote" id="panelsNoVotes">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
               <a href="/results?id='+'{{$key}}"><img src="/web/images/Vote_resized.jpg" width="150px" heigth="150px"></a>
               <div class="description-vote">
                 <h5>{{$value.Config.Description}}</h5>
               </div>
             </p> {{end}}
-          </div>
+          </div> -->
           <div class="title-vote" id="voteNo">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
               <h3>Vote {{$key}} : {{$value.Status}}</h3>
@@ -80,48 +74,50 @@
         </div>
       </div>
       <!-- FORMULAIRE CSS PAS ENCORE FAIT-->
-      <div id="formulaire">
-        <form method="post" class="form-example" >
+      
+      <form method="post" class="form-example" >
 
-          <div class="form-example">
-            <label for="title">Title: </label>
-            <input type="text" name="title" id="title" required>
-          </div>
+        <div class="form-example">
+          <label for="title">Title: </label>
+          <input type="text" name="title" id="title" required>
+        </div>
 
-          <div class="form-example">
-            <label for="id">Id of the room: </label>
-            <input type="number" name="id" id="id" required>
-          </div>
+        <div class="form-example">
+          <label for="id">Id of the room: </label>
+          <input type="number" name="id" id="id" required>
+        </div>
 
-          <div class="form-example">
-            <label for="status">Select a status :</label>
-            <input type="radio" name="status" id="open" value="open" checked>
-            <label for="open">Open</label>
-            <input type="radio" name="status" id="close" value="close" checked>
-            <label for="open">Close</label>
-          </div>
+        <div class="form-example">
+          <label for="status">Select a status :</label>
+          <span>
+            <input type="radio" name="status" id="status" value="open" checked>
+            <label for="status">Open </label>
+          </span>
+          <span>
+            <input type="radio" name="status" id="status" value="close" checked>
+            <label for="status">Close </label>
+          </span>
+        </div>
 
-          <div class="form-example">
-            <label for="desc">Description: </label>
-            <textarea type="textarea" name="desc" id="desc" rows="5" cols="30" maxlength="150" placeholder="#Description" required></textarea>
-          </div>
+        <div class="form-example">
+          <label for="desc">Description: </label>
+          <textarea type="textarea" name="desc" id="desc" rows="5" cols="30" maxlength="150" placeholder="#Description" required></textarea>
+        </div>
 
-          <div class="form-example">
-            <label for="votersList">Voters List: </label>
-            <textarea type="textarea" name="votersList" id="votersList" rows="3" cols="30" maxlength="150" placeholder="#Voter1, Voter2, Voter3..."></textarea>
-          </div>
+        <div class="form-example">
+          <label for="votersList">Voters List: </label>
+          <textarea type="textarea" name="votersList" id="votersList" rows="3" cols="30" maxlength="150" placeholder="#Voter1, Voter2, Voter3..."></textarea>
+        </div>
 
-          <div class="form-example">
-            <label for="candidates">Candidates List: </label>
-            <textarea type="textarea" name="candidates" id="candidates" rows="3" cols="30" maxlength="150" placeholder="#Candidate1, Candidate2..." required></textarea>
-          </div>
+        <div class="form-example">
+          <label for="candidates">Candidates List: </label>
+          <textarea type="textarea" name="candidates" id="candidates" rows="3" cols="30" maxlength="150" placeholder="#Candidate1, Candidate2..." required></textarea>
+        </div>
 
-          <div class="form-example">
-            <input type="submit" name="create" id="create" value="Create">
-          </div>
+        <div class="form-example">
+          <input type="submit" name="create" id="create" value="Create">
+        </div>
 
-        </form>
-
-      </div>
+      </form>
   </body>
 </html>

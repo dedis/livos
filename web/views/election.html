@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <link rel="stylesheet" href="/web/static/style.css">
+    <link rel="stylesheet" href="/web/static/vide.css">
 
     <title>Livos</title>
   </head>
@@ -18,6 +18,28 @@
           {{.}}
         </p> {{end}}
       </h4>
+      
+      <form method="post" class="form-example" >
 
+        <div class="form-example">
+          <label for="voter">Voter: </label>
+          <input type="text" name="voter" id="voter" required>
+        </div>
+
+        <div class="form-example">
+          <label for="id">Your yes Vote: </label>
+          <input type="number" name="Yes%" id="Yes%" >
+        </div>
+
+        <div class="form-example">
+          <label for="id">Your no Vote: </label>
+          <input type="number" name="No%" id="No%" >
+        </div>
+
+        <div class="form-example">
+          <input type="submit" name="Validate" id="Validate" value="Validate">
+        </div>
+
+      </form>
   </body>
 </html>
