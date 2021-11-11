@@ -109,7 +109,7 @@ body{
 	height: 90%;
 	position: absolute;
 	display: flex;
-	justify-content: center;
+	justify-content: left;
 	align-items: top;
 }
 #list{
@@ -150,7 +150,7 @@ form {
 	justify-content: left;
 	align-items: left;
 	border-radius: 20%;
-	top: calc(50% - 200px);
+	top: calc(47% - 200px);
 	left: 8%;
 	box-shadow:10px 5px 5px grey ;
 	background: #84C8F6;
@@ -213,30 +213,24 @@ textarea{
 		}
 	}
 
-@each $key, $value in $var(--idRoomOpen){
-	#voteYes::key{
-		top: calc(8% + 160px);
-		left: calc(25% - 75px)+ /* (key-1)*var(--left) */;
-	}
+#voteYes{
+	top: 10%;
+	left: 10%;
 }
-/* #voteYes::var(--idRoom){
-	top: calc(10% + 160px);
-	left: calc(25% - 75px)+ var(--idRoom)*var(--left);
-} */
 
 #voteNo{
-	top: calc(58% + 160px);
-	left: calc(25% - 75px);
+	top: 50%;
+	left: 10%;
 }
 
 #paramYes{
-	top: calc(13% + 160px);
-	left: calc(25% - 75px);
-   
+	top: 15%;
+	left: calc(10% + 50px);
 }
+
 #paramNo{
-	top: calc(40% + 160px);
-	left: calc(25% - 75px);
+	top: 55%;
+	left: calc(10% + 50px);
 }
 
 .description-vote{
