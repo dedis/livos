@@ -10,7 +10,6 @@
 	goutte rose : 	#f31ebf
 	goutte orange : #e99941
 	bleu  tache : #84C8F6
-
 	background color : #E9E9E9 (ancien : #D7F5F4)
 	
 	// 
@@ -18,12 +17,10 @@
 			- position : absolute
 			- top : un pourcentage / nb de pixels
 			- left : pareil
-
 			- display: flex;
 			- justify-content: center;
 			- align-items: center;
 	//
-
 */
 html,body{
 		width: 100%;
@@ -145,12 +142,42 @@ body{
 	align-items: center;
 }
 
-#formulaire{
+form {
+	width  : 30%;
+    height : 60%;
 	position: absolute;
 	display: flex;
 	justify-content: left;
 	align-items: left;
-    top: 20%;
+	border-radius: 20%;
+	top: calc(50% - 200px);
+	left: 8%;
+	box-shadow:10px 5px 5px grey ;
+	background: #84C8F6;
+}
+form.form-example {
+	display: table;
+	padding-top: 2%;
+	padding-bottom: 2%;
+}
+
+div.form-example {
+	display: table-row;
+}
+label {
+	padding-bottom: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+label[for="status"]{
+	white-space:pre-wrap;
+	flex: none;
+	padding-bottom: 10px;
+	display:inline-block;
+}
+textarea{
+	resize: none;
 }
 
 @keyframes illustrations{
@@ -188,7 +215,7 @@ body{
 
 @each $key, $value in $var(--idRoomOpen){
 	#voteYes::key{
-		top: calc(10% + 160px);
+		top: calc(8% + 160px);
 		left: calc(25% - 75px)+ /* (key-1)*var(--left) */;
 	}
 }
@@ -198,17 +225,17 @@ body{
 } */
 
 #voteNo{
-	top: calc(60% + 160px);
+	top: calc(58% + 160px);
 	left: calc(25% - 75px);
 }
 
 #paramYes{
-	top: calc(15% + 160px);
+	top: calc(13% + 160px);
 	left: calc(25% - 75px);
    
 }
 #paramNo{
-	top: calc(65% + 160px);
+	top: calc(40% + 160px);
 	left: calc(25% - 75px);
 }
 

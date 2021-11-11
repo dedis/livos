@@ -192,7 +192,7 @@ func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, 
 }
 
 func NewLiquid(p float64) (voting.Liquid, error) {
-	if p > 100 {
+	if p > 100 || p < 0 {
 		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be less than %d", p, PERCENTAGE)
 	}
 

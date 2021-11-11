@@ -109,16 +109,14 @@ func main() {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceNoemien, errN := impl.NewChoice(deleg, noChoice, 0, 100)
-	fmt.Println("CHOICE NOEMIEN: ", choiceNoemien)
 	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 100)
 	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 100)
 	fmt.Println("CHOICE Guigui: ", choiceGuillaume)
 	fmt.Println("CHOICE etien: ", choiceEtienne)
-	if (errN != nil) || (errG != nil) || (errE != nil) {
+	if (errG != nil) || (errE != nil) {
 		logger.Fatalf("Choices creation incorrect.")
 	}
-	vi.CastVote("Noemien", choiceNoemien)
+
 	vi.CastVote("Guillaume", choiceGuillaume)
 	vi.CastVote("Etienne", choiceEtienne)
 
