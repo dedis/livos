@@ -162,15 +162,15 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 
 func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request) {
 
-	t, err := template.ParseFS(c.views, "web/views/election.html")
+	err := req.ParseForm()
 	if err != nil {
-		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = req.ParseForm()
+	t, err := template.ParseFS(c.views, "web/views/election.html")
 	if err != nil {
-		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -206,7 +206,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			}
 		}
 
-		YesChoice := req.PostFormValue("Yes% ")
+		YesChoice := req.PostFormValue("yesPercent")
 		if YesChoice == "" {
 			liquidYes, err = impl.NewLiquid(0)
 			if err != nil {
@@ -223,7 +223,9 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			}
 		}
 
-		NoChoice := req.PostFormValue("No% ")
+		fmt.Println("THE YES CHOICE :::: ", YesChoice)
+
+		NoChoice := req.PostFormValue("noPercent")
 		if NoChoice == "" {
 			liquidNo, err = impl.NewLiquid(0)
 			if err != nil {
@@ -254,6 +256,8 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 
 		if isVoterValid && isPowerNoValid && isPowerYesValid {
 			electionAdd.CastVote(voter, choiceUser)
+		} else {
+			http.Error(w, "The name of the voter ", http.StatusInternalServerError)
 		}
 
 		http.Redirect(w, req, "/election?id="+id, http.StatusSeeOther)

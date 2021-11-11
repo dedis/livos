@@ -17,18 +17,14 @@
         <!-- <img src="/images/LivosLogoComplet.png"> -->
       </div>
       
-
-
-      
-      <form method="post" class="form-example" >
-
-        <div class="form-example">
+      <div id="boxBlue">
+        <h4>
           Results of the votes: <br>
           {{range $key, $value := .Results}} <p>
-              {{$key}} {{$value}}
+              Proportion of {{$key}} : {{$value}}
           </p> {{end}}
-        </div>
-      </form>
+        </h4>
+      </div>
       
 
 

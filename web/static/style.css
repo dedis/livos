@@ -78,8 +78,7 @@
         justify-content: center;
         align-items: center;
         top: calc(50%  - 250px);
-          left: calc(50% - 250px);
-    
+        left: calc(50% - 250px);
     }
     #text-login{
         width: 20%;
