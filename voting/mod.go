@@ -27,6 +27,8 @@ type VotingInstance interface {
 
 	GetStatus() string
 
+	CheckVotingPower(user *User) bool
+
 	//activate (open)?
 
 	//override the method print?
@@ -34,7 +36,7 @@ type VotingInstance interface {
 
 type VotingConfig struct {
 	// Voters is a list of userID
-	Voters      []string
+	Voters      []*User
 	Title       string
 	Description string
 	// Candidates is a list of userID (can be empty if yes/no question)
@@ -42,23 +44,21 @@ type VotingConfig struct {
 }
 
 type Choice struct {
-	// DelegatedTo contains the percentage of the voting power given to the
-	// different delegates (represented by a userID) or is empty if there is no
-	// delegation
-	DelegatedTo map[string]Liquid
-
-	// MyChoice contains map the YES/NO answer to the percentage of voting
+	// VoteValue contains map the YES/NO answer to the percentage of voting
 	// power, or is empty if there is a delegation
-	MyChoice map[string]Liquid
-
-	// Number of delegation power received
-	DelegatedFrom int
-
-	// VotingPower contains how many voting percentage is left ?
-	VotingPower float64
+	VoteValue map[string]Liquid
 }
 
 //for liquidity and delegation
 type Liquid struct {
 	Percentage float64
+}
+
+type User interface {
+	CheckVotingPower() bool
+
+	SetChoice(choice Choice) error
+
+	DelegTo(user *User, quantity Liquid) error
+	DelegFrom(user *User, quantity Liquid) error
 }

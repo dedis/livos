@@ -26,11 +26,11 @@ type VotingInstance struct {
 	//db.socket personnalisé pour chacun ?
 }
 
-func (vi *VotingInstance) CastVote(userID string, choice voting.Choice) error {
+func (vi *VotingInstance) CastVote(user *User) error {
 	if vi.Status == "close" {
 		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
 	}
-	vi.Votes[userID] = &choice
+	vi.Votes[user.UserID] = &(user.MyChoice)
 	return nil
 }
 
@@ -50,8 +50,7 @@ func (vi *VotingInstance) GetStatus() string {
 	return vi.Status
 }
 
-//mieux de garder pointeur ?
-func (vi VotingInstance) GetConfig() voting.VotingConfig {
+func (vi *VotingInstance) GetConfig() voting.VotingConfig {
 	return vi.Config
 }
 
@@ -62,8 +61,8 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 	var yesPower float64 = 0
 	var noPower float64 = 0
 	for _, v := range vi.Votes {
-		yesPower += v.MyChoice["yes"].Percentage
-		noPower += v.MyChoice["no"].Percentage
+		yesPower += v.VoteValue["yes"].Percentage
+		noPower += v.VoteValue["no"].Percentage
 		counter++
 	}
 	results["yes"] = yesPower / float64(counter)
@@ -149,7 +148,7 @@ func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
 	return *vs.VotingInstancesList[id]
 }
 
-func NewVotingConfig(voters []string, title string, desc string, cand []string) (voting.VotingConfig, error) {
+func NewVotingConfig(voters []*voting.User, title string, desc string, cand []string) (voting.VotingConfig, error) {
 	if title == "" {
 		return voting.VotingConfig{}, xerrors.Errorf("title is empty")
 	}
@@ -162,32 +161,36 @@ func NewVotingConfig(voters []string, title string, desc string, cand []string) 
 	}, nil
 }
 
-func NewChoice(deleg map[string]voting.Liquid, choice map[string]voting.Liquid, delegFrom int, votingPower float64) (voting.Choice, error) {
-	if delegFrom < 0 {
-		return voting.Choice{}, xerrors.Errorf("Delegation number received is negative : %d", delegFrom)
-	}
+func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice) (User, error) {
 
-	if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
-		return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
-	}
+	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
+	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
+	// }
 
-	//check that the sum overall votes is less or equal to the voting power
-	var sum float64 = 0
-	for _, value := range deleg {
-		sum += value.Percentage
-	}
-	for _, value := range choice {
-		sum += value.Percentage
-	}
-	if sum > (votingPower + float64(delegFrom)*PERCENTAGE) {
-		return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
-	}
+	// //check that the sum overall votes is less or equal to the voting power
+	// var sum float64 = 0
+	// for _, value := range deleg {
+	// 	sum += value.Percentage
+	// }
+	// for _, value := range choice {
+	// 	sum += value.Percentage
+	// }
+	// if sum > (votingPower + float64(delegFrom)*PERCENTAGE) {
+	// 	return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
+	// }
 
-	return voting.Choice{
-		DelegatedTo:   deleg,
-		MyChoice:      choice,
+	return User{
+		UserID:        userID,
+		DelegatedTo:   delegTo,
 		DelegatedFrom: delegFrom,
-		VotingPower:   votingPower,
+		MyChoice:      choice,
+		VotingPower:   PERCENTAGE,
+	}, nil
+}
+
+func NewChoice(voteValue map[string]voting.Liquid) (voting.Choice, error) {
+	return voting.Choice{
+		VoteValue: voteValue,
 	}, nil
 }
 
@@ -199,4 +202,73 @@ func NewLiquid(p float64) (voting.Liquid, error) {
 	return voting.Liquid{
 		Percentage: p,
 	}, nil
+}
+
+type User struct {
+	//name of the user
+	UserID string
+
+	//keep the record of how much was delegated to whom
+	DelegatedTo map[string]voting.Liquid
+
+	//keep the record of how much was given to self and from who
+	DelegatedFrom map[string]voting.Liquid
+
+	//choice of the user concerning the voting instance
+	MyChoice voting.Choice
+
+	//the amount of voting still left to split btw votes or delegations
+	VotingPower float64
+}
+
+func (user *User) CheckVotingPower() (bool, error) {
+	b := user.VotingPower >= 0
+	if !b {
+		return b, xerrors.Errorf("Value of voting power is negative: Was %f, must be more than 0", user.VotingPower)
+	}
+	return b, nil
+}
+
+func (user *User) SetChoice(choice voting.Choice) error {
+
+	var sumOfVotingPower float64 = 0
+	for _, v := range choice.VoteValue {
+		sumOfVotingPower += v.Percentage
+	}
+
+	user.VotingPower -= sumOfVotingPower
+
+	b, err := user.CheckVotingPower()
+	if !b {
+		return err
+	}
+
+	user.MyChoice = choice
+	return nil
+}
+
+func (user *User) DelegTo(other *User, quantity voting.Liquid) error {
+
+	user.DelegatedFrom[other.UserID] = quantity
+
+	user.VotingPower += quantity.Percentage
+	b, err := user.CheckVotingPower()
+	if !b {
+		return err
+	}
+
+	return nil
+}
+
+func (user *User) DelegFrom(other *User, quantity voting.Liquid) error {
+
+	user.DelegatedTo[other.UserID] = quantity
+
+	user.VotingPower -= quantity.Percentage
+	b, err := user.CheckVotingPower()
+	if !b {
+		return err
+	}
+
+	return nil
 }

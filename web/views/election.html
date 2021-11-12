@@ -19,9 +19,11 @@
       
       <h4>
         List of voters : <br>
-        {{range .Election.Config.Voters}} <p>
-          {{.}}
-        </p> {{end}}
+        <select name="pets" id="pet-select">
+          {{range .Election.Config.Voters}}
+            <option>{{.}}</option>
+          {{end}}
+        </select>
       </h4>
       
       <div id="formulaire">
