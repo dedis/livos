@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"fmt"
+
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
@@ -28,9 +30,26 @@ type VotingInstance struct {
 
 func (vi *VotingInstance) CastVote(user *voting.User) error {
 	if vi.Status == "close" {
-		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
+		return xerrors.Errorf("Impossible to cast the vote, the voting instance is closed.")
 	}
-	vi.Votes[user.UserID] = &(user.MyChoice)
+
+	fmt.Println(":::: VOICI LES VOTES ACTUELS", vi.Votes, vi.Votes[user.UserID])
+
+	if val, ok := vi.Votes[user.UserID]; ok {
+		fmt.Println("LA C'EST VAL ::: ", val)
+		for name, value := range user.MyChoice.VoteValue {
+			additionOfLiquid, err := addLiquid(val.VoteValue[name], value)
+			fmt.Println(" :::: LA C'EST ADDITION OF LIQUID ::: ", additionOfLiquid)
+			if err != nil {
+				return xerrors.Errorf("Addition of the liquid is incorrect.")
+			}
+			val.VoteValue[name] = additionOfLiquid
+			fmt.Println(" :::: LA C'EST RESULTAT APRES LE CHANGEMENT ::: ", val.VoteValue[name])
+		}
+	} else {
+		vi.Votes[user.UserID] = &(user.MyChoice)
+	}
+
 	return nil
 }
 
@@ -204,13 +223,21 @@ func NewChoice(voteValue map[string]voting.Liquid) (voting.Choice, error) {
 }
 
 func NewLiquid(p float64) (voting.Liquid, error) {
-	if p > 100 || p < 0 {
-		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be less than %d", p, PERCENTAGE)
-	}
+	// if p > 100 || p < 0 {
+	// 	return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be less than %d", p, PERCENTAGE)
+	// }
 
 	return voting.Liquid{
 		Percentage: p,
 	}, nil
+}
+
+func addLiquid(l1 voting.Liquid, l2 voting.Liquid) (voting.Liquid, error) {
+	result, err := NewLiquid(l1.Percentage + l2.Percentage)
+	if err != nil {
+		xerrors.Errorf("Addition of liquid incorect")
+	}
+	return result, err
 }
 
 // type User struct {

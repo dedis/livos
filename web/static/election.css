@@ -53,9 +53,9 @@ body{
     width: 500px;
     height: 500px;
     position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display:flex;
+    justify-content:space-around;
+    align-items:stretch;
     top: calc(50%  - 250px);
     left: calc(50% - 250px);
 }
@@ -64,8 +64,8 @@ form {
     height : 90%;
     position: absolute;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-around;
+    align-items:flex-start;
     border-radius: 20%;
     top: calc(50% - 200px);
     left: 0;
@@ -73,8 +73,8 @@ form {
     background: #84C8F6;
 }
 form.form-example {
-    display: table;
-    padding-top: 10%;
+    display:grid;
+    padding-top: 15%;
 }
 div.form-example {
     display: table-row;
@@ -91,11 +91,20 @@ label[for="status"]{
 	padding-bottom: 10px;
 	display:inline-block;
 }
-
 h4{
     position: absolute;
     left: 7%;
     top: 20%;
+}
+div.votingChoice{
+    align-items:center;
+    justify-content: left;
+    display:flex;
+}
+div.delegation{
+    align-items:center;
+    justify-content: left;
+    display: flex;
 }
 
 

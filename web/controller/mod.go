@@ -130,14 +130,8 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		candidatesParsed := strings.Split(candidats, ",")
-
-		// fmt.Fprintln(w, "TEST DE PRINT POUR VOIR SI RECUP VALUE FONCTIONNE")
 		fmt.Println("Title = \n", title)
-		// fmt.Fprintln(w, "Description = \n", description)
-		// fmt.Fprintln(w, "Status = \n", status)
-		// fmt.Fprintln(w, "id = \n", id)
-		//fmt.Println("List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
-		//fmt.Println("List of candidates = \n", candidatesParsed[0])
+
 		delegTo := make(map[string]voting.Liquid)
 		delegFrom := make(map[string]voting.Liquid)
 		voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
@@ -199,15 +193,17 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 
 	if req.Method == "POST" {
 
+		// VOTING CHOICE : VOTER, YESCHOICE, NOCHOICE => CASTVOTE -----------------
+
+		//get the voter name for the vote to be cast
 		voter := req.PostFormValue("voter")
 		if voter == "" {
 			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
 			return
 		}
 
+		//get the YES value of the the vote to be cast
 		liquidYes := voting.Liquid{}
-		liquidNo := voting.Liquid{}
-
 		YesChoice := req.PostFormValue("yesPercent")
 		if YesChoice == "" {
 			liquidYes, err = impl.NewLiquid(0)
@@ -225,8 +221,8 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			}
 		}
 
-		fmt.Println("THE YES CHOICE :::: ", YesChoice)
-
+		//get the NO value of the the vote to be cast
+		liquidNo := voting.Liquid{}
 		NoChoice := req.PostFormValue("noPercent")
 		if NoChoice == "" {
 			liquidNo, err = impl.NewLiquid(0)
@@ -244,11 +240,13 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			}
 		}
 
+		//get the user (object) from the retrieved name
 		userVoter, err := electionAdd.GetUser(voter)
 		if err != nil {
 			http.Error(w, "User cannot be found.", http.StatusInternalServerError)
 		}
 
+		//construct the choice from the YES and NO values above
 		choice := make(map[string]voting.Liquid)
 		choice["yes"] = liquidYes
 		choice["no"] = liquidNo
@@ -257,9 +255,60 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			http.Error(w, "Choice creation incorrect", http.StatusInternalServerError)
 		}
 
+		//set the choice to the user
 		electionAdd.SetChoice(userVoter, choiceUser)
 
+		//cast the vote of the user
 		electionAdd.CastVote(userVoter)
+
+		// DELEGATION : VOTER1, VOTER2, QUANTITY => DELEG_TO -----------------
+
+		//get the voterSender name for the delegation
+		voterSender := req.PostFormValue("voterSender")
+		if voterSender == "" {
+			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
+			return
+		}
+
+		//get the voterReceiver name for the delegation
+		voterReceiver := req.PostFormValue("voterReceiver")
+		if voterReceiver == "" {
+			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
+			return
+		}
+
+		//get the QUANTITY value of the the vote to be cast
+		liquidQuantity := voting.Liquid{}
+		Quantity := req.PostFormValue("quantity")
+		if Quantity == "" {
+			liquidNo, err = impl.NewLiquid(0)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		} else {
+			temp, err := strconv.ParseFloat(Quantity, 64)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+			liquidQuantity, err = impl.NewLiquid(temp)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		}
+
+		//get the userSender (object) from the retrieved name
+		userSender, err := electionAdd.GetUser(voterSender)
+		if err != nil {
+			http.Error(w, "User cannot be found.", http.StatusInternalServerError)
+		}
+
+		//get the userReceiver (object) from the retrieved name
+		userReceiver, err := electionAdd.GetUser(voterReceiver)
+		if err != nil {
+			http.Error(w, "User cannot be found.", http.StatusInternalServerError)
+		}
+
+		electionAdd.DelegTo(userSender, userReceiver, liquidQuantity)
 
 		http.Redirect(w, req, "/election?id="+id, http.StatusSeeOther)
 	}
