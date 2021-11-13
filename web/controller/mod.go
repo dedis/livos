@@ -125,10 +125,10 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		}
 		voterListParsed := strings.Split(voterList, ",")
 		candidats := req.FormValue("candidates")
-		if candidats == "" {
-			http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
-			return
-		}
+		// if candidats == "" {
+		// 	http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
+		// 	return
+		// }
 		candidatesParsed := strings.Split(candidats, ",")
 		fmt.Println("Title = \n", title)
 
