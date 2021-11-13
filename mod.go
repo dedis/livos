@@ -62,6 +62,7 @@ func main() {
 	//creation of controller (for the web interactions)
 	ctrl := controller.NewController(content, contenthomepage, views, votingSystem)
 
+	//creation of users
 	userNoemien, err := votingSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
 	if err != nil {
 		logger.Fatal("user noemien creation is incorrect.")
@@ -75,27 +76,27 @@ func main() {
 		logger.Fatal("user etienne creation is incorrect.")
 	}
 
+	//list of voters
 	voters := []*voting.User{&userNoemien, &userGuillaume, &userEtienne}
 
-	title := "VoteRoom1"
 	description := "Do you want fries every day at the restaurant?"
 	description2 := "Do you want free vacations (365 days a year) ?"
 
 	candidats := make([]string, 3)
-	votingConfig, err := impl.NewVotingConfig(voters, title, description, candidats)
+	votingConfig, err := impl.NewVotingConfig(voters, "VoteRoom1", description, candidats)
 	if err != nil {
 		logger.Fatal("NewVotingConfig is incorrect")
 	}
-	votingConfig2, err := impl.NewVotingConfig(voters, "VoteRoom2", description2, candidats)
+	voters2 := []*voting.User{}
+	votingConfig2, err := impl.NewVotingConfig(voters2, "VoteRoom2", description2, candidats)
 	if err != nil {
 		logger.Fatal("NewVotingConfig is incorrect")
 	}
-	votes := make(map[string]*voting.Choice)
-	votes2 := make(map[string]*voting.Choice)
+	votes := make(map[string]voting.Choice)
+	votes2 := make(map[string]voting.Choice)
 	votingSystem.CreateAndAdd("001", votingConfig, "open", votes)
 	votingSystem.CreateAndAdd("002", votingConfig2, "close", votes2)
 
-	//fmt.Println("Test de listVoting", votingSystem.CastVote())
 	fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
 
 	var vi = *votingSystem.VotingInstancesList["001"]
@@ -127,7 +128,9 @@ func main() {
 	}
 
 	vi.SetChoice(&userGuillaume, choiceGuillaume)
+	fmt.Println(":::::: Result of the setchoice of guillaume", userGuillaume.MyChoice)
 	vi.SetChoice(&userEtienne, choiceEtienne)
+	fmt.Println(":::::: Result of the setchoice of etienne", userEtienne.MyChoice)
 
 	vi.CastVote(&userGuillaume)
 	vi.CastVote(&userEtienne)

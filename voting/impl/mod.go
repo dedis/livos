@@ -23,7 +23,7 @@ type VotingInstance struct {
 	Status string
 
 	// Votes contains the choice of each voter, references by a userID
-	Votes map[string]*voting.Choice
+	Votes map[string]voting.Choice
 
 	//db.socket personnalisé pour chacun ?
 }
@@ -43,11 +43,11 @@ func (vi *VotingInstance) CastVote(user *voting.User) error {
 			if err != nil {
 				return xerrors.Errorf("Addition of the liquid is incorrect.")
 			}
-			val.VoteValue[name] = additionOfLiquid
+			vi.Votes[user.UserID].VoteValue[name] = additionOfLiquid
 			fmt.Println(" :::: LA C'EST RESULTAT APRES LE CHANGEMENT ::: ", val.VoteValue[name])
 		}
 	} else {
-		vi.Votes[user.UserID] = &(user.MyChoice)
+		vi.Votes[user.UserID] = user.MyChoice
 	}
 
 	return nil
@@ -116,7 +116,7 @@ func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem
 }
 
 //creation of a voting instance
-func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]*voting.Choice) (VotingInstance, error) {
+func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (VotingInstance, error) {
 
 	//check if id is null
 	if id == "" {
@@ -276,6 +276,7 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 
 	b, err := vi.CheckVotingPower(user)
 	if !b {
+		fmt.Println("-------------------------dans le error c'est sensé etre negatif")
 		return err
 	}
 
