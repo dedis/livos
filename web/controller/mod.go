@@ -138,8 +138,19 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		// fmt.Fprintln(w, "id = \n", id)
 		//fmt.Println("List of voters = \n", voterListParsed[0], voterListParsed[1], voterListParsed[2])
 		//fmt.Println("List of candidates = \n", candidatesParsed[0])
+		delegTo := make(map[string]voting.Liquid)
+		delegFrom := make(map[string]voting.Liquid)
+		voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
+		choice := voting.Choice{}
+		for idx, name := range voterListParsed {
+			u, err := c.vs.NewUser(name, delegTo, delegFrom, choice)
+			if err != nil {
+				http.Error(w, "USer creation is incorrect", http.StatusInternalServerError)
+			}
+			voterListParsedintoUser[idx] = &u
+		}
 
-		votingConfig, err := impl.NewVotingConfig(voterListParsed, title, description, candidatesParsed)
+		votingConfig, err := impl.NewVotingConfig(voterListParsedintoUser, title, description, candidatesParsed)
 		if err != nil {
 			http.Error(w, "NewVotingConfig is incorrect", http.StatusInternalServerError)
 		}
@@ -186,12 +197,6 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	isVoterValid := false
-	isPowerYesValid := false
-	isPowerNoValid := false
-
-	liquidYes := voting.Liquid{}
-	liquidNo := voting.Liquid{}
 	if req.Method == "POST" {
 
 		voter := req.PostFormValue("voter")
@@ -200,11 +205,8 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			return
 		}
 
-		for _, object := range (*electionAdd).Config.Voters {
-			if object == voter {
-				isVoterValid = true
-			}
-		}
+		liquidYes := voting.Liquid{}
+		liquidNo := voting.Liquid{}
 
 		YesChoice := req.PostFormValue("yesPercent")
 		if YesChoice == "" {
@@ -242,23 +244,22 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			}
 		}
 
-		fmt.Fprint(w, "this is the yes liquid", liquidYes.Percentage)
-		deleg := make(map[string]voting.Liquid)
+		userVoter, err := electionAdd.GetUser(voter)
+		if err != nil {
+			http.Error(w, "User cannot be found.", http.StatusInternalServerError)
+		}
+
 		choice := make(map[string]voting.Liquid)
 		choice["yes"] = liquidYes
 		choice["no"] = liquidNo
-		choiceUser, err := impl.NewChoice(deleg, choice, 0, 100)
+		choiceUser, err := impl.NewChoice(choice)
 		if err != nil {
 			http.Error(w, "Choice creation incorrect", http.StatusInternalServerError)
 		}
-		isPowerYesValid = liquidYes.Percentage >= 0. && liquidYes.Percentage <= 100.
-		isPowerNoValid = liquidNo.Percentage >= 0. && liquidNo.Percentage <= 100.
 
-		if isVoterValid && isPowerNoValid && isPowerYesValid {
-			electionAdd.CastVote(voter, choiceUser)
-		} else {
-			http.Error(w, "The name of the voter ", http.StatusInternalServerError)
-		}
+		electionAdd.SetChoice(userVoter, choiceUser)
+
+		electionAdd.CastVote(userVoter)
 
 		http.Redirect(w, req, "/election?id="+id, http.StatusSeeOther)
 	}
@@ -375,7 +376,18 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		voterList := req.FormValue("votersList")
 		voterListParsed := strings.Split(voterList, ",")
 		if voterList != "" {
-			c.vs.VotingInstancesList[id].Config.Voters = voterListParsed
+			delegTo := make(map[string]voting.Liquid)
+			delegFrom := make(map[string]voting.Liquid)
+			voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
+			choice := voting.Choice{}
+			for idx, name := range voterListParsed {
+				u, err := c.vs.NewUser(name, delegTo, delegFrom, choice)
+				if err != nil {
+					http.Error(w, "User creation is incorrect", http.StatusInternalServerError)
+				}
+				voterListParsedintoUser[idx] = &u
+			}
+			c.vs.VotingInstancesList[id].Config.Voters = voterListParsedintoUser
 		}
 
 		candidats := req.FormValue("candidates")

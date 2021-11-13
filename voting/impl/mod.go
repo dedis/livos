@@ -26,7 +26,7 @@ type VotingInstance struct {
 	//db.socket personnalisé pour chacun ?
 }
 
-func (vi *VotingInstance) CastVote(user *User) error {
+func (vi *VotingInstance) CastVote(user *voting.User) error {
 	if vi.Status == "close" {
 		return xerrors.Errorf("Impossible the cast the vote, the voting instance is closed.")
 	}
@@ -69,6 +69,15 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 	results["no"] = noPower / float64(counter)
 
 	return results
+}
+
+func (vi *VotingInstance) GetUser(userID string) (*voting.User, error) {
+	for _, value := range vi.Config.Voters {
+		if value.UserID == userID {
+			return value, nil
+		}
+	}
+	return nil, xerrors.Errorf("Cannot find the user. UserId is %s", userID)
 }
 
 type VotingSystem struct {
@@ -161,7 +170,7 @@ func NewVotingConfig(voters []*User, title string, desc string, cand []string) (
 	}, nil
 }
 
-func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice) (User, error) {
+func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice) (voting.User, error) {
 
 	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
 	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
@@ -179,7 +188,7 @@ func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid,
 	// 	return voting.Choice{}, xerrors.Errorf("Cumulate voting power distributed is greater than the voting power. Was: %f, must not be greater thant %f.", sum, votingPower)
 	// }
 
-	return User{
+	return voting.User{
 		UserID:        userID,
 		DelegatedTo:   delegTo,
 		DelegatedFrom: delegFrom,
@@ -204,24 +213,24 @@ func NewLiquid(p float64) (voting.Liquid, error) {
 	}, nil
 }
 
-type User struct {
-	//name of the user
-	UserID string
+// type User struct {
+// 	//name of the user
+// 	UserID string
 
-	//keep the record of how much was delegated to whom
-	DelegatedTo map[string]voting.Liquid
+// 	//keep the record of how much was delegated to whom
+// 	DelegatedTo map[string]voting.Liquid
 
-	//keep the record of how much was given to self and from who
-	DelegatedFrom map[string]voting.Liquid
+// 	//keep the record of how much was given to self and from who
+// 	DelegatedFrom map[string]voting.Liquid
 
-	//choice of the user concerning the voting instance
-	MyChoice voting.Choice
+// 	//choice of the user concerning the voting instance
+// 	MyChoice voting.Choice
 
-	//the amount of voting still left to split btw votes or delegations
-	VotingPower float64
-}
+// 	//the amount of voting still left to split btw votes or delegations
+// 	VotingPower float64
+// }
 
-func (user *User) CheckVotingPower() (bool, error) {
+func (vi *VotingInstance) CheckVotingPower(user *voting.User) (bool, error) {
 	b := user.VotingPower >= 0
 	if !b {
 		return b, xerrors.Errorf("Value of voting power is negative: Was %f, must be more than 0", user.VotingPower)
@@ -229,7 +238,7 @@ func (user *User) CheckVotingPower() (bool, error) {
 	return b, nil
 }
 
-func (user *User) SetChoice(choice voting.Choice) error {
+func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) error {
 
 	var sumOfVotingPower float64 = 0
 	for _, v := range choice.VoteValue {
@@ -238,7 +247,7 @@ func (user *User) SetChoice(choice voting.Choice) error {
 
 	user.VotingPower -= sumOfVotingPower
 
-	b, err := user.CheckVotingPower()
+	b, err := vi.CheckVotingPower(user)
 	if !b {
 		return err
 	}
@@ -247,25 +256,20 @@ func (user *User) SetChoice(choice voting.Choice) error {
 	return nil
 }
 
-func (user *User) DelegTo(other *User, quantity voting.Liquid) error {
+func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.User, quantity voting.Liquid) error {
 
-	other.DelegatedFrom[user.UserID] = quantity
+	userReceive.DelegatedFrom[userSend.UserID] = quantity
 
-	user.VotingPower += quantity.Percentage
-	b, err := user.CheckVotingPower()
+	userSend.DelegatedTo[userReceive.UserID] = quantity
+
+	userReceive.VotingPower += quantity.Percentage
+	b, err := vi.CheckVotingPower(userReceive)
 	if !b {
 		return err
 	}
 
-	return nil
-}
-
-func (user *User) DelegFrom(other *User, quantity voting.Liquid) error {
-
-	user.DelegatedTo[other.UserID] = quantity
-
-	user.VotingPower -= quantity.Percentage
-	b, err := user.CheckVotingPower()
+	userSend.VotingPower -= quantity.Percentage
+	b, err = vi.CheckVotingPower(userSend)
 	if !b {
 		return err
 	}

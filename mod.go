@@ -62,8 +62,20 @@ func main() {
 	//creation of controller (for the web interactions)
 	ctrl := controller.NewController(content, contenthomepage, views, votingSystem)
 
-	voters := []string{"Noemien", "Guillaume", "Etienne"}
-	//fmt.Println(voters)
+	userNoemien, err := votingSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+	if err != nil {
+		logger.Fatal("user noemien creation is incorrect.")
+	}
+	userGuillaume, err := votingSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+	if err != nil {
+		logger.Fatal("user guillaume creation is incorrect.")
+	}
+	userEtienne, err := votingSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+	if err != nil {
+		logger.Fatal("user etienne creation is incorrect.")
+	}
+
+	voters := []*voting.User{&userNoemien, &userGuillaume, &userEtienne}
 
 	title := "VoteRoom1"
 	description := "Do you want fries every day at the restaurant?"
@@ -89,8 +101,6 @@ func main() {
 	var vi = *votingSystem.VotingInstancesList["001"]
 
 	fmt.Println("VI:", vi)
-
-	deleg := make(map[string]voting.Liquid)
 	yesChoice := make(map[string]voting.Liquid)
 	noChoice := make(map[string]voting.Liquid)
 	midChoice := make(map[string]voting.Liquid)
@@ -108,16 +118,19 @@ func main() {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceGuillaume, errG := impl.NewChoice(deleg, noChoice, 0, 100)
-	choiceEtienne, errE := impl.NewChoice(deleg, midChoice, 0, 100)
+	choiceGuillaume, errG := impl.NewChoice(noChoice)
+	choiceEtienne, errE := impl.NewChoice(midChoice)
 	fmt.Println("CHOICE Guigui: ", choiceGuillaume)
 	fmt.Println("CHOICE etien: ", choiceEtienne)
 	if (errG != nil) || (errE != nil) {
 		logger.Fatalf("Choices creation incorrect.")
 	}
 
-	vi.CastVote("Guillaume", choiceGuillaume)
-	vi.CastVote("Etienne", choiceEtienne)
+	vi.SetChoice(&userGuillaume, choiceGuillaume)
+	vi.SetChoice(&userEtienne, choiceEtienne)
+
+	vi.CastVote(&userGuillaume)
+	vi.CastVote(&userEtienne)
 
 	fmt.Println("RESULTS OF THE VOTE ====> ", vi.GetResults())
 

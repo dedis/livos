@@ -27,9 +27,13 @@ type VotingInstance interface {
 
 	GetStatus() string
 
+	GetUSer(string) (*User, error)
+
 	CheckVotingPower(user *User) bool
 
-	//activate (open)?
+	SetChoice(user *User, choice Choice) error
+
+	DelegTo(user *User, other *User, quantity Liquid) error
 
 	//override the method print?
 }
@@ -54,11 +58,29 @@ type Liquid struct {
 	Percentage float64
 }
 
-type User interface {
-	CheckVotingPower() bool
+type User struct {
+	//name of the user
+	UserID string
 
-	SetChoice(choice Choice) error
+	//keep the record of how much was delegated to whom
+	DelegatedTo map[string]Liquid
 
-	DelegTo(user *User, quantity Liquid) error
-	DelegFrom(user *User, quantity Liquid) error
+	//keep the record of how much was given to self and from who
+	DelegatedFrom map[string]Liquid
+
+	//choice of the user concerning the voting instance
+	MyChoice Choice
+
+	//the amount of voting still left to split btw votes or delegations
+	VotingPower float64
 }
+
+// type User interface {
+// 	CheckVotingPower() bool
+
+// 	SetChoice(choice Choice) error
+
+// 	DelegTo(user *User, quantity Liquid) error
+
+// 	DelegFrom(user *User, quantity Liquid) error
+// }
