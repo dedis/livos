@@ -37,11 +37,6 @@ body{
 
 }
 
-:root {
-	--left: 25%;
-	--idRoomOpen: {{.VotingInstanceTabOpen}};
-  }
-
 #header-left{
 	width: 200px;
 	height: 100px;
@@ -121,12 +116,12 @@ body{
 	width: 0px;
 	height: 0px;
 	overflow: hidden;
-	position:absolute;
+	position:relative;
 	border: 2px solid #D69D1B;
 	border-color: rgba(236, 230, 230, 0);
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	justify-content: left;
+	align-items: left;
 	animation: illustrations 0.7s; 
 	animation-delay: 0.5s;
 	opacity:1;
@@ -136,10 +131,10 @@ body{
 
 .parambutton{
 	overflow: hidden;
-	position:absolute;
+	position:relative;
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	justify-content: left;
+	align-items: left;
 }
 
 form {
@@ -198,10 +193,10 @@ textarea{
 .title-vote{
 	width: 150px;
 	height: 25px;
-	position: absolute;
-	display: flex;
-	justify-content: center;
-	align-self: bottom;
+	position: relative;
+	display: inline-block;
+	justify-content: left;
+	align-self: left;
 	opacity: 0;
 	animation: title 0.7s; 
 	animation-delay: 1s;
@@ -215,22 +210,20 @@ textarea{
 
 #voteYes{
 	top: 10%;
-	left: 10%;
 }
 
 #voteNo{
 	top: 50%;
-	left: 10%;
 }
 
 #paramYes{
 	top: 15%;
-	left: calc(10% + 50px);
+	left: 20%;
 }
 
 #paramNo{
 	top: 55%;
-	left: calc(10% + 50px);
+	left: 20%;
 }
 
 .description-vote{
@@ -244,13 +237,13 @@ textarea{
 		opacity:0;
 	}
 #panelsYesVotes{
-	left: calc(25% - 75px);
+	display: block;
+	float: left;
 	top: 10%;
 }
 
 #panelsNoVotes{
-	left: calc(25% - 75px);
-	top: 60%;
+	top: 50%;
 }
 
 .button {
