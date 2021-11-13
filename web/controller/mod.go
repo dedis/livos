@@ -149,7 +149,7 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "NewVotingConfig is incorrect", http.StatusInternalServerError)
 		}
 
-		votes := make(map[string]*voting.Choice)
+		votes := make(map[string]voting.Choice)
 		c.vs.CreateAndAdd(id, votingConfig, status, votes)
 
 		http.Redirect(w, req, "/homepage", http.StatusSeeOther)
@@ -256,10 +256,19 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		}
 
 		//set the choice to the user
-		electionAdd.SetChoice(userVoter, choiceUser)
+		fmt.Println("::::::00 Result of the setchoice of guillaume", userVoter.MyChoice)
+		fmt.Println(":::::: CHOICE USER choice of guillaume", choiceUser)
+		err = electionAdd.SetChoice(userVoter, choiceUser)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		fmt.Println("::::::11 Result of the setchoice of guillaume", userVoter.MyChoice)
 
 		//cast the vote of the user
-		electionAdd.CastVote(userVoter)
+		err = electionAdd.CastVote(userVoter)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 
 		// DELEGATION : VOTER1, VOTER2, QUANTITY => DELEG_TO -----------------
 
