@@ -157,7 +157,7 @@ func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
 	return *vs.VotingInstancesList[id]
 }
 
-func NewVotingConfig(voters []*User, title string, desc string, cand []string) (voting.VotingConfig, error) {
+func NewVotingConfig(voters []*voting.User, title string, desc string, cand []string) (voting.VotingConfig, error) {
 	if title == "" {
 		return voting.VotingConfig{}, xerrors.Errorf("title is empty")
 	}

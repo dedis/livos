@@ -94,10 +94,11 @@ body{
 	width: 50%;
 	height: 100%;
 	position: absolute;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	display:grid;
+	justify-content:start;
+	align-items: baseline;
 	left: 50%;
+	top: 10%;
 }
 #text-voting-session{
 	width: 100%;
@@ -107,36 +108,6 @@ body{
 	justify-content: left;
 	align-items: top;
 }
-#list{
-	width: 100%;
-	height: 80%;
-	position: absolute;
-}
-.vote{
-	width: 0px;
-	height: 0px;
-	overflow: hidden;
-	position:relative;
-	border: 2px solid #D69D1B;
-	border-color: rgba(236, 230, 230, 0);
-	display: flex;
-	justify-content: left;
-	align-items: left;
-	animation: illustrations 0.7s; 
-	animation-delay: 0.5s;
-	opacity:1;
-	animation-fill-mode: both;
-	border-radius: 18%;
-}
-
-.parambutton{
-	overflow: hidden;
-	position:relative;
-	display: flex;
-	justify-content: left;
-	align-items: left;
-}
-
 form {
 	width  : 30%;
     height : 60%;
@@ -175,85 +146,46 @@ textarea{
 	resize: none;
 }
 
-@keyframes illustrations{
-		to{
-			width: 150px;
-			height: 150px;
-		}
-	}
-.vote:hover > a{
-		filter:grayscale(1) brightness(0.25);
-		transition: transform 0.7s;
-		transform: scale(1.1);
-}
-.vote:hover > .description-vote{
-	opacity: 1;
-	color: #ffffff;
-} 
-.title-vote{
-	width: 150px;
-	height: 25px;
+.Open{
 	position: relative;
-	display: inline-block;
-	justify-content: left;
-	align-self: left;
-	opacity: 0;
-	animation: title 0.7s; 
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	align-self: start;
+	animation-delay: 1s;
+	animation-fill-mode: both;
+	top: 40%;
+}
+
+.Close{
+	position: relative;
+	display:flex;
+	justify-content: space-around;
+	align-items:center;
+	align-self: start;
 	animation-delay: 1s;
 	animation-fill-mode: both;
 }
-@keyframes title{
-		to{
-			opacity: 1;
-		}
-	}
 
-#voteYes{
-	top: 10%;
+.voteOpen{
+	left: -10%;
+	white-space:pre-line;
+}
+.voteClose{
+	left: -10%;
+	white-space:pre-line;
 }
 
-#voteNo{
-	top: 50%;
+.buttonsOpen{
+	justify-content: space-around;
+	align-items: center;
+	left: 15%;
+
 }
 
-#paramYes{
-	top: 15%;
-	left: 20%;
-}
+.buttonsClose{
+	justify-content: space-between;
+	align-items: center;
+	left: 15%;
 
-#paramNo{
-	top: 55%;
-	left: 20%;
 }
-
-.description-vote{
-		position:absolute;
-		width: 100%;
-		height: 100%;
-		color: rgb(0, 0, 0);
-		display:flex;
-		justify-content: center;
-		align-items: center;
-		opacity:0;
-	}
-#panelsYesVotes{
-	display: block;
-	float: left;
-	top: 10%;
-}
-
-#panelsNoVotes{
-	top: 50%;
-}
-
-.button {
-   /*  border: none;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block; */
-	background-image: url(/web/images/Vote_resized.jpg);
-   /*  font-size: 16px; */
-	height: 200px;
-	width: 200px;
-  }

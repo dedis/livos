@@ -28,35 +28,26 @@
           <h1>Voting Session</h1>
         </div>
         
-        <div id="list">
-           
-          <div class="title-vote" id="voteYes">
+        <div class="Open">
+          <div class="voteOpen">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              <h3>Vote {{$key}} :{{$value.Status}}</h3>
+              <h3>Vote {{$key}} :{{$value.Status}} </h3>
             </p> {{end}}
           </div>
-          <div class="parambutton" id="paramYes">
+          <div class="buttonsOpen">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
               <span><input type="button" name="param" value="Room: {{$key}}" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
               <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
             </p> {{end}}
           </div>
-
-          
-         <!--  <div class="vote" id="panelsNoVotes">
+        </div>
+        <div class="Close">
+          <div class="voteClose">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
-              <a href="/results?id='+'{{$key}}"><img src="/web/images/Vote_resized.jpg" width="150px" heigth="150px"></a>
-              <div class="description-vote">
-                <h5>{{$value.Config.Description}}</h5>
-              </div>
-            </p> {{end}}
-          </div> -->
-          <div class="title-vote" id="voteNo">
-            {{range $key, $value := .VotingInstanceTabClose}} <p>
-              <h3>Vote {{$key}} : {{$value.Status}}</h3>
+              <h3>Vote {{$key}} : {{$value.Status}} </h3>
             </p> {{end}} 
           </div>
-          <div class="parambutton" id="paramNo">
+          <div class="buttonsClose">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
               <span><input type="button" name="param" value="Room {{$key}}" onclick="self.location.href='/results?id='+'{{$key}}'" ></span>
               <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
@@ -64,7 +55,6 @@
           </div>
         </div>
       </div>
-      <!-- FORMULAIRE CSS PAS ENCORE FAIT-->
       
       <form method="post" class="form-example" >
 
