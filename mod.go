@@ -62,8 +62,7 @@ func main() {
 	//creation of controller (for the web interactions)
 	ctrl := controller.NewController(content, contenthomepage, views, votingSystem)
 
-	voters := make([]string, 3)
-	voters = append(voters, "Noemien", "Guillaume", "Etienne")
+	voters := []string{"Noemien", "Guillaume", "Etienne"}
 	//fmt.Println(voters)
 
 	title := "VoteRoom1"
