@@ -148,7 +148,7 @@ func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
 	return *vs.VotingInstancesList[id]
 }
 
-func NewVotingConfig(voters []*voting.User, title string, desc string, cand []string) (voting.VotingConfig, error) {
+func NewVotingConfig(voters []*User, title string, desc string, cand []string) (voting.VotingConfig, error) {
 	if title == "" {
 		return voting.VotingConfig{}, xerrors.Errorf("title is empty")
 	}
@@ -249,7 +249,7 @@ func (user *User) SetChoice(choice voting.Choice) error {
 
 func (user *User) DelegTo(other *User, quantity voting.Liquid) error {
 
-	user.DelegatedFrom[other.UserID] = quantity
+	other.DelegatedFrom[user.UserID] = quantity
 
 	user.VotingPower += quantity.Percentage
 	b, err := user.CheckVotingPower()

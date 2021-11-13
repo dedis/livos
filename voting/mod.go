@@ -15,7 +15,7 @@ type VotingSystem interface {
 }
 
 type VotingInstance interface {
-	CastVote(userID string, choice Choice)
+	CastVote(user *User)
 
 	GetConfig() VotingConfig
 
