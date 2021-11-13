@@ -17,21 +17,16 @@
         <!-- <img src="/images/LivosLogoComplet.png"> -->
       </div>
       
-      <h4>
-        List of voters : <br>
-        <select name="pets" id="pet-select">
-          {{range .Election.Config.Voters}}
-            <option>{{.}}</option>
-          {{end}}
-        </select>
-      </h4>
-      
       <div id="formulaire">
         <form method="post" class="form-example" >
 
           <div class="form-example">
-            <label for="voter">Voter: </label>
-            <input type="text" name="voter" id="voter" required>
+            <label for="voter">List of voters : </label>
+              <select name="voter" id="voter">
+                {{range $key, $value := .Election.Config.Voters}}
+                  <option>{{$value.UserID}}</option>
+                {{end}}
+              </select>
           </div>
 
           <div class="form-example">
