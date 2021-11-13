@@ -29,16 +29,7 @@
         </div>
         
         <div id="list">
-          
-            <!-- {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              <div class="vote" id="panelsYesVotes'+'{{$key}}">
-            
-                <a href="/election?id='+'{{$key}}"> <img src="/web/images/Vote_resized.jpg" alt="Vote_resized" width="150px" heigth="150px"></a>                
-                <div class="description-vote">
-                  <h5>{{$value.Config.Description}}</h5>
-                </div>
-              </div> 
-            </p> {{end}}  -->
+           
           <div class="title-vote" id="voteYes">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
               <h3>Vote {{$key}} :{{$value.Status}}</h3>
@@ -46,8 +37,8 @@
           </div>
           <div class="parambutton" id="paramYes">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
               <span><input type="button" name="param" value="Room: {{$key}}" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
             </p> {{end}}
           </div>
 
@@ -67,8 +58,8 @@
           </div>
           <div class="parambutton" id="paramNo">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
-              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
               <span><input type="button" name="param" value="Room {{$key}}" onclick="self.location.href='/results?id='+'{{$key}}'" ></span>
+              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
             </p>{{end}}
           </div>
         </div>
