@@ -40,7 +40,7 @@
 
           <div class="form-example">
             <label for="desc">Description: </label>
-            <textarea type="text" name="desc" id="desc" rows="3" cols="30" maxlength="150" value={{.Election.Config.Description}}></textarea>
+            <textarea type="text" name="desc" id="desc" rows="3" cols="30" maxlength="150" placeholder={{.Election.Config.Description}}></textarea>
           </div>
 
           <div class="form-example">
@@ -57,6 +57,10 @@
             <div class="button">
               <input type="submit" name="validate" id="validate" value="Validate">
             </div>
+          </div>
+          
+          <div class="exitButton">
+            <input type="button" name="Homepage" id="Homepage" value="Go to Homepage" onclick="self.location.href='/homepage'">
           </div>
 
         </form>

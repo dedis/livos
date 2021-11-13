@@ -107,4 +107,26 @@ div.delegation{
     display: flex;
 }
 
+.exitButton{
+    position: relative;
+	display:flex;
+	justify-content: flex-end;
+	align-items:flex-end;
+	align-self: start;
+    right: 10%;
+}
+
+.listOfVoters{
+    width  : 20%;
+    position: relative;
+	display:table;
+	justify-content:left;
+	align-self: left;
+    background: #84C8F6;
+    border-radius: 20%;
+    left: 4%;
+    top: 25%;
+    padding-top: 2%;
+}
+
 

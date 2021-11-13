@@ -280,6 +280,7 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 	}
 
 	user.MyChoice = choice
+
 	return nil
 }
 

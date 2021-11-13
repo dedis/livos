@@ -16,6 +16,15 @@
       <div id="logo">
         <!-- <img src="/images/LivosLogoComplet.png"> -->
       </div>
+
+      <div class="listOfVoters">
+        <h3>
+          List of Voters :<br>
+        </h3>
+        {{range $key, $value := .Election.Config.Voters}}
+          <br><h3>{{$value.UserID}} has {{$value.VotingPower}}% left.</h3> <br>
+        {{end}}
+      </div>
       
       <div id="formulaire">
         <form method="post" class="form-example" >
@@ -68,6 +77,9 @@
 
           <div class="form-example">
             <input type="submit" name="Validate" id="Validate" value="Validate">
+          </div>
+          <div class="exitButton">
+            <input type="button" name="Homepage" id="Homepage" value="Go to Homepage" onclick="self.location.href='/homepage'">
           </div>
 
         </form>

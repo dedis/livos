@@ -105,5 +105,11 @@ textarea{
     resize: none;
 }
 
-
-
+.exitButton{
+    position: relative;
+	display:flex;
+	justify-content: flex-end;
+	align-items:flex-end;
+    right: 10%;
+    bottom: 10%;
+}

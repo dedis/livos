@@ -52,7 +52,7 @@ body{
 #boxBlue{
     width  : 500px;
     height : 500px;
-    position: absolute;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
