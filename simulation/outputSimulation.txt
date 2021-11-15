@@ -1,0 +1,7 @@
+digraph network_activity {
+labelloc="t";label = <Network Diagram of 4 nodes <font point-size='10'><br/>(generated 15 Nov 21 - 19:10:55)</font>>;graph [fontname = "helvetica"];node [fontname = "helvetica"];edge [fontname = "helvetica"];
+"Noemien" -> "YES" [ label = < <font color='#303030'><b>100</b></font><br/>> color="#4AB2FF" ];
+"Noemien" -> "YES" [ label = < <font color='#303030'><b>50</b></font><br/>> color="#4AB2FF" ];
+"Noemien" -> "NO" [ label = < <font color='#303030'><b>50</b></font><br/>> color="#4AB2FF" ];
+"Bastien" -> "Noemien" [ label = < <font color='#303030'><b>100</b></font><br/>> color="#4AB2FF" ];
+}

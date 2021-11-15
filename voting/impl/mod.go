@@ -33,22 +33,28 @@ func (vi *VotingInstance) CastVote(user *voting.User) error {
 		return xerrors.Errorf("Impossible to cast the vote, the voting instance is closed.")
 	}
 
-	fmt.Println(":::: VOICI LES VOTES ACTUELS", vi.Votes, vi.Votes[user.UserID])
-
 	if val, ok := vi.Votes[user.UserID]; ok {
-		fmt.Println("LA C'EST VAL ::: ", val)
 		for name, value := range user.MyChoice.VoteValue {
 			additionOfLiquid, err := addLiquid(val.VoteValue[name], value)
-			fmt.Println(" :::: LA C'EST ADDITION OF LIQUID ::: ", additionOfLiquid)
 			if err != nil {
-				return xerrors.Errorf("Addition of the liquid is incorrect.")
+				return xerrors.Errorf(err.Error())
 			}
 			vi.Votes[user.UserID].VoteValue[name] = additionOfLiquid
-			fmt.Println(" :::: LA C'EST RESULTAT APRES LE CHANGEMENT ::: ", val.VoteValue[name])
 		}
 	} else {
 		vi.Votes[user.UserID] = user.MyChoice
 	}
+
+	//update history of choice with the current choice
+	histVoteValue := make(map[string]voting.Liquid)
+	for key, value := range user.MyChoice.VoteValue {
+		histVoteValue[key] = value
+	}
+	histChoice, err := NewChoice(histVoteValue)
+	if err != nil {
+		return xerrors.Errorf(err.Error())
+	}
+	user.HistoryOfChoice = append(user.HistoryOfChoice, histChoice)
 
 	return nil
 }
@@ -283,9 +289,6 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 		fmt.Println("-------------------------dans le error c'est sensé etre negatif")
 		return err
 	}
-
-	//update history of choice with the current choice
-	user.HistoryOfChoice = append(user.HistoryOfChoice, choice)
 
 	//update the current choice with the new one
 	user.MyChoice = choice

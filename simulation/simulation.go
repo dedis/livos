@@ -96,6 +96,8 @@ func Simulation(out io.Writer) {
 		fmt.Println(err.Error())
 	}
 
+	//fmt.Println("ICI MAP(bastien, 100)", userNoemien.DelegatedFrom)
+
 	//update noemien's choice (50%, 50%)
 	choiceNoemien, err = impl.NewChoice(midChoice)
 	if err != nil {
@@ -118,7 +120,7 @@ func Simulation(out io.Writer) {
 	fmt.Fprintf(out, "label = <Network Diagram of %d nodes <font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, time.Now().Format("2 Jan 06 - 15:04:05"))
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\"];")
-	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];")
+	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
 
 	for _, user := range VoteInstance.Config.Voters {
 
@@ -127,20 +129,20 @@ func Simulation(out io.Writer) {
 		for _, choice := range user.HistoryOfChoice {
 			if choice.VoteValue["yes"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#303030'><b>%b</b></font><br/>> color=\"%s\" ];\n",
+					"[ label = < <font color='#303030'><b>%v</b></font><br/>> color=\"%s\" ];\n",
 					user.UserID, "YES", choice.VoteValue["yes"].Percentage, color)
 			}
 
 			if choice.VoteValue["no"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#303030'><b>%b</b></font><br/>> color=\"%s\" ];\n",
+					"[ label = < <font color='#303030'><b>%v</b></font><br/>> color=\"%s\" ];\n",
 					user.UserID, "NO", choice.VoteValue["no"].Percentage, color)
 			}
 		}
 
 		for other, quantity := range user.DelegatedTo {
 			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-				"[ label = < <font color='#303030'><b>%b</b></font><br/>> color=\"%s\" ];\n",
+				"[ label = < <font color='#303030'><b>%v</b></font><br/>> color=\"%s\" ];\n",
 				user.UserID, other, quantity.Percentage, color)
 		}
 	}
