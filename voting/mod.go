@@ -73,6 +73,9 @@ type User struct {
 
 	//the amount of voting still left to split btw votes or delegations
 	VotingPower float64
+
+	//history of choices that were cast
+	HistoryOfChoice []Choice
 }
 
 // type User interface {

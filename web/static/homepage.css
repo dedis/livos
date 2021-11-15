@@ -155,7 +155,14 @@ textarea{
 	animation-delay: 1s;
 	animation-fill-mode: both;
 	top: 40%;
+	/* border-style: groove;
+	border-radius: 5%;
+	border-left: #f31ebf;
+	border-color: #f31ebf;
+	background: #84C8F6; */
 }
+
+
 
 .Close{
 	position: relative;
@@ -165,6 +172,11 @@ textarea{
 	align-self: start;
 	animation-delay: 1s;
 	animation-fill-mode: both;
+	/* border-style: groove;
+	border-radius: 5%;
+	border-left: #e99941;
+	border-color: #e99941;
+	background: #84C8F6; */
 }
 
 .voteOpen{
@@ -185,5 +197,7 @@ textarea{
 	justify-content: space-between;
 	align-items: center;
 	left: 15%;
-
 }
+
+
+

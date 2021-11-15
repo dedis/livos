@@ -84,6 +84,9 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 		noPower += v.VoteValue["no"].Percentage
 		counter++
 	}
+	//in order to get 4 and not 4.6666666... for example
+	// var temp1 = float64(int(yesPower/float64(counter))*100) / 100
+	// var temp2 = float64(int(noPower/float64(counter))*100) / 100
 	results["yes"] = yesPower / float64(counter)
 	results["no"] = noPower / float64(counter)
 
@@ -116,16 +119,16 @@ func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem
 }
 
 //creation of a voting instance
-func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (VotingInstance, error) {
+func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (*VotingInstance, error) {
 
 	//check if id is null
 	if id == "" {
-		return VotingInstance{}, xerrors.Errorf("The id is empty.")
+		return nil, xerrors.Errorf("The id is empty.")
 	}
 
 	//check if status is open or close only
 	if !(status == "open") && !(status == "close") {
-		return VotingInstance{}, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
+		return nil, xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
 	}
 
 	//fmt.Println("Votes: ", votes)
@@ -144,7 +147,7 @@ func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, statu
 	//adding vi to the list of vi's of the voting system
 	vs.VotingInstancesList[id] = p
 
-	return *p, nil
+	return p, nil
 }
 
 func (vs VotingSystem) Delete(id string) error {
@@ -189,7 +192,7 @@ func NewVotingConfig(voters []*voting.User, title string, desc string, cand []st
 	}, nil
 }
 
-func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice) (voting.User, error) {
+func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice, historyOfChoice []voting.Choice) (voting.User, error) {
 
 	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
 	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
@@ -208,11 +211,12 @@ func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid,
 	// }
 
 	return voting.User{
-		UserID:        userID,
-		DelegatedTo:   delegTo,
-		DelegatedFrom: delegFrom,
-		MyChoice:      choice,
-		VotingPower:   PERCENTAGE,
+		UserID:          userID,
+		DelegatedTo:     delegTo,
+		DelegatedFrom:   delegFrom,
+		MyChoice:        choice,
+		VotingPower:     PERCENTAGE,
+		HistoryOfChoice: historyOfChoice,
 	}, nil
 }
 
@@ -280,12 +284,18 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 		return err
 	}
 
+	//update history of choice with the current choice
+	user.HistoryOfChoice = append(user.HistoryOfChoice, choice)
+
+	//update the current choice with the new one
 	user.MyChoice = choice
 
 	return nil
 }
 
 func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.User, quantity voting.Liquid) error {
+
+	//CANNOT DELEGATE 0, do nothing if it is the case !!! TODO !!!
 
 	userReceive.DelegatedFrom[userSend.UserID] = quantity
 

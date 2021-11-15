@@ -62,16 +62,19 @@ func main() {
 	//creation of controller (for the web interactions)
 	ctrl := controller.NewController(content, contenthomepage, views, votingSystem)
 
+	//Creation of a empty list of choces (for history)
+	histoChoice := make([]voting.Choice, 0)
+
 	//creation of users
-	userNoemien, err := votingSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+	userNoemien, err := votingSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 	if err != nil {
 		logger.Fatal("user noemien creation is incorrect.")
 	}
-	userGuillaume, err := votingSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+	userGuillaume, err := votingSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 	if err != nil {
 		logger.Fatal("user guillaume creation is incorrect.")
 	}
-	userEtienne, err := votingSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+	userEtienne, err := votingSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 	if err != nil {
 		logger.Fatal("user etienne creation is incorrect.")
 	}

@@ -11,28 +11,31 @@ import (
 var VoteList = make(map[string]*impl.VotingInstance)
 var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 
-var userNoemien, err = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+//Creation of a empty list of choces (for history)
+var histoChoice = make([]voting.Choice, 0)
+
+var userNoemien, err = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 
 func TestCreationUserNoemien(t *testing.T) {
 	require.Equal(t, err, nil, "Cannot create VotingConfig")
 }
 
-var userGuillaume, err1 = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+var userGuillaume, err1 = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 
 func TestCreationUserGuillaume(t *testing.T) {
-	require.Equal(t, err1, nil, "Cannot create VotingConfig")
+	require.Equal(t, err1, nil, "Cannot create user")
 }
 
-var userEtienne, err2 = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+var userEtienne, err2 = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 
 func TestCreationUserEtienne(t *testing.T) {
-	require.Equal(t, err2, nil, "Cannot create VotingConfig")
+	require.Equal(t, err2, nil, "Cannot create user")
 }
 
-var userJoseph, err3 = VoteSystem.NewUser("Joseph", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+var userJoseph, err3 = VoteSystem.NewUser("Joseph", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
 
 func TestCreationUserJoseph(t *testing.T) {
-	require.Equal(t, err3, nil, "Cannot create VotingConfig")
+	require.Equal(t, err3, nil, "Cannot create user")
 }
 
 var voters = []*voting.User{&userNoemien, &userGuillaume, &userEtienne, &userJoseph}
