@@ -121,21 +121,21 @@ func main() {
 	midChoice["yes"] = liq50
 	choiceGuillaume, errG := impl.NewChoice(noChoice)
 	choiceEtienne, errE := impl.NewChoice(midChoice)
-	fmt.Println("CHOICE Guigui: ", choiceGuillaume)
-	fmt.Println("CHOICE etien: ", choiceEtienne)
+	/* fmt.Println("CHOICE Guigui: ", choiceGuillaume)
+	fmt.Println("CHOICE etien: ", choiceEtienne) */
 	if (errG != nil) || (errE != nil) {
 		logger.Fatalf("Choices creation incorrect.")
 	}
 
 	vi.SetChoice(&userGuillaume, choiceGuillaume)
-	fmt.Println(":::::: Result of the setchoice of guillaume", userGuillaume.MyChoice)
+	/* fmt.Println(":::::: Result of the setchoice of guillaume", userGuillaume.MyChoice) */
 	vi.SetChoice(&userEtienne, choiceEtienne)
-	fmt.Println(":::::: Result of the setchoice of etienne", userEtienne.MyChoice)
+	/* fmt.Println(":::::: Result of the setchoice of etienne", userEtienne.MyChoice) */
 
 	vi.CastVote(&userGuillaume)
 	vi.CastVote(&userEtienne)
 
-	fmt.Println("RESULTS OF THE VOTE ====> ", vi.GetResults())
+	/* fmt.Println("RESULTS OF THE VOTE ====> ", vi.GetResults()) */
 
 	mux.HandleFunc("/", ctrl.HandleHome)
 	mux.HandleFunc("/homepage", ctrl.HandleHomePage)

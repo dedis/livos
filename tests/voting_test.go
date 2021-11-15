@@ -10,12 +10,36 @@ import (
 
 var VoteList = make(map[string]*impl.VotingInstance)
 var VoteSystem = impl.NewVotingSystem(nil, VoteList)
-var voters = make([]string, 3)
+
+var userNoemien, err = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+
+func TestCreationUserNoemien(t *testing.T) {
+	require.Equal(t, err, nil, "Cannot create VotingConfig")
+}
+
+var userGuillaume, err1 = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+
+func TestCreationUserGuillaume(t *testing.T) {
+	require.Equal(t, err1, nil, "Cannot create VotingConfig")
+}
+
+var userEtienne, err2 = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+
+func TestCreationUserEtienne(t *testing.T) {
+	require.Equal(t, err2, nil, "Cannot create VotingConfig")
+}
+
+var userJoseph, err3 = VoteSystem.NewUser("Joseph", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{})
+
+func TestCreationUserJoseph(t *testing.T) {
+	require.Equal(t, err3, nil, "Cannot create VotingConfig")
+}
+
+var voters = []*voting.User{&userNoemien, &userGuillaume, &userEtienne, &userJoseph}
 var candidats = make([]string, 3)
-var votes = make(map[string]*voting.Choice)
+var votes = make(map[string]voting.Choice)
 
 func TestVotingSystemCreate(t *testing.T) {
-	voters = append(voters, "Noemien", "Guillaume", "Etienne")
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Cannot create VotingConfig")
 
@@ -33,7 +57,7 @@ func TestVotingSystemCreate(t *testing.T) {
 }
 
 func TestSetStatus(t *testing.T) {
-	voters = append(voters, "Noemien", "Guillaume", "Etienne")
+
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
@@ -46,7 +70,6 @@ func TestSetStatus(t *testing.T) {
 }
 
 func TestCloseVoting(t *testing.T) {
-	voters = append(voters, "Noemien", "Guillaume", "Etienne")
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
@@ -59,14 +82,12 @@ func TestCloseVoting(t *testing.T) {
 }
 
 func TestGetResults(t *testing.T) {
-	voters = append(voters, "Noemien", "Guillaume", "Etienne")
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	vi, err := VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
 	require.Equal(t, err, nil, "Creation of votingInstance is incorrect.")
 
-	deleg := make(map[string]voting.Liquid)
 	yesChoice := make(map[string]voting.Liquid)
 	noChoice := make(map[string]voting.Liquid)
 	midChoice := make(map[string]voting.Liquid)
@@ -86,22 +107,28 @@ func TestGetResults(t *testing.T) {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceNoemien, err := impl.NewChoice(deleg, yesChoice, 0, 100)
-	require.Equal(t, err, nil, "Creation of the choice is incorrect.")
+	choiceGuillaume, errG := impl.NewChoice(noChoice)
+	choiceEtienne, errE := impl.NewChoice(midChoice)
+	choiceNoemien, errN := impl.NewChoice(yesChoice)
+	require.Equal(t, errN, nil, "Creation of the choice is incorrect.")
 
-	choiceGuillaume, err := impl.NewChoice(deleg, noChoice, 0, 100)
-	require.Equal(t, err, nil, "Creation of the choice is incorrect.")
+	require.Equal(t, errE, nil, "Creation of the choice is incorrect.")
 
-	choiceEtienne, err := impl.NewChoice(deleg, midChoice, 0, 100)
-	require.Equal(t, err, nil, "Creation of the choice is incorrect.")
+	require.Equal(t, errG, nil, "Creation of the choice is incorrect.")
 
-	err = vi.CastVote("Noemien", choiceNoemien)
+	err = vi.SetChoice(&userGuillaume, choiceGuillaume)
+	require.Equal(t, err, nil, "Impossible to cast a vote, negative voting Power.")
+	err = vi.CastVote(&userGuillaume)
 	require.Equal(t, err, nil, "Impossible to cast a vote on a closed session.")
 
-	err = vi.CastVote("Guillaume", choiceGuillaume)
+	err = vi.SetChoice(&userEtienne, choiceEtienne)
+	require.Equal(t, err, nil, "Impossible to cast a vote, negative voting Power.")
+	err = vi.CastVote(&userEtienne)
 	require.Equal(t, err, nil, "Impossible to cast a vote on a closed session.")
 
-	err = vi.CastVote("Etienne", choiceEtienne)
+	err = vi.SetChoice(&userNoemien, choiceNoemien)
+	require.Equal(t, err, nil, "Impossible to cast a vote, negative voting Power.")
+	err = vi.CastVote(&userNoemien)
 	require.Equal(t, err, nil, "Impossible to cast a vote on a closed session.")
 
 	propYes := vi.GetResults()["yes"]
@@ -113,14 +140,13 @@ func TestGetResults(t *testing.T) {
 }
 
 func TestCastVotes(t *testing.T) {
-	voters = append(voters, "Noemien", "Guillaume", "Etienne")
+
 	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	vi, err := VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
 	require.Equal(t, err, nil, "Creation of votingInstance is incorrect.")
 
-	deleg := make(map[string]voting.Liquid)
 	yesChoice := make(map[string]voting.Liquid)
 
 	liq100, err := impl.NewLiquid(100)
@@ -132,11 +158,13 @@ func TestCastVotes(t *testing.T) {
 	yesChoice["yes"] = liq100
 	yesChoice["no"] = liqid0
 
-	choiceNoemien, err := impl.NewChoice(deleg, yesChoice, 0, 100)
-	require.Equal(t, err, nil, "Creation of the choice is incorrect.")
+	choiceJoseph, errN := impl.NewChoice(yesChoice)
+	require.Equal(t, errN, nil, "Creation of the choice is incorrect.")
 
-	err = vi.CastVote("Noemien", choiceNoemien)
+	err = vi.SetChoice(&userJoseph, choiceJoseph)
+	require.Equal(t, err, nil, "Impossible to cast a vote, negative voting Power.")
+	err = vi.CastVote(&userJoseph)
 	require.Equal(t, err, nil, "Impossible to cast a vote on a closed session.")
 
-	require.Equal(t, vi.Votes["Noemien"].MyChoice["yes"].Percentage, 100., "Proportion in yes is incorrect. Was: %f, should be %f", vi.Votes["Noemien"].MyChoice["yes"].Percentage, 100.)
+	require.Equal(t, vi.Votes["Joseph"].VoteValue["yes"].Percentage, 100., "Proportion in yes is incorrect. Was: %f, should be %f", vi.Votes["Noemien"].VoteValue["yes"].Percentage, 100.)
 }
