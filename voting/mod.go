@@ -35,6 +35,8 @@ type VotingInstance interface {
 
 	DelegTo(user *User, other *User, quantity Liquid) error
 
+	CheckVotingPowerOfVoters() bool
+
 	//override the method print?
 }
 

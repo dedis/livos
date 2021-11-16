@@ -255,6 +255,15 @@ func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
 	return nil
 }
 
+func (vi *VotingInstance) CheckVotingPowerOfVoters() bool {
+	for _, user := range vi.Config.Voters {
+		if user.VotingPower != 0. {
+			return true
+		}
+	}
+	return false
+}
+
 func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) error {
 
 	var sumOfVotingPower float64 = 0
