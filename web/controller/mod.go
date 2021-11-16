@@ -293,16 +293,16 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		if Quantity == "" {
 			liquidNo, err = impl.NewLiquid(0)
 			if err != nil {
-				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		} else {
 			temp, err := strconv.ParseFloat(Quantity, 64)
 			if err != nil {
-				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			liquidQuantity, err = impl.NewLiquid(temp)
 			if err != nil {
-				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
 

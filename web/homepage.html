@@ -29,22 +29,24 @@
         </div>
         
         <div class="Open">
+          <!-- <div><p>Open Votations :</p></div> -->
           <div class="voteOpen">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              <h3>Vote {{$key}} : {{$value.Status}} </h3>
+              <h4>{{$key}} : {{$value.Status}} => </h4>
             </p> {{end}}
           </div>
           <div class="buttonsOpen">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              <span><input type="button" name="param" value="Room: {{$key}}" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
+              <span><input type="button" name="param" value="Room {{$key}}" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
               <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
             </p> {{end}}
           </div>
         </div>
         <div class="Close">
+          <!-- <div><h3>Close Votations : </h3><br></div> -->
           <div class="voteClose">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
-              <h3>Vote {{$key}} : {{$value.Status}} </h3>
+              <h4>{{$key}} : {{$value.Status}} => </h4>
             </p> {{end}} 
           </div>
           <div class="buttonsClose">
@@ -67,7 +69,7 @@
 
         <div class="form-example">
           <label for="id">Id of the room: </label>
-          <input type="number" name="id" id="id" required>
+          <input type="number" name="id" id="id" min="0" required>
         </div>
 
         <br>

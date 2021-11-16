@@ -1,8 +1,6 @@
 package impl
 
 import (
-	"fmt"
-
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
@@ -233,9 +231,9 @@ func NewChoice(voteValue map[string]voting.Liquid) (voting.Choice, error) {
 }
 
 func NewLiquid(p float64) (voting.Liquid, error) {
-	// if p > 100 || p < 0 {
-	// 	return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be less than %d", p, PERCENTAGE)
-	// }
+	if p < 0 {
+		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be positive.", p)
+	}
 
 	return voting.Liquid{
 		Percentage: p,
@@ -245,34 +243,16 @@ func NewLiquid(p float64) (voting.Liquid, error) {
 func addLiquid(l1 voting.Liquid, l2 voting.Liquid) (voting.Liquid, error) {
 	result, err := NewLiquid(l1.Percentage + l2.Percentage)
 	if err != nil {
-		xerrors.Errorf("Addition of liquid incorect")
+		return voting.Liquid{}, xerrors.Errorf(err.Error())
 	}
 	return result, err
 }
 
-// type User struct {
-// 	//name of the user
-// 	UserID string
-
-// 	//keep the record of how much was delegated to whom
-// 	DelegatedTo map[string]voting.Liquid
-
-// 	//keep the record of how much was given to self and from who
-// 	DelegatedFrom map[string]voting.Liquid
-
-// 	//choice of the user concerning the voting instance
-// 	MyChoice voting.Choice
-
-// 	//the amount of voting still left to split btw votes or delegations
-// 	VotingPower float64
-// }
-
-func (vi *VotingInstance) CheckVotingPower(user *voting.User) (bool, error) {
-	b := user.VotingPower >= 0
-	if !b {
-		return b, xerrors.Errorf("Value of voting power is negative: Was %f, must be more than 0", user.VotingPower)
+func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
+	if !(user.VotingPower >= 0) {
+		return xerrors.Errorf("Value of voting power is negative: Was %f, must be more or equal than 0", user.VotingPower)
 	}
-	return b, nil
+	return nil
 }
 
 func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) error {
@@ -284,10 +264,9 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 
 	user.VotingPower -= sumOfVotingPower
 
-	b, err := vi.CheckVotingPower(user)
-	if !b {
-		fmt.Println("-------------------------dans le error c'est sensé etre negatif")
-		return err
+	err := vi.CheckVotingPower(user)
+	if err != nil {
+		return xerrors.Errorf(err.Error())
 	}
 
 	//update the current choice with the new one
@@ -298,22 +277,23 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 
 func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.User, quantity voting.Liquid) error {
 
-	//CANNOT DELEGATE 0, do nothing if it is the case !!! TODO !!!
+	//CANNOT DELEGATE 0 voting power, do nothing if it is the case
+	if quantity.Percentage > 0 {
+		userReceive.DelegatedFrom[userSend.UserID] = quantity
 
-	userReceive.DelegatedFrom[userSend.UserID] = quantity
+		userSend.DelegatedTo[userReceive.UserID] = quantity
 
-	userSend.DelegatedTo[userReceive.UserID] = quantity
+		userReceive.VotingPower += quantity.Percentage
+		err := vi.CheckVotingPower(userReceive)
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
 
-	userReceive.VotingPower += quantity.Percentage
-	b, err := vi.CheckVotingPower(userReceive)
-	if !b {
-		return err
-	}
-
-	userSend.VotingPower -= quantity.Percentage
-	b, err = vi.CheckVotingPower(userSend)
-	if !b {
-		return err
+		userSend.VotingPower -= quantity.Percentage
+		err = vi.CheckVotingPower(userSend)
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
 	}
 
 	return nil
