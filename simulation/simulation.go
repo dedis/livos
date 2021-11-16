@@ -20,7 +20,7 @@ func Simulation(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(3, 4)
+	var randomNumOfUser, err = random.IntRange(10, 15)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -35,18 +35,7 @@ func Simulation(out io.Writer) {
 		voters = append(voters, &user)
 	}
 
-	// userNoemien, err := VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
-	// if err != nil {
-	// 	xerrors.Errorf(err.Error())
-	// }
-
-	// userBastien, err := VoteSystem.NewUser("Bastien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
-	// if err != nil {
-	// 	xerrors.Errorf(err.Error())
-	// }
-
-	// //creation of list of voters
-	// var voters = []*voting.User{&userNoemien, &userBastien}
+	//candidats
 	var candidats = make([]string, 3)
 
 	//empty list of votes
@@ -64,15 +53,13 @@ func Simulation(out io.Writer) {
 		fmt.Println(err.Error())
 	}
 
-	fmt.Println("LIST OF VOTERS :::::::", VoteInstance.Config.Voters)
-
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
 		for i, user := range VoteInstance.Config.Voters {
-			fmt.Println("USER :::::::", *user)
+			//fmt.Println("USER :::::::", *user)
 			if user.VotingPower > 0 {
 				randomAction, err := random.IntRange(1, 4)
 				if err != nil {
-					fmt.Println(err.Error())
+					fmt.Println(err.Error(), "fail to do randomAction")
 				}
 
 				if randomAction == 1 {
@@ -81,35 +68,37 @@ func Simulation(out io.Writer) {
 					//random index creation (must NOT be == to index of current user)
 					randomDelegateToIndex, err := random.IntRange(0, len(voters))
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
 					}
 					for ok := true; ok; ok = (randomDelegateToIndex == i) {
 						randomDelegateToIndex, err = random.IntRange(0, len(voters))
 						if err != nil {
-							fmt.Println(err.Error())
+							fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
 						}
 					}
-					randomQuantityToDelegate, err := random.IntRange(1, int(user.VotingPower/10))
+					randomQuantityToDelegate, err := random.IntRange(1, int(user.VotingPower/10)+1)
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(err.Error(), "fail to do randomQuantityToDelegate")
 					}
 					randomQuantityToDelegate *= 10
 					quantity_to_deleg, err := impl.NewLiquid(float64(randomQuantityToDelegate))
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(err.Error(), "fail to do quantity to deleg")
 					}
 					err = VoteInstance.DelegTo(user, voters[randomDelegateToIndex], quantity_to_deleg)
 					if err != nil {
 						fmt.Println(err.Error())
 					}
 
+					fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID)
+
 				} else if randomAction == 2 {
 					//Vote YES action
 
 					//quantity to yes vote
-					randomQuantityToYesVote, err := random.IntRange(1, int(user.VotingPower/10))
+					randomQuantityToYesVote, err := random.IntRange(1, int(user.VotingPower)/10)
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(err.Error(), "fail to do randomQuantityToYesVote ")
 					}
 					randomQuantityToYesVote *= 10
 					quantity_to_yesVote, err := impl.NewLiquid(float64(randomQuantityToYesVote))
@@ -143,13 +132,15 @@ func Simulation(out io.Writer) {
 						fmt.Println(err.Error())
 					}
 
+					fmt.Println(user.UserID, " a voté YES pour ", quantity_to_yesVote, "%")
+
 				} else if randomAction == 3 {
 					//Vote NO action
 
 					//quantity to yes vote
-					randomQuantityToNoVote, err := random.IntRange(1, int(user.VotingPower/10))
+					randomQuantityToNoVote, err := random.IntRange(1, int(user.VotingPower)/10)
 					if err != nil {
-						fmt.Println(err.Error())
+						fmt.Println(err.Error(), "fail to get randomQuantityToNoVote ")
 					}
 					randomQuantityToNoVote *= 10
 					quantity_to_noVote, err := impl.NewLiquid(float64(randomQuantityToNoVote))
@@ -182,78 +173,17 @@ func Simulation(out io.Writer) {
 					if err != nil {
 						fmt.Println(err.Error())
 					}
+
+					fmt.Println(user.UserID, " a voté NON pour ", quantity_to_noVote, "%")
+
 				}
 			}
 		}
 	}
 
-	/* //creation of the yesChoice map (containing vote 100% for yes)
-	yesChoice := make(map[string]voting.Liquid)
-	//creation of the mid map choice (50%, 50%)
-	midChoice := make(map[string]voting.Liquid)
-
-	//liquid 100%
-	liquid_100, err := impl.NewLiquid(100)
-	if err != nil {
-		fmt.Println(err.Error())
+	for _, user := range VoteInstance.Config.Voters {
+		fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower)
 	}
-	//liquid 0%
-	liquid_0, err := impl.NewLiquid(0)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	//liquid 50%
-	liquid_50, err := impl.NewLiquid(50)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	//fill the yesChoice map with the liquids
-	yesChoice["yes"] = liquid_100
-	yesChoice["no"] = liquid_0
-	midChoice["yes"] = liquid_50
-	midChoice["no"] = liquid_50
-
-	//create noemien's choice (100%)
-	choiceNoemien, err := impl.NewChoice(yesChoice)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	//set the yesChoice for Noemien
-	err = VoteInstance.SetChoice(&userNoemien, choiceNoemien)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	//cast and register the vote for noemien
-	err = VoteInstance.CastVote(&userNoemien)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	//delegation of the 100% of the voting power of bastien to noemien
-	err = VoteInstance.DelegTo(&userBastien, &userNoemien, liquid_100)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	//fmt.Println("ICI MAP(bastien, 100)", userNoemien.DelegatedFrom)
-
-	//update noemien's choice (50%, 50%)
-	choiceNoemien, err = impl.NewChoice(midChoice)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	//set the midChoice for Noemien
-	err = VoteInstance.SetChoice(&userNoemien, choiceNoemien)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	//cast and register the second vote for noemien
-	err = VoteInstance.CastVote(&userNoemien)
-	if err != nil {
-		fmt.Println(err.Error())
-	} */
 
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
@@ -264,26 +194,46 @@ func Simulation(out io.Writer) {
 
 	for _, user := range VoteInstance.Config.Voters {
 
-		color := "#4AB2FF"
+		colorVoteYes := "#22bd27"
+		colorVoteNo := "#cf1111"
+		colorDeleg := "#8A2BE2"
 
+		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
+		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
+		new_vote_value := make(map[string]voting.Liquid)
 		for _, choice := range user.HistoryOfChoice {
+			for name, value := range choice.VoteValue {
+				new_vote_value[name], err = impl.AddLiquid(new_vote_value[name], value)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
+		}
+		new_choice, err := impl.NewChoice(new_vote_value)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
+
+		//creation of the arrows for the votes
+		for _, choice := range cumulativeHistoryOfChoice {
 			if choice.VoteValue["yes"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#303030'><b>%v</b></font><br/>> color=\"%s\" ];\n",
-					user.UserID, "YES", choice.VoteValue["yes"].Percentage, color)
+					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" ];\n",
+					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes)
 			}
 
 			if choice.VoteValue["no"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#303030'><b>%v</b></font><br/>> color=\"%s\" ];\n",
-					user.UserID, "NO", choice.VoteValue["no"].Percentage, color)
+					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" ];\n",
+					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo)
 			}
 		}
 
 		for other, quantity := range user.DelegatedTo {
 			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-				"[ label = < <font color='#303030'><b>%v</b></font><br/>> color=\"%s\" ];\n",
-				user.UserID, other, quantity.Percentage, color)
+				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" ];\n",
+				user.UserID, other, quantity.Percentage, colorDeleg)
 		}
 	}
 

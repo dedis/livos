@@ -33,7 +33,7 @@ func (vi *VotingInstance) CastVote(user *voting.User) error {
 
 	if val, ok := vi.Votes[user.UserID]; ok {
 		for name, value := range user.MyChoice.VoteValue {
-			additionOfLiquid, err := addLiquid(val.VoteValue[name], value)
+			additionOfLiquid, err := AddLiquid(val.VoteValue[name], value)
 			if err != nil {
 				return xerrors.Errorf(err.Error())
 			}
@@ -240,7 +240,7 @@ func NewLiquid(p float64) (voting.Liquid, error) {
 	}, nil
 }
 
-func addLiquid(l1 voting.Liquid, l2 voting.Liquid) (voting.Liquid, error) {
+func AddLiquid(l1 voting.Liquid, l2 voting.Liquid) (voting.Liquid, error) {
 	result, err := NewLiquid(l1.Percentage + l2.Percentage)
 	if err != nil {
 		return voting.Liquid{}, xerrors.Errorf(err.Error())
@@ -288,12 +288,16 @@ func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.Use
 
 	//CANNOT DELEGATE 0 voting power, do nothing if it is the case
 	if quantity.Percentage > 0 {
-		userReceive.DelegatedFrom[userSend.UserID] = quantity
+		new_quantity, err := AddLiquid(quantity, userReceive.DelegatedFrom[userSend.UserID])
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
+		userReceive.DelegatedFrom[userSend.UserID] = new_quantity
 
-		userSend.DelegatedTo[userReceive.UserID] = quantity
+		userSend.DelegatedTo[userReceive.UserID] = new_quantity
 
 		userReceive.VotingPower += quantity.Percentage
-		err := vi.CheckVotingPower(userReceive)
+		err = vi.CheckVotingPower(userReceive)
 		if err != nil {
 			return xerrors.Errorf(err.Error())
 		}
