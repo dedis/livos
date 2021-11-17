@@ -20,7 +20,7 @@ func Simulation(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(10, 15)
+	var randomNumOfUser, err = random.IntRange(20, 25)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -185,11 +185,13 @@ func Simulation(out io.Writer) {
 		fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower)
 	}
 
+	results := VoteInstance.GetResults()
+
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Network Diagram of %d nodes <font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, time.Now().Format("2 Jan 06 - 15:04:05"))
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %v, No = %v <font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, results["yes"], results["no"], time.Now().Format("2 Jan 06 - 15:04:05"))
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
-	fmt.Fprintf(out, "node [fontname = \"helvetica\"];")
+	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
 
 	for _, user := range VoteInstance.Config.Voters {
@@ -219,21 +221,21 @@ func Simulation(out io.Writer) {
 		for _, choice := range cumulativeHistoryOfChoice {
 			if choice.VoteValue["yes"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" ];\n",
-					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes)
+					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes, choice.VoteValue["yes"].Percentage/40)
 			}
 
 			if choice.VoteValue["no"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" ];\n",
-					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo)
+					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo, choice.VoteValue["no"].Percentage/40)
 			}
 		}
 
 		for other, quantity := range user.DelegatedTo {
 			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" ];\n",
-				user.UserID, other, quantity.Percentage, colorDeleg)
+				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+				user.UserID, other, quantity.Percentage, colorDeleg, quantity.Percentage/40)
 		}
 	}
 

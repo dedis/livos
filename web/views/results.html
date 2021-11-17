@@ -17,16 +17,18 @@
         <!-- <img src="/images/LivosLogoComplet.png"> -->
       </div>
       
-      <div id="boxBlue">
-        <h4>
-          Results of the votes: <br>
-          {{range $key, $value := .Results}} <p>
-              Proportion of {{$key}} : {{$value}}
-          </p> {{end}}
-        </h4>
+      <div class="space">
+        <div id="boxBlue">
+          <h4>
+            Results of the votes: <br><br><br>
+            {{range $key, $value := .Results}} <p>
+                Proportion of {{$key}} votes : {{$value}} %
+            </p><br> {{end}}
+            Proportion of blank votes : {{.Blanks}} %
+          </h4>
+        </div>
       </div>
-      
-
+    
 
   </body>
 </html>

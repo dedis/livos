@@ -49,16 +49,21 @@ body{
     top:  3px;
     left: 3px;
 }
-#boxBlue{
-    width  : 500px;
-    height : 500px;
-    position: relative;
+#space{
     display: flex;
     justify-content: center;
-    align-items: center;
-    border-radius: 20%;
-    top: 20%;
-    left: 30%;
+    align-items:center;
+}
+#boxBlue{
+    height: 250px;
+    width: 350px;
+    position: relative;
+    display:flex;
+    justify-content: space-around;
+    align-items:center;
+    border-radius: 15%;
+    top: 100px;
+    left: 35%;
     box-shadow:10px 5px 5px grey ;
     background: #84C8F6;
 }

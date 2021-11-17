@@ -365,16 +365,21 @@ func (c Controller) HandleShowResults(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	fmt.Println("ELECTION ADD object: ", *electionAdd)
+	//fmt.Println("ELECTION ADD object: ", *electionAdd)
+	results := electionAdd.GetResults()
+
+	blanks := 100. - results["yes"] - results["no"]
 
 	data := struct {
 		Election impl.VotingInstance
 		id       string
 		Results  map[string]float64
+		Blanks   float64
 	}{
 		Election: *electionAdd,
 		id:       id,
-		Results:  electionAdd.GetResults(),
+		Results:  results,
+		Blanks:   blanks,
 	}
 
 	err = t.Execute(w, data)
