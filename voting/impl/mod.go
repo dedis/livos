@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"fmt"
+
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
@@ -98,8 +100,16 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 }
 
 func (vi *VotingInstance) GetUser(userID string) (*voting.User, error) {
+
+	for _, x := range vi.Config.Voters {
+		fmt.Println("config.voters elem = ", *x)
+	}
+
 	for _, value := range vi.Config.Voters {
+		fmt.Println("value.UserID is : ", value.UserID)
+		fmt.Println("userID is : ", userID)
 		if value.UserID == userID {
+			fmt.Println("value returned is = ", value)
 			return value, nil
 		}
 	}
@@ -271,7 +281,9 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 		sumOfVotingPower += v.Percentage
 	}
 
-	user.VotingPower -= sumOfVotingPower
+	if user.VotingPower-sumOfVotingPower >= 0 {
+		user.VotingPower -= sumOfVotingPower
+	}
 
 	err := vi.CheckVotingPower(user)
 	if err != nil {

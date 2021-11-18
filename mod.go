@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/dedis/livos/storage/bbolt"
-	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
 	"github.com/dedis/livos/web/controller"
 )
@@ -62,81 +61,81 @@ func main() {
 	//creation of controller (for the web interactions)
 	ctrl := controller.NewController(content, contenthomepage, views, votingSystem)
 
-	//Creation of a empty list of choces (for history)
-	histoChoice := make([]voting.Choice, 0)
+	// // //Creation of a empty list of choces (for history)
+	// histoChoice := make([]voting.Choice, 0)
 
-	//creation of users
-	userNoemien, err := votingSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
-	if err != nil {
-		logger.Fatal("user noemien creation is incorrect.")
-	}
-	userGuillaume, err := votingSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
-	if err != nil {
-		logger.Fatal("user guillaume creation is incorrect.")
-	}
-	userEtienne, err := votingSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
-	if err != nil {
-		logger.Fatal("user etienne creation is incorrect.")
-	}
+	// //creation of users
+	// userNoemien, err := votingSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
+	// if err != nil {
+	// 	logger.Fatal("user noemien creation is incorrect.")
+	// }
+	// userGuillaume, err := votingSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
+	// if err != nil {
+	// 	logger.Fatal("user guillaume creation is incorrect.")
+	// }
+	// userEtienne, err := votingSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
+	// if err != nil {
+	// 	logger.Fatal("user etienne creation is incorrect.")
+	// }
 
-	//list of voters
-	voters := []*voting.User{&userNoemien, &userGuillaume, &userEtienne}
+	// //list of voters
+	// voters := []*voting.User{&userNoemien, &userGuillaume, &userEtienne}
 
-	description := "Do you want fries every day at the restaurant?"
-	description2 := "Do you want free vacations (365 days a year) ?"
+	// description := "Do you want fries every day at the restaurant?"
+	// description2 := "Do you want free vacations (365 days a year) ?"
 
-	candidats := make([]string, 3)
-	votingConfig, err := impl.NewVotingConfig(voters, "VoteRoom1", description, candidats)
-	if err != nil {
-		logger.Fatal("NewVotingConfig is incorrect")
-	}
-	voters2 := []*voting.User{}
-	votingConfig2, err := impl.NewVotingConfig(voters2, "VoteRoom2", description2, candidats)
-	if err != nil {
-		logger.Fatal("NewVotingConfig is incorrect")
-	}
-	votes := make(map[string]voting.Choice)
-	votes2 := make(map[string]voting.Choice)
-	votingSystem.CreateAndAdd("001", votingConfig, "open", votes)
-	votingSystem.CreateAndAdd("002", votingConfig2, "close", votes2)
+	// candidats := make([]string, 3)
+	// votingConfig, err := impl.NewVotingConfig(voters, "VoteRoom1", description, candidats)
+	// if err != nil {
+	// 	logger.Fatal("NewVotingConfig is incorrect")
+	// }
+	// voters2 := []*voting.User{}
+	// votingConfig2, err := impl.NewVotingConfig(voters2, "VoteRoom2", description2, candidats)
+	// if err != nil {
+	// 	logger.Fatal("NewVotingConfig is incorrect")
+	// }
+	// votes := make(map[string]voting.Choice)
+	// votes2 := make(map[string]voting.Choice)
+	// votingSystem.CreateAndAdd("001", votingConfig, "open", votes)
+	// votingSystem.CreateAndAdd("002", votingConfig2, "close", votes2)
 
-	fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
+	// fmt.Println("VOTING INSTANCE LIST : ", votingSystem.VotingInstancesList)
 
-	var vi = *votingSystem.VotingInstancesList["001"]
+	// var vi = *votingSystem.VotingInstancesList["001"]
 
-	fmt.Println("VI:", vi)
-	yesChoice := make(map[string]voting.Liquid)
-	noChoice := make(map[string]voting.Liquid)
-	midChoice := make(map[string]voting.Liquid)
+	// fmt.Println("VI:", vi)
+	// yesChoice := make(map[string]voting.Liquid)
+	// noChoice := make(map[string]voting.Liquid)
+	// midChoice := make(map[string]voting.Liquid)
 
-	liq100, err100 := impl.NewLiquid(100)
-	liq50, err50 := impl.NewLiquid(50)
-	liqid0, err0 := impl.NewLiquid(0)
-	if (err100 != nil) || (err50 != nil) || (err0 != nil) {
-		logger.Fatalf("Creation of liquid is incorrect.")
-	}
+	// liq100, err100 := impl.NewLiquid(100)
+	// liq50, err50 := impl.NewLiquid(50)
+	// liqid0, err0 := impl.NewLiquid(0)
+	// if (err100 != nil) || (err50 != nil) || (err0 != nil) {
+	// 	logger.Fatalf("Creation of liquid is incorrect.")
+	// }
 
-	yesChoice["yes"] = liq100
-	yesChoice["no"] = liqid0
-	noChoice["no"] = liq100
-	noChoice["yes"] = liqid0
-	midChoice["no"] = liq50
-	midChoice["yes"] = liq50
-	choiceGuillaume, errG := impl.NewChoice(noChoice)
-	choiceEtienne, errE := impl.NewChoice(midChoice)
-	/* fmt.Println("CHOICE Guigui: ", choiceGuillaume)
-	fmt.Println("CHOICE etien: ", choiceEtienne) */
-	if (errG != nil) || (errE != nil) {
-		logger.Fatalf("Choices creation incorrect.")
-	}
+	// yesChoice["yes"] = liq100
+	// yesChoice["no"] = liqid0
+	// noChoice["no"] = liq100
+	// noChoice["yes"] = liqid0
+	// midChoice["no"] = liq50
+	// midChoice["yes"] = liq50
+	// choiceGuillaume, errG := impl.NewChoice(noChoice)
+	// choiceEtienne, errE := impl.NewChoice(midChoice)
+	// /* fmt.Println("CHOICE Guigui: ", choiceGuillaume)
+	// fmt.Println("CHOICE etien: ", choiceEtienne) */
+	// if (errG != nil) || (errE != nil) {
+	// 	logger.Fatalf("Choices creation incorrect.")
+	// }
 
-	vi.SetChoice(&userGuillaume, choiceGuillaume)
-	/* fmt.Println(":::::: Result of the setchoice of guillaume", userGuillaume.MyChoice) */
-	vi.SetChoice(&userEtienne, choiceEtienne)
-	/* fmt.Println(":::::: Result of the setchoice of etienne", userEtienne.MyChoice) */
+	// vi.SetChoice(&userGuillaume, choiceGuillaume)
+	// /* fmt.Println(":::::: Result of the setchoice of guillaume", userGuillaume.MyChoice) */
+	// vi.SetChoice(&userEtienne, choiceEtienne)
+	// /* fmt.Println(":::::: Result of the setchoice of etienne", userEtienne.MyChoice) */
 
-	vi.CastVote(&userGuillaume)
-	vi.CastVote(&userEtienne)
+	// vi.CastVote(&userGuillaume)
+	// vi.CastVote(&userEtienne)
 
 	/* fmt.Println("RESULTS OF THE VOTE ====> ", vi.GetResults()) */
 

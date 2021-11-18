@@ -20,7 +20,7 @@ func Simulation(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(20, 25)
+	var randomNumOfUser, err = random.IntRange(10, 13)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -94,6 +94,8 @@ func Simulation(out io.Writer) {
 
 				} else if randomAction == 2 {
 					//Vote YES action
+
+					//user.attibut = yes
 
 					//quantity to yes vote
 					randomQuantityToYesVote, err := random.IntRange(1, int(user.VotingPower)/10)
@@ -186,10 +188,11 @@ func Simulation(out io.Writer) {
 	}
 
 	results := VoteInstance.GetResults()
+	s := "%"
 
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %v, No = %v <font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, results["yes"], results["no"], time.Now().Format("2 Jan 06 - 15:04:05"))
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, results["yes"], s, results["no"], s, time.Now().Format("2 Jan 06 - 15:04:05"))
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
