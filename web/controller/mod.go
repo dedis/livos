@@ -123,15 +123,20 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "failed to get list of voters: ", http.StatusInternalServerError)
 			return
 		}
+		//removing all whitespace
+		voterList = strings.ReplaceAll(voterList, " ", "")
+
+		//parsing the list to get usernames
 		voterListParsed := strings.Split(voterList, ",")
+
 		fmt.Println("List of voters : ", voterListParsed)
 		candidats := req.FormValue("candidates")
 		// if candidats == "" {
 		// 	http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
 		// 	return
 		// }
+		candidats = strings.ReplaceAll(candidats, " ", "")
 		candidatesParsed := strings.Split(candidats, ",")
-		//fmt.Println("Title = \n", title)
 
 		delegTo := make(map[string]voting.Liquid)
 		delegFrom := make(map[string]voting.Liquid)
@@ -247,10 +252,9 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		}
 
 		//get the user (object) from the retrieved name
-		fmt.Println("VOTER IS ::: ", voter)
-		fmt.Println("VOTER LIST is ::: ", electionAdd.Config.Voters)
+		//fmt.Println("VOTER IS ::: ", voter)
+		//fmt.Println("VOTER LIST is ::: ", electionAdd.Config.Voters)
 		userVoter, err := electionAdd.GetUser(voter)
-		fmt.Println("BONJOURRRR")
 		if err != nil {
 			http.Error(w, "User cannot be found.", http.StatusInternalServerError)
 		}
@@ -270,12 +274,12 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		//fmt.Println("::::::00 Result of the setchoice of guillaume", userVoter.MyChoice)
 		//fmt.Println(":::::: CHOICE USER choice of guillaume", choiceUser)
 
-		fmt.Println("address de uservoter", &userVoter)
+		//fmt.Println("address de uservoter", &userVoter)
 
-		fmt.Println("AVANT LE SET CHOICE : user = ", userVoter, "  choice = ", choiceUser)
-		if liquidNo.Percentage != 0. || liquidYes.Percentage != 0 {
+		//fmt.Println("AVANT LE SET CHOICE : user = ", userVoter, "  choice = ", choiceUser)
+		if liquidNo.Percentage != 0. || liquidYes.Percentage != 0. {
 			err = electionAdd.SetChoice(userVoter, choiceUser)
-			//fmt.Println("ET PUIS l'erreur : ", err.Error())
+
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}

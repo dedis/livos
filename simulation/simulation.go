@@ -20,7 +20,7 @@ func Simulation(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(10, 13)
+	var randomNumOfUser, err = random.IntRange(15, 20)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -93,17 +93,10 @@ func Simulation(out io.Writer) {
 					fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID)
 
 				} else if randomAction == 2 {
-					//Vote YES action
+					//Vote action
 
-					//user.attibut = yes
-
-					//quantity to yes vote
-					randomQuantityToYesVote, err := random.IntRange(1, int(user.VotingPower)/10)
-					if err != nil {
-						fmt.Println(err.Error(), "fail to do randomQuantityToYesVote ")
-					}
-					randomQuantityToYesVote *= 10
-					quantity_to_yesVote, err := impl.NewLiquid(float64(randomQuantityToYesVote))
+					quantity := user.VotingPower
+					quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
 					if err != nil {
 						fmt.Println(err.Error())
 					}
@@ -113,8 +106,29 @@ func Simulation(out io.Writer) {
 					}
 
 					choiceTab := make(map[string]voting.Liquid)
-					choiceTab["yes"] = quantity_to_yesVote
-					choiceTab["no"] = liquid_0
+
+					if len(user.HistoryOfChoice) == 0 {
+						yesOrNo, err := random.IntRange(1, 3)
+						if err != nil {
+							fmt.Println(err.Error(), "fail to do yesOrNo ")
+						}
+
+						if yesOrNo == 1 {
+							choiceTab["yes"] = quantity_to_Vote
+							choiceTab["no"] = liquid_0
+						} else {
+							choiceTab["yes"] = liquid_0
+							choiceTab["no"] = quantity_to_Vote
+						}
+					} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
+						choiceTab["yes"] = liquid_0
+						choiceTab["no"] = quantity_to_Vote
+					} else {
+						choiceTab["yes"] = quantity_to_Vote
+						choiceTab["no"] = liquid_0
+					}
+
+					//quantity to vote
 
 					//create choice
 					choice, err := impl.NewChoice(choiceTab)
@@ -134,51 +148,10 @@ func Simulation(out io.Writer) {
 						fmt.Println(err.Error())
 					}
 
-					fmt.Println(user.UserID, " a voté YES pour ", quantity_to_yesVote, "%")
-
-				} else if randomAction == 3 {
-					//Vote NO action
-
-					//quantity to yes vote
-					randomQuantityToNoVote, err := random.IntRange(1, int(user.VotingPower)/10)
-					if err != nil {
-						fmt.Println(err.Error(), "fail to get randomQuantityToNoVote ")
-					}
-					randomQuantityToNoVote *= 10
-					quantity_to_noVote, err := impl.NewLiquid(float64(randomQuantityToNoVote))
-					if err != nil {
-						fmt.Println(err.Error())
-					}
-					liquid_0, err := impl.NewLiquid(0)
-					if err != nil {
-						fmt.Println(err.Error())
-					}
-
-					choiceTab := make(map[string]voting.Liquid)
-					choiceTab["no"] = quantity_to_noVote
-					choiceTab["yes"] = liquid_0
-
-					//create choice
-					choice, err := impl.NewChoice(choiceTab)
-					if err != nil {
-						fmt.Println(err.Error())
-					}
-
-					//set the choice
-					err = VoteInstance.SetChoice(user, choice)
-					if err != nil {
-						fmt.Println(err.Error())
-					}
-
-					//cast the vote
-					err = VoteInstance.CastVote(user)
-					if err != nil {
-						fmt.Println(err.Error())
-					}
-
-					fmt.Println(user.UserID, " a voté NON pour ", quantity_to_noVote, "%")
+					fmt.Println(user.UserID, " a voté pour ", quantity, "%")
 
 				}
+
 			}
 		}
 	}

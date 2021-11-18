@@ -81,6 +81,11 @@ func (vi *VotingInstance) GetConfig() voting.VotingConfig {
 
 //Give the result of the choices of the voting instance in the form: map[no:50 yes:50]
 func (vi *VotingInstance) GetResults() map[string]float64 {
+	fmt.Println("AFFICHAGE DES VOTES INDIVIDUELS : ")
+	for s, v := range vi.Votes {
+		fmt.Println(s, " votes: ", v)
+	}
+
 	results := make(map[string]float64, len(vi.Votes))
 	counter := 0
 	var yesPower float64 = 0
@@ -93,8 +98,8 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 	//in order to get 4 and not 4.6666666... for example
 	// var temp1 = float64(int(yesPower/float64(counter))*100) / 100
 	// var temp2 = float64(int(noPower/float64(counter))*100) / 100
-	results["yes"] = yesPower / float64(counter)
-	results["no"] = noPower / float64(counter)
+	results["yes"] = yesPower / float64(len(vi.Config.Voters))
+	results["no"] = noPower / float64(len(vi.Config.Voters))
 
 	return results
 }
