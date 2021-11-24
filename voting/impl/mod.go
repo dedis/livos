@@ -23,44 +23,12 @@ type VotingInstance struct {
 	Status string
 
 	// Votes contains the choice of each voter, references by a userID
-	Votes map[string]voting.Choice
+	//Votes map[string]voting.Choice
 
 	//db.socket personnalisé pour chacun ?
 }
 
 //VOTING INSTANCE FUNCTIONS :::::
-
-//Register the vote of the user into the voting instance data
-func (vi *VotingInstance) CastVote(user *voting.User) error {
-	if vi.Status == "close" {
-		return xerrors.Errorf("Impossible to cast the vote, the voting instance is closed.")
-	}
-
-	if val, ok := vi.Votes[user.UserID]; ok {
-		for name, value := range user.MyChoice.VoteValue {
-			additionOfLiquid, err := AddLiquid(val.VoteValue[name], value)
-			if err != nil {
-				return xerrors.Errorf(err.Error())
-			}
-			vi.Votes[user.UserID].VoteValue[name] = additionOfLiquid
-		}
-	} else {
-		vi.Votes[user.UserID] = user.MyChoice
-	}
-
-	//update history of choice with the current choice
-	histVoteValue := make(map[string]voting.Liquid)
-	for key, value := range user.MyChoice.VoteValue {
-		histVoteValue[key] = value
-	}
-	histChoice, err := NewChoice(histVoteValue)
-	if err != nil {
-		return xerrors.Errorf(err.Error())
-	}
-	user.HistoryOfChoice = append(user.HistoryOfChoice, histChoice)
-
-	return nil
-}
 
 //Close the voting instance session (open -> close)
 func (vi *VotingInstance) CloseVoting() {
@@ -88,19 +56,14 @@ func (vi *VotingInstance) GetConfig() voting.VotingConfig {
 
 //Give the result of the choices of the voting instance in the form: map[no:50 yes:50]
 func (vi *VotingInstance) GetResults() map[string]float64 {
-	fmt.Println("AFFICHAGE DES VOTES INDIVIDUELS : ")
-	for s, v := range vi.Votes {
-		fmt.Println(s, " votes: ", v)
-	}
-
-	results := make(map[string]float64, len(vi.Votes))
-	counter := 0
+	results := make(map[string]float64, len(vi.Config.Voters))
 	var yesPower float64 = 0
 	var noPower float64 = 0
-	for _, v := range vi.Votes {
-		yesPower += v.VoteValue["yes"].Percentage
-		noPower += v.VoteValue["no"].Percentage
-		counter++
+	for _, user := range vi.Config.Voters {
+		for _, choice := range user.HistoryOfChoice {
+			yesPower += choice.VoteValue["yes"].Percentage
+			noPower += choice.VoteValue["no"].Percentage
+		}
 	}
 	//in order to get 4 and not 4.6666666... for example
 	// var temp1 = float64(int(yesPower/float64(counter))*100) / 100
@@ -148,7 +111,7 @@ func (vi *VotingInstance) CheckVotingPowerOfVoters() bool {
 }
 
 //Set (link) a given choice to a given user
-func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) error {
+func (vi *VotingInstance) SetVote(user *voting.User, choice voting.Choice) error {
 
 	var sumOfVotingPower float64 = 0
 	for _, v := range choice.VoteValue {
@@ -164,8 +127,16 @@ func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) err
 		return xerrors.Errorf(err.Error())
 	}
 
-	//update the current choice with the new one
-	user.MyChoice = choice
+	//update history of choice with the current choice
+	histVoteValue := make(map[string]voting.Liquid)
+	for key, value := range choice.VoteValue {
+		histVoteValue[key] = value
+	}
+	histChoice, err := NewChoice(histVoteValue)
+	if err != nil {
+		return xerrors.Errorf(err.Error())
+	}
+	user.HistoryOfChoice = append(user.HistoryOfChoice, histChoice)
 
 	return nil
 }
@@ -209,6 +180,11 @@ type VotingSystem struct {
 	Database storage.DB
 }
 
+//Returns the voting instance list
+func (vs *VotingSystem) GetVotingInstanceList() map[string]*VotingInstance {
+	return vs.VotingInstancesList
+}
+
 //Creation of a voting system, passing db and map as arguments
 func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem {
 	return VotingSystem{
@@ -218,7 +194,7 @@ func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem
 }
 
 //Creates and add new a voting instance
-func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (*VotingInstance, error) {
+func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string) (*VotingInstance, error) {
 
 	//check if id is null
 	if id == "" {
@@ -237,7 +213,6 @@ func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, statu
 		Id:     id,
 		Config: config,
 		Status: status,
-		Votes:  votes,
 	}
 
 	p := &vi
@@ -293,7 +268,7 @@ func NewVotingConfig(voters []*voting.User, title string, desc string, cand []st
 }
 
 //Create and return a new User
-func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice, historyOfChoice []voting.Choice) (voting.User, error) {
+func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, historyOfChoice []voting.Choice) (voting.User, error) {
 
 	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
 	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
@@ -315,7 +290,6 @@ func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid,
 		UserID:          userID,
 		DelegatedTo:     delegTo,
 		DelegatedFrom:   delegFrom,
-		MyChoice:        choice,
 		VotingPower:     PERCENTAGE,
 		HistoryOfChoice: historyOfChoice,
 	}, nil

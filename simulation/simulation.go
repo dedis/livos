@@ -28,7 +28,7 @@ func Simulation(out io.Writer) {
 	//Random creating of a user and adds it to the list of voters
 	var voters = make([]*voting.User, 0)
 	for i := 0; i < randomNumOfUser; i++ {
-		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), voting.Choice{}, histoChoice)
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice)
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
@@ -39,7 +39,7 @@ func Simulation(out io.Writer) {
 	var candidats = make([]string, 3)
 
 	//empty list of votes
-	var votes = make(map[string]voting.Choice)
+	//var votes = make(map[string]voting.Choice)
 
 	//creation of votingConfig
 	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Sunny day everyday ?", candidats)
@@ -48,7 +48,7 @@ func Simulation(out io.Writer) {
 	}
 
 	//creation of the voting instance
-	VoteInstance, err := VoteSystem.CreateAndAdd("Simulation01", voteConfig, "open", votes)
+	VoteInstance, err := VoteSystem.CreateAndAdd("Simulation01", voteConfig, "open")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -137,16 +137,16 @@ func Simulation(out io.Writer) {
 					}
 
 					//set the choice
-					err = VoteInstance.SetChoice(user, choice)
+					err = VoteInstance.SetVote(user, choice)
 					if err != nil {
 						fmt.Println(err.Error())
 					}
 
 					//cast the vote
-					err = VoteInstance.CastVote(user)
-					if err != nil {
-						fmt.Println(err.Error())
-					}
+					// err = VoteInstance.CastVote(user)
+					// if err != nil {
+					// 	fmt.Println(err.Error())
+					// }
 
 					fmt.Println(user.UserID, " a voté pour ", quantity, "%")
 

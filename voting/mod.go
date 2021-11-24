@@ -11,12 +11,12 @@ type VotingSystem interface {
 
 	Delete(votingID string)
 
+	GetVotingInstanceList() map[string]*VotingInstance
+
 	//override the method print?
 }
 
 type VotingInstance interface {
-	CastVote(user *User)
-
 	GetConfig() VotingConfig
 
 	CloseVoting()
@@ -31,7 +31,7 @@ type VotingInstance interface {
 
 	CheckVotingPower(user *User) bool
 
-	SetChoice(user *User, choice Choice) error
+	SetVote(user *User, choice Choice) error
 
 	DelegTo(user *User, other *User, quantity Liquid) error
 
@@ -69,9 +69,6 @@ type User struct {
 
 	//keep the record of how much was given to self and from who
 	DelegatedFrom map[string]Liquid
-
-	//choice of the user concerning the voting instance
-	MyChoice Choice
 
 	//the amount of voting still left to split btw votes or delegations
 	VotingPower float64

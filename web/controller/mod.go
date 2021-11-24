@@ -54,11 +54,6 @@ func (c Controller) HandleHome(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	//req.Form.Get(election//)
-	// name := req.FormValue("username")
-	// description := req.FormValue("description")
-	// roomID := req.FormValue("roomID")
 }
 
 func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
@@ -78,8 +73,8 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 	VotingInstanceTabOpen := make(map[string]*impl.VotingInstance)
 	VotingInstanceTabClose := make(map[string]*impl.VotingInstance)
 
-	for key, value := range c.vs.VotingInstancesList {
-		if value.Status == "open" {
+	for key, value := range c.vs.GetVotingInstanceList() {
+		if value.GetStatus() == "open" {
 			VotingInstanceTabOpen[key] = value
 		} else {
 			VotingInstanceTabClose[key] = value
@@ -142,10 +137,9 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		delegFrom := make(map[string]voting.Liquid)
 		//userListParsed := make([]voting.User, 0)
 		voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
-		choice := voting.Choice{}
 		histoChoice := make([]voting.Choice, 0)
 		for idx, name := range voterListParsed {
-			u, err := c.vs.NewUser(name, delegTo, delegFrom, choice, histoChoice)
+			u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice)
 			//userListParsed = append(userListParsed, u)
 			if err != nil {
 				http.Error(w, "User creation is incorrect"+err.Error(), http.StatusInternalServerError)
@@ -160,8 +154,8 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Println("The voting config is : ", votingConfig)
 
-		votes := make(map[string]voting.Choice)
-		_, err = c.vs.CreateAndAdd(id, votingConfig, status, votes)
+		//votes := make(map[string]voting.Choice)
+		_, err = c.vs.CreateAndAdd(id, votingConfig, status)
 		if err != nil {
 			http.Error(w, "CreateAndAdd is incorrect"+err.Error(), http.StatusInternalServerError)
 		}
@@ -278,7 +272,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 
 		//fmt.Println("AVANT LE SET CHOICE : user = ", userVoter, "  choice = ", choiceUser)
 		if liquidNo.Percentage != 0. || liquidYes.Percentage != 0. {
-			err = electionAdd.SetChoice(userVoter, choiceUser)
+			err = electionAdd.SetVote(userVoter, choiceUser)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -287,10 +281,10 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			//fmt.Println("::::::11 Result of the setchoice of guillaume", userVoter.MyChoice)
 
 			//cast the vote of the user
-			err = electionAdd.CastVote(userVoter)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
+			// err = electionAdd.CastVote(userVoter)
+			// if err != nil {
+			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+			// }
 		}
 
 		// DELEGATION : VOTER1, VOTER2, QUANTITY => DELEG_TO -----------------
@@ -472,10 +466,9 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 			delegTo := make(map[string]voting.Liquid)
 			delegFrom := make(map[string]voting.Liquid)
 			voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
-			choice := voting.Choice{}
 			histoChoice := make([]voting.Choice, 0)
 			for idx, name := range voterListParsed {
-				u, err := c.vs.NewUser(name, delegTo, delegFrom, choice, histoChoice)
+				u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice)
 				if err != nil {
 					http.Error(w, "User creation is incorrect", http.StatusInternalServerError)
 				}
