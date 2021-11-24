@@ -20,7 +20,7 @@ func Simulation(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(15, 20)
+	var randomNumOfUser, err = random.IntRange(5, 7)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}

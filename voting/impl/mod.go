@@ -8,7 +8,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-//the voting implementation
+//VOTING IMPLEMENTATION
 
 const PERCENTAGE = 100
 
@@ -28,6 +28,9 @@ type VotingInstance struct {
 	//db.socket personnalisé pour chacun ?
 }
 
+//VOTING INSTANCE FUNCTIONS :::::
+
+//Register the vote of the user into the voting instance data
 func (vi *VotingInstance) CastVote(user *voting.User) error {
 	if vi.Status == "close" {
 		return xerrors.Errorf("Impossible to cast the vote, the voting instance is closed.")
@@ -59,10 +62,12 @@ func (vi *VotingInstance) CastVote(user *voting.User) error {
 	return nil
 }
 
+//Close the voting instance session (open -> close)
 func (vi *VotingInstance) CloseVoting() {
 	vi.SetStatus("close")
 }
 
+//Set the status of the voting instance (open or close)
 func (vi *VotingInstance) SetStatus(status string) error {
 	if !(status == "open") && !(status == "close") {
 		return xerrors.Errorf("The status is incorrect, should be either 'open' or 'close'.")
@@ -71,10 +76,12 @@ func (vi *VotingInstance) SetStatus(status string) error {
 	return nil
 }
 
+//Return the status of the voting instance
 func (vi *VotingInstance) GetStatus() string {
 	return vi.Status
 }
 
+//Return the configuration of the voting instance
 func (vi *VotingInstance) GetConfig() voting.VotingConfig {
 	return vi.Config
 }
@@ -104,6 +111,7 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 	return results
 }
 
+//Return the user object from the string passed in argument
 func (vi *VotingInstance) GetUser(userID string) (*voting.User, error) {
 
 	for _, x := range vi.Config.Voters {
@@ -121,6 +129,78 @@ func (vi *VotingInstance) GetUser(userID string) (*voting.User, error) {
 	return nil, xerrors.Errorf("Cannot find the user. UserId is %s", userID)
 }
 
+//Check that the voting power of a user is always positive
+func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
+	if !(user.VotingPower >= 0) {
+		return xerrors.Errorf("Value of voting power is negative: Was %f, must be more or equal than 0", user.VotingPower)
+	}
+	return nil
+}
+
+//Check if all the voters have used all their voting power (usefull for simulation)
+func (vi *VotingInstance) CheckVotingPowerOfVoters() bool {
+	for _, user := range vi.Config.Voters {
+		if user.VotingPower != 0. {
+			return true
+		}
+	}
+	return false
+}
+
+//Set (link) a given choice to a given user
+func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) error {
+
+	var sumOfVotingPower float64 = 0
+	for _, v := range choice.VoteValue {
+		sumOfVotingPower += v.Percentage
+	}
+
+	if user.VotingPower-sumOfVotingPower >= 0 {
+		user.VotingPower -= sumOfVotingPower
+	}
+
+	err := vi.CheckVotingPower(user)
+	if err != nil {
+		return xerrors.Errorf(err.Error())
+	}
+
+	//update the current choice with the new one
+	user.MyChoice = choice
+
+	return nil
+}
+
+//Transfer of voting power between 2 users
+func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.User, quantity voting.Liquid) error {
+
+	//CANNOT DELEGATE 0 voting power, do nothing if it is the case
+	if quantity.Percentage > 0 {
+		new_quantity, err := AddLiquid(quantity, userReceive.DelegatedFrom[userSend.UserID])
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
+		userReceive.DelegatedFrom[userSend.UserID] = new_quantity
+
+		userSend.DelegatedTo[userReceive.UserID] = new_quantity
+
+		userReceive.VotingPower += quantity.Percentage
+		err = vi.CheckVotingPower(userReceive)
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
+
+		userSend.VotingPower -= quantity.Percentage
+		err = vi.CheckVotingPower(userSend)
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
+	}
+
+	return nil
+}
+
+//VOTING SYSTEM FUNCTIONS :::::
+
 type VotingSystem struct {
 	//contain all the votingInstances mapped to their stringID
 	VotingInstancesList map[string]*VotingInstance
@@ -129,7 +209,7 @@ type VotingSystem struct {
 	Database storage.DB
 }
 
-//creation of a voting system, passing db and map as arguments
+//Creation of a voting system, passing db and map as arguments
 func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem {
 	return VotingSystem{
 		Database:            db,
@@ -137,7 +217,7 @@ func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem
 	}
 }
 
-//creation of a voting instance
+//Creates and add new a voting instance
 func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string, votes map[string]voting.Choice) (*VotingInstance, error) {
 
 	//check if id is null
@@ -169,6 +249,7 @@ func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, statu
 	return p, nil
 }
 
+//Delete the voting instance linked to the id
 func (vs VotingSystem) Delete(id string) error {
 
 	vi := vs.VotingInstancesList[id]
@@ -192,12 +273,12 @@ func (vs VotingSystem) ListVotings() []string {
 	return listeDeVotes
 }
 
-//Do we need to make a check to see if the id is null or letters or in fact
-//doesn't belong to the list of ids
+//Return the voting instance from the id
 func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
 	return *vs.VotingInstancesList[id]
 }
 
+//Create and return a new voting configuration
 func NewVotingConfig(voters []*voting.User, title string, desc string, cand []string) (voting.VotingConfig, error) {
 	if title == "" {
 		return voting.VotingConfig{}, xerrors.Errorf("title is empty")
@@ -211,6 +292,7 @@ func NewVotingConfig(voters []*voting.User, title string, desc string, cand []st
 	}, nil
 }
 
+//Create and return a new User
 func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, choice voting.Choice, historyOfChoice []voting.Choice) (voting.User, error) {
 
 	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
@@ -239,12 +321,14 @@ func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid,
 	}, nil
 }
 
+//Create and return a new Choice
 func NewChoice(voteValue map[string]voting.Liquid) (voting.Choice, error) {
 	return voting.Choice{
 		VoteValue: voteValue,
 	}, nil
 }
 
+//Create and return a new Liquid
 func NewLiquid(p float64) (voting.Liquid, error) {
 	if p < 0 {
 		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be positive.", p)
@@ -255,76 +339,11 @@ func NewLiquid(p float64) (voting.Liquid, error) {
 	}, nil
 }
 
+//Return the addition of 2 liquids
 func AddLiquid(l1 voting.Liquid, l2 voting.Liquid) (voting.Liquid, error) {
 	result, err := NewLiquid(l1.Percentage + l2.Percentage)
 	if err != nil {
 		return voting.Liquid{}, xerrors.Errorf(err.Error())
 	}
 	return result, err
-}
-
-func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
-	if !(user.VotingPower >= 0) {
-		return xerrors.Errorf("Value of voting power is negative: Was %f, must be more or equal than 0", user.VotingPower)
-	}
-	return nil
-}
-
-func (vi *VotingInstance) CheckVotingPowerOfVoters() bool {
-	for _, user := range vi.Config.Voters {
-		if user.VotingPower != 0. {
-			return true
-		}
-	}
-	return false
-}
-
-func (vi *VotingInstance) SetChoice(user *voting.User, choice voting.Choice) error {
-
-	var sumOfVotingPower float64 = 0
-	for _, v := range choice.VoteValue {
-		sumOfVotingPower += v.Percentage
-	}
-
-	if user.VotingPower-sumOfVotingPower >= 0 {
-		user.VotingPower -= sumOfVotingPower
-	}
-
-	err := vi.CheckVotingPower(user)
-	if err != nil {
-		return xerrors.Errorf(err.Error())
-	}
-
-	//update the current choice with the new one
-	user.MyChoice = choice
-
-	return nil
-}
-
-func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.User, quantity voting.Liquid) error {
-
-	//CANNOT DELEGATE 0 voting power, do nothing if it is the case
-	if quantity.Percentage > 0 {
-		new_quantity, err := AddLiquid(quantity, userReceive.DelegatedFrom[userSend.UserID])
-		if err != nil {
-			return xerrors.Errorf(err.Error())
-		}
-		userReceive.DelegatedFrom[userSend.UserID] = new_quantity
-
-		userSend.DelegatedTo[userReceive.UserID] = new_quantity
-
-		userReceive.VotingPower += quantity.Percentage
-		err = vi.CheckVotingPower(userReceive)
-		if err != nil {
-			return xerrors.Errorf(err.Error())
-		}
-
-		userSend.VotingPower -= quantity.Percentage
-		err = vi.CheckVotingPower(userSend)
-		if err != nil {
-			return xerrors.Errorf(err.Error())
-		}
-	}
-
-	return nil
 }

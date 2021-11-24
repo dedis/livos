@@ -1,15 +1,14 @@
-package tests
+package impl
 
 import (
 	"testing"
 
 	"github.com/dedis/livos/voting"
-	"github.com/dedis/livos/voting/impl"
 	"github.com/stretchr/testify/require"
 )
 
-var VoteList = make(map[string]*impl.VotingInstance)
-var VoteSystem = impl.NewVotingSystem(nil, VoteList)
+var VoteList = make(map[string]*VotingInstance)
+var VoteSystem = NewVotingSystem(nil, VoteList)
 
 //Creation of a empty list of choces (for history)
 var histoChoice = make([]voting.Choice, 0)
@@ -43,7 +42,7 @@ var candidats = make([]string, 3)
 var votes = make(map[string]voting.Choice)
 
 func TestVotingSystemCreate(t *testing.T) {
-	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Cannot create VotingConfig")
 
 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
@@ -61,7 +60,7 @@ func TestVotingSystemCreate(t *testing.T) {
 
 func TestSetStatus(t *testing.T) {
 
-	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
@@ -73,7 +72,7 @@ func TestSetStatus(t *testing.T) {
 }
 
 func TestCloseVoting(t *testing.T) {
-	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	s := "close"
@@ -85,7 +84,7 @@ func TestCloseVoting(t *testing.T) {
 }
 
 func TestGetResults(t *testing.T) {
-	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	vi, err := VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
@@ -95,13 +94,13 @@ func TestGetResults(t *testing.T) {
 	noChoice := make(map[string]voting.Liquid)
 	midChoice := make(map[string]voting.Liquid)
 
-	liq100, err := impl.NewLiquid(100)
+	liq100, err := NewLiquid(100)
 	require.Equal(t, err, nil, "Creation of liquid is incorrect.")
 
-	liq50, err := impl.NewLiquid(50)
+	liq50, err := NewLiquid(50)
 	require.Equal(t, err, nil, "Creation of liquid is incorrect.")
 
-	liqid0, err := impl.NewLiquid(0)
+	liqid0, err := NewLiquid(0)
 	require.Equal(t, err, nil, "Creation of liquid is incorrect.")
 
 	yesChoice["yes"] = liq100
@@ -110,9 +109,9 @@ func TestGetResults(t *testing.T) {
 	noChoice["yes"] = liqid0
 	midChoice["no"] = liq50
 	midChoice["yes"] = liq50
-	choiceGuillaume, errG := impl.NewChoice(noChoice)
-	choiceEtienne, errE := impl.NewChoice(midChoice)
-	choiceNoemien, errN := impl.NewChoice(yesChoice)
+	choiceGuillaume, errG := NewChoice(noChoice)
+	choiceEtienne, errE := NewChoice(midChoice)
+	choiceNoemien, errN := NewChoice(yesChoice)
 	require.Equal(t, errN, nil, "Creation of the choice is incorrect.")
 
 	require.Equal(t, errE, nil, "Creation of the choice is incorrect.")
@@ -144,7 +143,7 @@ func TestGetResults(t *testing.T) {
 
 func TestCastVotes(t *testing.T) {
 
-	voteConfig, err := impl.NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	vi, err := VoteSystem.CreateAndAdd("Session01", voteConfig, "open", votes)
@@ -152,16 +151,16 @@ func TestCastVotes(t *testing.T) {
 
 	yesChoice := make(map[string]voting.Liquid)
 
-	liq100, err := impl.NewLiquid(100)
+	liq100, err := NewLiquid(100)
 	require.Equal(t, err, nil, "Creation of liquid is incorrect.")
 
-	liqid0, err := impl.NewLiquid(0)
+	liqid0, err := NewLiquid(0)
 	require.Equal(t, err, nil, "Creation of liquid is incorrect.")
 
 	yesChoice["yes"] = liq100
 	yesChoice["no"] = liqid0
 
-	choiceJoseph, errN := impl.NewChoice(yesChoice)
+	choiceJoseph, errN := NewChoice(yesChoice)
 	require.Equal(t, errN, nil, "Creation of the choice is incorrect.")
 
 	err = vi.SetChoice(&userJoseph, choiceJoseph)
