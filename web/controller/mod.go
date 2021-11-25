@@ -455,9 +455,9 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 
 	data := struct {
 		Title             string
-		VotingInstanceTab map[string]*impl.VotingInstance
+		VotingInstanceTab map[string]voting.VotingInstance
 	}{Title: "Creation of Voting Room",
-		VotingInstanceTab: c.vs.VotingInstancesList,
+		VotingInstanceTab: c.vs.GetVotingInstanceList(),
 	}
 
 	if req.Method == "POST" {
