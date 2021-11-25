@@ -9,7 +9,7 @@ import (
 )
 
 //VARIABLES NECESSAIRES
-var VoteList = make(map[string]*VotingInstance)
+var VoteList = make(map[string]voting.VotingInstance)
 var VoteSystem = NewVotingSystem(nil, VoteList)
 
 //Creation of a empty list of choces (for history)
@@ -54,13 +54,13 @@ func TestVotingInstanceCreate(t *testing.T) {
 	require.Equal(t, err, nil, "Cannot create VotingConfig")
 
 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open")
-	id := VoteSystem.VotingInstancesList["Session01"].Id
+	id := VoteSystem.VotingInstancesList["Session01"].GetVotingID()
 	require.Equal(t, id, "Session01", "The id of the votingInstance just created is incorrect, got: %s, want %s.", id, "Session01")
 
-	status := VoteSystem.VotingInstancesList["Session01"].Status
+	status := VoteSystem.VotingInstancesList["Session01"].GetStatus()
 	require.Equal(t, status, "open", "The status of the votingInstance just created is incorrect, got: %s, want %s.", status, "open")
 
-	config := VoteSystem.VotingInstancesList["Session01"].Config
+	config := VoteSystem.VotingInstancesList["Session01"].GetConfig()
 	require.Equal(t, config.Title, "TestVotingTitle", "The config title of the votingInstance just created is incorrect, got: %s, want %s.", config.Title, "TestVotingTitle")
 
 	require.Equal(t, config.Description, "Quick description", "The config description of the votingInstance just created is incorrect, got: %s, want %s.", config.Description, "Quick description")
@@ -85,7 +85,7 @@ func TestCreateAndAdd(t *testing.T) {
 
 func TestCloseVoting(t *testing.T) {
 	vi.CloseVoting()
-	require.Equal(t, vi.Status, "close", "Status incorrect. Was: %s, should be: %s", vi.Status, "close")
+	require.Equal(t, vi.GetStatus(), "close", "Status incorrect. Was: %s, should be: %s", vi.GetStatus(), "close")
 }
 
 func TestSetStatus(t *testing.T) {
@@ -93,10 +93,10 @@ func TestSetStatus(t *testing.T) {
 	require.Equal(t, err.Error(), "The status is incorrect, should be either 'open' or 'close'.")
 
 	vi.SetStatus("close")
-	require.Equal(t, vi.Status, "close", "Status incorrect. Was: %s, should be: %s", vi.Status, "close")
+	require.Equal(t, vi.GetStatus(), "close", "Status incorrect. Was: %s, should be: %s", vi.GetStatus(), "close")
 
 	vi.SetStatus("open")
-	require.Equal(t, vi.Status, "open", "Status incorrect. Was: %s, should be: %s", vi.Status, "open")
+	require.Equal(t, vi.GetStatus(), "open", "Status incorrect. Was: %s, should be: %s", vi.GetStatus(), "open")
 }
 
 func TestCreationOfLiquid(t *testing.T) {
@@ -186,7 +186,7 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	var VoteList = make(map[string]*VotingInstance)
+	var VoteList = make(map[string]voting.VotingInstance)
 	var VoteSystem2 = NewVotingSystem(nil, VoteList)
 	var voters = []*voting.User{}
 	var candidats = make([]string, 0)

@@ -1,8 +1,6 @@
 package impl
 
 import (
-	"fmt"
-
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"golang.org/x/xerrors"
@@ -44,6 +42,30 @@ func (vi *VotingInstance) SetStatus(status string) error {
 	return nil
 }
 
+//Set the title of the voting instance
+func (vi *VotingInstance) SetTitle(title string) error {
+	vi.Config.Title = title
+	return nil
+}
+
+//Set the voters of the voting instance
+func (vi *VotingInstance) SetVoters(users []*voting.User) error {
+	vi.Config.Voters = users
+	return nil
+}
+
+//Set the candidates of the voting instance
+func (vi *VotingInstance) SetCandidates(candidates []string) error {
+	vi.Config.Candidates = candidates
+	return nil
+}
+
+//Set the description of the voting instance
+func (vi *VotingInstance) SetDescription(description string) error {
+	vi.Config.Description = description
+	return nil
+}
+
 //Return the status of the voting instance
 func (vi *VotingInstance) GetStatus() string {
 	return vi.Status
@@ -76,26 +98,18 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 
 //Return the user object from the string passed in argument
 func (vi *VotingInstance) GetUser(userID string) (*voting.User, error) {
-
-	for _, x := range vi.Config.Voters {
-		fmt.Println("config.voters elem = ", *x)
-	}
-
 	for _, value := range vi.Config.Voters {
-		fmt.Println("value.UserID is : ", value.UserID)
-		fmt.Println("userID is : ", userID)
 		if value.UserID == userID {
-			fmt.Println("value returned is = ", value)
 			return value, nil
 		}
 	}
-	return nil, xerrors.Errorf("Cannot find the user. UserId is %s", userID)
+	return nil, xerrors.Errorf("Cannot find the user. UserId is incorrect.")
 }
 
 //Check that the voting power of a user is always positive
 func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
-	if !(user.VotingPower >= 0) {
-		return xerrors.Errorf("Value of voting power is negative: Was %f, must be more or equal than 0", user.VotingPower)
+	if user.VotingPower < 0 {
+		return xerrors.Errorf("Value of voting power is negative: Was %d, must be more or equal than 0", int(user.VotingPower))
 	}
 	return nil
 }
@@ -120,23 +134,20 @@ func (vi *VotingInstance) SetVote(user *voting.User, choice voting.Choice) error
 
 	if user.VotingPower-sumOfVotingPower >= 0 {
 		user.VotingPower -= sumOfVotingPower
-	}
 
-	err := vi.CheckVotingPower(user)
-	if err != nil {
-		return xerrors.Errorf(err.Error())
+		//update history of choice with the current choice
+		histVoteValue := make(map[string]voting.Liquid)
+		for key, value := range choice.VoteValue {
+			histVoteValue[key] = value
+		}
+		histChoice, err := NewChoice(histVoteValue)
+		if err != nil {
+			return xerrors.Errorf(err.Error())
+		}
+		user.HistoryOfChoice = append(user.HistoryOfChoice, histChoice)
+	} else {
+		return xerrors.Errorf("Voting power can't be negative.")
 	}
-
-	//update history of choice with the current choice
-	histVoteValue := make(map[string]voting.Liquid)
-	for key, value := range choice.VoteValue {
-		histVoteValue[key] = value
-	}
-	histChoice, err := NewChoice(histVoteValue)
-	if err != nil {
-		return xerrors.Errorf(err.Error())
-	}
-	user.HistoryOfChoice = append(user.HistoryOfChoice, histChoice)
 
 	return nil
 }
@@ -174,27 +185,29 @@ func (vi *VotingInstance) DelegTo(userSend *voting.User, userReceive *voting.Use
 
 type VotingSystem struct {
 	//contain all the votingInstances mapped to their stringID
-	VotingInstancesList map[string]*VotingInstance
+
+	//66666666666666666666666666666 ESSAYER DE RETIRER LE POINTEUR
+	VotingInstancesList map[string]voting.VotingInstance
 
 	//database
 	Database storage.DB
 }
 
 //Returns the voting instance list
-func (vs *VotingSystem) GetVotingInstanceList() map[string]*VotingInstance {
+func (vs VotingSystem) GetVotingInstanceList() map[string]voting.VotingInstance {
 	return vs.VotingInstancesList
 }
 
 //Creation of a voting system, passing db and map as arguments
-func NewVotingSystem(db storage.DB, vil map[string]*VotingInstance) VotingSystem {
+func NewVotingSystem(db storage.DB, votingInstanceList map[string]voting.VotingInstance) VotingSystem {
 	return VotingSystem{
 		Database:            db,
-		VotingInstancesList: vil,
+		VotingInstancesList: votingInstanceList,
 	}
 }
 
 //Creates and add new a voting instance
-func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string) (*VotingInstance, error) {
+func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, status string) (voting.VotingInstance, error) {
 
 	//check if id is null
 	if id == "" {
@@ -224,12 +237,16 @@ func (vs VotingSystem) CreateAndAdd(id string, config voting.VotingConfig, statu
 	return p, nil
 }
 
+func (vi VotingInstance) GetVotingID() string {
+	return vi.Id
+}
+
 //Delete the voting instance linked to the id
 func (vs VotingSystem) Delete(id string) error {
 
 	vi := vs.VotingInstancesList[id]
-	if vi.Status == "open" {
-		//vi.Status = "close"
+	if vi.GetStatus() == "open" {
+		//vi.Status = "close
 		return xerrors.Errorf("Can't delete the votingInsance because it is still open")
 	} else {
 		delete(vs.VotingInstancesList, id)
@@ -241,7 +258,7 @@ func (vs VotingSystem) Delete(id string) error {
 func (vs VotingSystem) ListVotings() []string {
 	listeDeVotes := make([]string, len(vs.VotingInstancesList))
 	for key := range vs.VotingInstancesList {
-		if vs.VotingInstancesList[key].Status == "open" {
+		if vs.VotingInstancesList[key].GetStatus() == "open" {
 			listeDeVotes = append(listeDeVotes, key)
 		}
 	}
@@ -249,14 +266,14 @@ func (vs VotingSystem) ListVotings() []string {
 }
 
 //Return the voting instance from the id
-func (vs VotingSystem) GetVotingInstance(id string) VotingInstance {
-	return *vs.VotingInstancesList[id]
+func (vs VotingSystem) GetVotingInstance(id string) voting.VotingInstance {
+	return vs.VotingInstancesList[id]
 }
 
 //Create and return a new voting configuration
 func NewVotingConfig(voters []*voting.User, title string, desc string, cand []string) (voting.VotingConfig, error) {
 	if title == "" {
-		return voting.VotingConfig{}, xerrors.Errorf("title is empty")
+		return voting.VotingConfig{}, xerrors.Errorf("Title is empty")
 	}
 
 	return voting.VotingConfig{
@@ -268,7 +285,7 @@ func NewVotingConfig(voters []*voting.User, title string, desc string, cand []st
 }
 
 //Create and return a new User
-func (vs *VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, historyOfChoice []voting.Choice) (voting.User, error) {
+func (vs VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, historyOfChoice []voting.Choice) (voting.User, error) {
 
 	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
 	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
@@ -305,7 +322,7 @@ func NewChoice(voteValue map[string]voting.Liquid) (voting.Choice, error) {
 //Create and return a new Liquid
 func NewLiquid(p float64) (voting.Liquid, error) {
 	if p < 0 {
-		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: Was %f, must be positive.", p)
+		return voting.Liquid{}, xerrors.Errorf("Init value is incorrect: was %d, must be positive.", int(p))
 	}
 
 	return voting.Liquid{

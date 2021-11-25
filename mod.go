@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dedis/livos/storage/bbolt"
+	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
 	"github.com/dedis/livos/web/controller"
 )
@@ -55,7 +56,11 @@ func main() {
 	}
 
 	//creation of voting system
-	vil := make(map[string]*impl.VotingInstance)
+	vil := make(map[string]voting.VotingInstance)
+	vs := impl.NewVotingSystem(db, vil)
+	fmt.Println(vs)
+
+	//var votingSystem voting.VotingSystem
 	votingSystem := impl.NewVotingSystem(db, vil)
 
 	//creation of controller (for the web interactions)

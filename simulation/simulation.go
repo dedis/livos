@@ -16,7 +16,7 @@ import (
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
 func Simulation(out io.Writer) {
 
-	var VoteList = make(map[string]*impl.VotingInstance)
+	var VoteList = make(map[string]voting.VotingInstance)
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
@@ -54,7 +54,7 @@ func Simulation(out io.Writer) {
 	}
 
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
-		for i, user := range VoteInstance.Config.Voters {
+		for i, user := range VoteInstance.GetConfig().Voters {
 			//fmt.Println("USER :::::::", *user)
 			if user.VotingPower > 0 {
 				randomAction, err := random.IntRange(1, 4)
@@ -156,7 +156,7 @@ func Simulation(out io.Writer) {
 		}
 	}
 
-	for _, user := range VoteInstance.Config.Voters {
+	for _, user := range VoteInstance.GetConfig().Voters {
 		fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower)
 	}
 
@@ -170,7 +170,7 @@ func Simulation(out io.Writer) {
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
 
-	for _, user := range VoteInstance.Config.Voters {
+	for _, user := range VoteInstance.GetConfig().Voters {
 
 		colorVoteYes := "#22bd27"
 		colorVoteNo := "#cf1111"

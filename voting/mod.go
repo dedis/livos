@@ -5,13 +5,15 @@ package voting
 type VotingSystem interface {
 	ListVotings() []string
 
-	GetVotingInstance(votingID string) VotingInstance
+	GetVotingInstance(id string) VotingInstance
 
-	CreateAndAdd(config VotingConfig) VotingInstance
+	CreateAndAdd(id string, config VotingConfig, status string) (VotingInstance, error)
 
-	Delete(votingID string)
+	Delete(votingID string) error
 
-	GetVotingInstanceList() map[string]*VotingInstance
+	GetVotingInstanceList() map[string]VotingInstance
+
+	NewUser(userID string, delegTo map[string]Liquid, delegFrom map[string]Liquid, histoChoice []Choice) (User, error)
 
 	//override the method print?
 }
@@ -21,15 +23,25 @@ type VotingInstance interface {
 
 	CloseVoting()
 
-	GetResults() map[string]float32
+	GetResults() map[string]float64
 
-	SetStatus(status string)
+	SetStatus(status string) error
 
 	GetStatus() string
 
-	GetUSer(string) (*User, error)
+	GetVotingID() string
 
-	CheckVotingPower(user *User) bool
+	SetTitle(title string) error
+
+	SetDescription(description string) error
+
+	SetVoters(users []*User) error
+
+	SetCandidates(candidates []string) error
+
+	GetUser(string) (*User, error)
+
+	CheckVotingPower(user *User) error
 
 	SetVote(user *User, choice Choice) error
 

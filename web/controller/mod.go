@@ -8,17 +8,12 @@ import (
 	"strconv"
 	"strings"
 
-	//"strings"
-
-	//"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
-
 	"github.com/dedis/livos/voting/impl"
-	//"honnef.co/go/js/dom"
 )
 
 // NewController ...
-func NewController(homeHTML embed.FS, homepage embed.FS, views embed.FS, vs impl.VotingSystem) Controller {
+func NewController(homeHTML embed.FS, homepage embed.FS, views embed.FS, vs voting.VotingSystem) Controller {
 	return Controller{
 		homeHTML: homeHTML,
 		homepage: homepage,
@@ -32,7 +27,7 @@ type Controller struct {
 	homeHTML embed.FS
 	homepage embed.FS
 	views    embed.FS
-	vs       impl.VotingSystem
+	vs       voting.VotingSystem
 }
 
 // HandleHome ...
@@ -70,8 +65,8 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	VotingInstanceTabOpen := make(map[string]*impl.VotingInstance)
-	VotingInstanceTabClose := make(map[string]*impl.VotingInstance)
+	VotingInstanceTabOpen := make(map[string]voting.VotingInstance)
+	VotingInstanceTabClose := make(map[string]voting.VotingInstance)
 
 	for key, value := range c.vs.GetVotingInstanceList() {
 		if value.GetStatus() == "open" {
@@ -83,11 +78,11 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 
 	data := struct {
 		Title                  string
-		VotingInstanceTab      map[string]*impl.VotingInstance
-		VotingInstanceTabOpen  map[string]*impl.VotingInstance
-		VotingInstanceTabClose map[string]*impl.VotingInstance
+		VotingInstanceTab      map[string]voting.VotingInstance
+		VotingInstanceTabOpen  map[string]voting.VotingInstance
+		VotingInstanceTabClose map[string]voting.VotingInstance
 	}{Title: "HomePage",
-		VotingInstanceTab:      c.vs.VotingInstancesList,
+		VotingInstanceTab:      c.vs.GetVotingInstanceList(),
 		VotingInstanceTabOpen:  VotingInstanceTabOpen,
 		VotingInstanceTabClose: VotingInstanceTabClose}
 
@@ -190,7 +185,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	electionAdd, found := c.vs.VotingInstancesList[id]
+	electionAdd, found := c.vs.GetVotingInstanceList()[id]
 	if !found {
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
@@ -347,10 +342,10 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 	}
 
 	data := struct {
-		Election impl.VotingInstance
+		Election voting.VotingInstance
 		id       string
 	}{
-		Election: *electionAdd,
+		Election: electionAdd,
 		id:       id,
 	}
 
@@ -382,7 +377,7 @@ func (c Controller) HandleShowResults(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	electionAdd, found := c.vs.VotingInstancesList[id]
+	electionAdd, found := c.vs.GetVotingInstanceList()[id]
 	if !found {
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
@@ -394,12 +389,12 @@ func (c Controller) HandleShowResults(w http.ResponseWriter, req *http.Request) 
 	blanks := 100. - results["yes"] - results["no"]
 
 	data := struct {
-		Election impl.VotingInstance
+		Election voting.VotingInstance
 		id       string
 		Results  map[string]float64
 		Blanks   float64
 	}{
-		Election: *electionAdd,
+		Election: electionAdd,
 		id:       id,
 		Results:  results,
 		Blanks:   blanks,
@@ -432,17 +427,17 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	electionAdd, found := c.vs.VotingInstancesList[id]
+	electionAdd, found := c.vs.GetVotingInstanceList()[id]
 	if !found {
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
 	}
 
 	data := struct {
-		Election impl.VotingInstance
+		Election voting.VotingInstance
 		id       string
 	}{
-		Election: *electionAdd,
+		Election: electionAdd,
 		id:       id,
 	}
 
@@ -450,14 +445,14 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 
 		title := req.PostFormValue("title")
 		if title != "" {
-			c.vs.VotingInstancesList[id].Config.Title = title
+			c.vs.GetVotingInstanceList()[id].SetTitle(title)
 		}
 		status := req.FormValue("status")
-		c.vs.VotingInstancesList[id].SetStatus(status)
+		c.vs.GetVotingInstanceList()[id].SetStatus(status)
 
 		description := req.FormValue("desc")
 		if description != "" {
-			c.vs.VotingInstancesList[id].Config.Description = description
+			c.vs.GetVotingInstanceList()[id].SetDescription(description)
 		}
 
 		voterList := req.FormValue("votersList")
@@ -474,13 +469,13 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 				}
 				voterListParsedintoUser[idx] = &u
 			}
-			c.vs.VotingInstancesList[id].Config.Voters = voterListParsedintoUser
+			c.vs.GetVotingInstanceList()[id].SetVoters(voterListParsedintoUser)
 		}
 
 		candidats := req.FormValue("candidates")
 		candidatesParsed := strings.Split(candidats, ",")
 		if candidats != "" {
-			c.vs.VotingInstancesList[id].Config.Candidates = candidatesParsed
+			c.vs.GetVotingInstanceList()[id].SetCandidates(candidatesParsed)
 
 		}
 
