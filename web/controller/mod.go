@@ -92,77 +92,25 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		VotingInstanceTabClose: VotingInstanceTabClose}
 
 	if req.Method == "POST" {
-
-		title := req.PostFormValue("title")
-		if title == "" {
-			http.Error(w, "failed to get title: ", http.StatusInternalServerError)
-			return
-		}
 		id := req.FormValue("id")
 		if id == "" {
 			http.Error(w, "failed to get id: ", http.StatusInternalServerError)
 			return
 		}
+
 		status := req.FormValue("status")
 		if status == "" {
 			http.Error(w, "failed to get status: ", http.StatusInternalServerError)
 			return
 		}
-		description := req.FormValue("desc")
-		if description == "" {
-			http.Error(w, "failed to get description: ", http.StatusInternalServerError)
-			return
-		}
-		voterList := req.FormValue("votersList")
-		if voterList == "" {
-			http.Error(w, "failed to get list of voters: ", http.StatusInternalServerError)
-			return
-		}
-		//removing all whitespace
-		voterList = strings.ReplaceAll(voterList, " ", "")
-
-		//parsing the list to get usernames
-		voterListParsed := strings.Split(voterList, ",")
-
-		fmt.Println("List of voters : ", voterListParsed)
-		candidats := req.FormValue("candidates")
-		// if candidats == "" {
-		// 	http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
-		// 	return
-		// }
-		candidats = strings.ReplaceAll(candidats, " ", "")
-		candidatesParsed := strings.Split(candidats, ",")
-
-		delegTo := make(map[string]voting.Liquid)
-		delegFrom := make(map[string]voting.Liquid)
-		//userListParsed := make([]voting.User, 0)
-		voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
-		histoChoice := make([]voting.Choice, 0)
-		for idx, name := range voterListParsed {
-			u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice)
-			//userListParsed = append(userListParsed, u)
-			if err != nil {
-				http.Error(w, "User creation is incorrect"+err.Error(), http.StatusInternalServerError)
-			}
-			fmt.Println("The user created is : ", u)
-			voterListParsedintoUser[idx] = &u //&userListParsed[idx]
-		}
-
-		votingConfig, err := impl.NewVotingConfig(voterListParsedintoUser, title, description, candidatesParsed)
-		if err != nil {
-			http.Error(w, "NewVotingConfig is incorrect"+err.Error(), http.StatusInternalServerError)
-		}
-		fmt.Println("The voting config is : ", votingConfig)
-
-		//votes := make(map[string]voting.Choice)
-		_, err = c.vs.CreateAndAdd(id, votingConfig, status)
-		if err != nil {
-			http.Error(w, "CreateAndAdd is incorrect"+err.Error(), http.StatusInternalServerError)
+		if status == "open" {
+			c.vs.GetVotingInstanceList()[id].SetStatus("close")
+		} else {
+			c.vs.GetVotingInstanceList()[id].SetStatus("open")
 		}
 
 		http.Redirect(w, req, "/homepage", http.StatusSeeOther)
 	}
-
 	err = t2.Execute(w, data)
 	if err != nil {
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
@@ -335,12 +283,12 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		}
 
 		if liquidQuantity.Percentage != 0. {
-			fmt.Println("JUST BEFORE THE DELEG_TO")
+			//fmt.Println("JUST BEFORE THE DELEG_TO")
 			err = electionAdd.DelegTo(userSender, userReceiver, liquidQuantity)
 			if err != nil {
 				http.Error(w, "DelegTo incorrect"+err.Error(), http.StatusInternalServerError)
 			}
-			fmt.Println("JUST AFTER THE DELEG_TO")
+			//fmt.Println("JUST AFTER THE DELEG_TO")
 		}
 
 		http.Redirect(w, req, "/election?id="+id, http.StatusSeeOther)
@@ -494,4 +442,104 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+}
+
+func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Request) {
+
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t2, err := template.ParseFS(c.views, "web/views/createVotes.html")
+	if err != nil {
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Title             string
+		VotingInstanceTab map[string]*impl.VotingInstance
+	}{Title: "Creation of Voting Room",
+		VotingInstanceTab: c.vs.VotingInstancesList,
+	}
+
+	if req.Method == "POST" {
+
+		title := req.PostFormValue("title")
+		if title == "" {
+			http.Error(w, "failed to get title: ", http.StatusInternalServerError)
+			return
+		}
+		id := req.FormValue("id")
+		if id == "" {
+			http.Error(w, "failed to get id: ", http.StatusInternalServerError)
+			return
+		}
+		status := req.FormValue("status")
+		if status == "" {
+			http.Error(w, "failed to get status: ", http.StatusInternalServerError)
+			return
+		}
+		description := req.FormValue("desc")
+		if description == "" {
+			http.Error(w, "failed to get description: ", http.StatusInternalServerError)
+			return
+		}
+		voterList := req.FormValue("votersList")
+		if voterList == "" {
+			http.Error(w, "failed to get list of voters: ", http.StatusInternalServerError)
+			return
+		}
+		//removing all whitespace
+		voterList = strings.ReplaceAll(voterList, " ", "")
+
+		//parsing the list to get usernames
+		voterListParsed := strings.Split(voterList, ",")
+
+		fmt.Println("List of voters : ", voterListParsed)
+		candidats := req.FormValue("candidates")
+		// if candidats == "" {
+		// 	http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
+		// 	return
+		// }
+		candidats = strings.ReplaceAll(candidats, " ", "")
+		candidatesParsed := strings.Split(candidats, ",")
+
+		delegTo := make(map[string]voting.Liquid)
+		delegFrom := make(map[string]voting.Liquid)
+		//userListParsed := make([]voting.User, 0)
+		voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
+		histoChoice := make([]voting.Choice, 0)
+		for idx, name := range voterListParsed {
+			u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice)
+			//userListParsed = append(userListParsed, u)
+			if err != nil {
+				http.Error(w, "User creation is incorrect"+err.Error(), http.StatusInternalServerError)
+			}
+			fmt.Println("The user created is : ", u)
+			voterListParsedintoUser[idx] = &u //&userListParsed[idx]
+		}
+
+		votingConfig, err := impl.NewVotingConfig(voterListParsedintoUser, title, description, candidatesParsed)
+		if err != nil {
+			http.Error(w, "NewVotingConfig is incorrect"+err.Error(), http.StatusInternalServerError)
+		}
+		fmt.Println("The voting config is : ", votingConfig)
+
+		//votes := make(map[string]voting.Choice)
+		_, err = c.vs.CreateAndAdd(id, votingConfig, status)
+		if err != nil {
+			http.Error(w, "CreateAndAdd is incorrect"+err.Error(), http.StatusInternalServerError)
+		}
+
+		http.Redirect(w, req, "/homepage", http.StatusSeeOther)
+	}
+
+	err = t2.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
