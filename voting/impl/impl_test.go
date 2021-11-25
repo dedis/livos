@@ -175,3 +175,34 @@ func TestGetResults(t *testing.T) {
 	propNo := vi.GetResults()["no"]
 	require.Equal(t, propYes, 50., "No proportion is incorrect, got: %f, want: %f.", propNo, 50.)
 }
+
+func TestGetUser(t *testing.T) {
+	user, _ := vi.GetUser("Noemien")
+	require.Equal(t, *user, userNoemien, "Get user returned incorrect user")
+	require.Equal(t, user.UserID, "Noemien", "Get user returned incorrect userID")
+
+	_, err := vi.GetUser("else")
+	require.Equal(t, err.Error(), "Cannot find the user. UserId is incorrect.")
+}
+
+func TestDelete(t *testing.T) {
+	var VoteList = make(map[string]*VotingInstance)
+	var VoteSystem2 = NewVotingSystem(nil, VoteList)
+	var voters = []*voting.User{}
+	var candidats = make([]string, 0)
+	var voteConfig, _ = NewVotingConfig(voters, "TestDelete", "Quick description", candidats)
+
+	VoteSystem2.CreateAndAdd("Session02", voteConfig, "open")
+	require.Equal(t, 1, len(VoteSystem2.VotingInstancesList), "Creation of the voting instance not complete. It didn't appear on the voting instance list.")
+
+	err := VoteSystem2.Delete("Session02")
+	require.Equal(t, "Can't delete the votingInsance because it is still open", err.Error(), "Deletion of the voting instance incorrect. It's still there.")
+
+	VoteSystem2.VotingInstancesList["Session02"].CloseVoting()
+	VoteSystem2.Delete("Session02")
+	require.Equal(t, 0, len(VoteSystem2.VotingInstancesList), "Deletion of the voting instance incorrect. It's still there.")
+}
+
+//addLiquid
+
+//delegFrom
