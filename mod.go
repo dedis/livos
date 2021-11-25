@@ -149,6 +149,7 @@ func main() {
 	mux.HandleFunc("/election", ctrl.HandleShowElection)
 	mux.HandleFunc("/results", ctrl.HandleShowResults)
 	mux.HandleFunc("/manage", ctrl.HandleManageVoting)
+	mux.HandleFunc("/createVotes", ctrl.HandleCreateVotingRoom)
 
 	// serve assets
 	mux.Handle("/web/static/", http.FileServer(http.FS(static)))

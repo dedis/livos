@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <link rel="stylesheet" href="/web/static/createVotes.css">
+
+    <title>Livos creation Voting Rooms </title>
+  </head>
+  <body>
+    <h2>Livos creation Voting Rooms:</h2>
+    <form method="post" class="form-example" >
+
+        <div class="form-example">
+          <label for="title">Title: </label>
+          <input type="text" name="title" id="title" required>
+        </div>
+
+        <br>
+
+        <div class="form-example">
+          <label for="id">Id of the room: </label>
+          <input type="number" name="id" id="id" min="0" required>
+        </div>
+
+        <br>
+
+        <div class="form-example">
+          <label for="status">Select a status :</label>
+          <span>
+            <input type="radio" name="status" id="status" value="open" checked>
+            <label for="status">Open </label>
+          </span>
+          <span>
+            <input type="radio" name="status" id="status" value="close" checked>
+            <label for="status">Close </label>
+          </span>
+        </div>
+
+        <div class="form-example">
+          <label for="desc">Description: </label>
+          <textarea type="textarea" name="desc" id="desc" rows="5" cols="30" maxlength="150" placeholder="#Description" required></textarea>
+        </div>
+
+        <div class="form-example">
+          <label for="votersList">Voters List: </label>
+          <textarea type="textarea" name="votersList" id="votersList" rows="3" cols="30" maxlength="150" placeholder="#Voter1,Voter2,Voter3..." required></textarea>
+        </div>
+
+        <div class="form-example">
+          <label for="candidates">Candidates List: </label>
+          <textarea type="textarea" name="candidates" id="candidates" rows="3" cols="30" maxlength="150" placeholder="#Candidate1,Candidate2..." ></textarea>
+        </div>
+
+        <div class="form-example">
+          <input type="submit" name="create" id="create" value="Create">
+        </div>
+
+    </form>
+  </body>
+</html>
