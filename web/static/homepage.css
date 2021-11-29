@@ -22,19 +22,37 @@
 			- align-items: center;
 	//
 */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,900&display=swap');
+
+
 html,body{
 		width: 100%;
 		height: 100%;
 	}
 body{
-	background-color: #E9E9E9;
+	background: linear-gradient(-45deg, #e99941, #52b9ff, #287cc2, #dd45b7);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+	/* background-color: #E9E9E9; */
 	position: absolute;
 	font-family: "optiamwayregular", Arial, sans-serif;
 	font-weight: normal;
 	color: black;
 	text-align: center;
 	overflow: hidden;
+}
 
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 #header-left{
@@ -100,7 +118,8 @@ body{
 	top: 15%;
 }
 #text-voting-session{
-	height: 90%;
+	height: 10%;
+	width: 50%;
 	position: absolute;
 	display: flex;
 	justify-content: left;
@@ -120,28 +139,36 @@ form {
 
 
 .Open{
-	position: relative;
-	display: flex;
-	justify-content: space-around;
-	align-items: left;
-	align-self: start;
-	animation-delay: 1s;
-	animation-fill-mode: both;
-	left: 10%;
-	top:40%;
+	width: 30vw;
+	height: 70vh;
+	position: absolute;
+	display: table-row-group;
+	justify-content: center;
+	align-items: flex-start;
+	top:20%;
+	border-radius: 5em;
+	border-right: 10em, solid, #dd45b7;
 }
 
 .Close{
-	position: relative;
-	display:flex;
-	justify-content: space-around;
-	align-items:left;
-	align-self: start;
-	animation-delay: 1s;
-	animation-fill-mode: both;
-	left: 10%;
+	width: 30vw;
+	height: 70vh;
+	position: absolute;
+	display:table-row;
+	justify-content: center;
+	align-items:flex-start;
+	/* align-self: start; */
+	/* animation-delay: 1s;
+	animation-fill-mode: both; */
+	left: 30vw;
+	top:20%;
+	border-radius: 5em;
+	border-left: 2em, solid, #e99941;
 }
-
+.formInside{
+	position: absolute;
+	left:25%;
+}
 .voteOpen{
 	left: -10%;
 }
@@ -150,25 +177,190 @@ form {
 }
 
 .buttonsOpen{
-	justify-content:space-around;
+	width: 100%;
+	height: 10%;
+	display: flex;
+	justify-content: start;
 	align-items: flex-start;
-	left: 15%;
+	position: relative;
 }
 
 .buttonsClose{
-	justify-content: space-around;
-	align-items: stretch;
-	left: 15%;
+	width: 100%;
+	height: 10%;
+	display: flex;
+	justify-content: start;
+	align-items: flex-start;
+	position: relative;
+}
+.Open input[type=submit]{
+	padding:0.2em 1em;
+	margin:0 0.1em 0.1em 0;
+	font-weight: 250;
+	font-family:'Roboto',sans-serif;
+	text-transform: uppercase;
+	border-radius: 1.5em;
+	color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf, #f03e26);
+	border: 0.15em solid #000000;
+	cursor: pointer;
+	transition: all 1s ease 0s;
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35)
+  }
+.Open input[type="submit"]:hover {
+	color: #000000;
+	background: linear-gradient(-45deg, #f03e26, #a9b9cf);
+	border-color: #000000;
+	-webkit-transition: all 0.3s ease;
+	-ms-transition: all 0.3s ease;
+	transition: all 1s ease;
 }
 
+.Close input[type=submit]{
+	padding:0.2em 1em;
+	margin:0 0.1em 0.1em 0;
+	font-weight: 250;
+	font-family:'Roboto',sans-serif;
+	text-transform: uppercase;
+	border-radius: 1.5em;
+	color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf, #46b442);
+	border: 0.15em solid #000000;
+	cursor: pointer;
+	transition: all 1s ease 0s;
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35)
+}
+.Close input[type="submit"]:hover {
+	color: #000000;
+	background: linear-gradient(-45deg,#46b442, #a9b9cf);
+	border-color: #000000;
+	-webkit-transition: all 0.5s ease;
+	-ms-transition: all 0.5s ease;
+	transition: all 1s ease;
+	transition: transform 1s;
+}
+
+input[type="submit"]:focus {
+	-webkit-transition: all 0.3s ease;
+	-ms-transition: all 0.3s ease;
+	transition: all 0.3s ease;
+}
 .createRoom{
+	width: 250px;
+	height: 250px;
 	position: relative;
 	display:flex;
-	justify-content: space-around;
-	align-items:right;
-	align-self: start;
-	top: 70%;
-	left: 25%;
+	justify-content: center;
+	align-items:center;
+	/* align-self: start; */
+	top: calc(42% - 100px);
+	left: calc(80% - 100px);
+}
+
+a.button4{
+	display:inline-block;
+	padding:0.3em 1.2em;
+	margin:0 0.1em 0.1em 0;
+	border:0.16em solid rgba(255,255,255,0);
+	border-radius:2em;
+	border-color: #000000;
+	box-sizing: border-box;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#000000;
+	background: linear-gradient(-45deg, #52b9ff, #a9b9cf);
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35);
+	text-align:center;
+	transition: all 1s;
+}
+
+a.button4:hover{
+	border-color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf,  #e99941);
+	transition: transform 1s;
+}
+
+a.buttonParam{
+	display:inline-block;
+	padding:0.3em 1.2em;
+	margin:0 0.1em 0.1em 0;
+	border:0.16em solid rgba(255,255,255,0);
+	border-radius:2em;
+	border-color: #000000;
+	box-sizing: border-box;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#000000;
+	background: linear-gradient(-45deg, #717072, #a9b9cf);
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35);
+	text-align:center;
+	transition: all 1s;
+}
+
+a.buttonParam:hover{
+	border-color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf,  #717072);	transition: transform 1s;
+	transition: transform 1s;
+}
+
+.buttonsClose > a img{
+	width: 35px;
+	height: 35px;
+	position: relative;
+	transition: 0.5s;
+}
+.buttonsClose > a img:hover{
+	transition: transform 0.5s;
+	transform: scale(1.1) rotate(90deg);
+}
+
+.buttonsOpen > a img{
+	width: 35px;
+	height: 35px;
+	position: relative;
+	transition: 0.5s;
+	left:10px;
+}
+.buttonsOpen > a img:hover{
+	transition: transform 0.5s;
+	transform: scale(1.1) rotate(90deg);
+}
+
+@media all and (max-width:30em){
+	a.button4{
+		display:block;
+		margin:0.2em auto;
+	}
 }
 
 
+
+
+/* HOMPAGE */
+
+svg{font-weight:bold;max-width:600px;height:auto;}
+
+/* .threeD {
+	color: #e99941;
+	white-space: nowrap;
+	position: absolute;
+	top: 10%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 2em;
+	font-family: sans-serif;
+	letter-spacing: 0.1em;
+	transition: 0.3s;
+	text-shadow: 1px 1px 0 grey, 1px 2px 0 grey, 1px 3px 0 grey, 1px 4px 0 grey,
+	  1px 5px 0 grey, 1px 6px 0 grey, 1px 7px 0 grey, 1px 8px 0 grey,
+	  5px 13px 15px black;
+  }
+  
+  .threeD:hover {
+	transition: 0.3s;
+	transform: translate(-50%, -50%);
+	text-shadow: 1px -1px 0 grey, 1px -2px 0 grey, 1px -3px 0 grey,
+	  1px -4px 0 grey, 1px -5px 0 grey, 1px -6px 0 grey, 1px -7px 0 grey,
+	  1px -8px 0 grey, 5px -13px 15px black, 5px -13px 25px #808080;
+  } */
+   

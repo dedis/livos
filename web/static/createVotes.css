@@ -27,14 +27,28 @@ html,body{
 		height: 100%;
 	}
 body{
-	background-color: #E9E9E9;
+	background: linear-gradient(-45deg, #e99941, #52b9ff, #287cc2, #dd45b7);
+	background-size: 400% 400%;
+	animation: gradient 15s ease infinite;
+	/* background-color: #E9E9E9; */
 	position: absolute;
 	font-family: "optiamwayregular", Arial, sans-serif;
 	font-weight: normal;
 	color: black;
 	text-align: center;
 	overflow: hidden;
+}
 
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 }
 
 #header-left{
@@ -128,6 +142,61 @@ textarea{
 	resize: none;
 }
 
+.exitButton{
+    position: relative;
+	display:flex;
+	justify-content: flex-end;
+	align-items:flex-end;
+    top: calc(80% - 100px);
+    right: 8%;
+    bottom: 10%;
+}
+
+a.button4{
+	display:inline-block;
+	padding:0.3em 1.2em;
+	margin:0 0.1em 0.1em 0;
+	border:0.16em solid rgba(255,255,255,0);
+	border-radius:2em;
+	border-color: #000000;
+	box-sizing: border-box;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#000000;
+	background: linear-gradient(-45deg, #52b9ff, #a9b9cf);
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35);
+	text-align:center;
+	transition: all 1s;
+}
+
+a.button4:hover{
+	border-color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf,  #e99941);
+	transition: transform 1s;
+}
+
+input[type=submit]{
+	display:inline-block;
+	padding:0.3em 1.2em;
+	margin:0 0.1em 0.1em 0;
+	border:0.16em solid rgba(255,255,255,0);
+	border-radius:2em;
+	border-color: #000000;
+	box-sizing: border-box;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#000000;
+	background: linear-gradient(-45deg, #52b9ff, #a9b9cf);
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35);
+	text-align:center;
+	transition: all 1s;
+}
+
+input[type=submit]:hover{
+	border-color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf,  #e99941);
+	transition: transform 1s;
+}
 
 
 

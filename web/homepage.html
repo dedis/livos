@@ -10,18 +10,43 @@
     <title>Livos Accueil</title>
   </head>
   <body>
-      <h2>Welcome on the homepage</h2>
+
+    <svg viewbox="0 0 100 20">
+      <defs>
+        <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="5%" stop-color="#e99941"/>
+          <stop offset="95%" stop-color="#e3b786"/>
+        </linearGradient>
+        <pattern id="wave" x="0" y="0" width="120" height="20" patternUnits="userSpaceOnUse">
+          <path id="wavePath" d="M-40 9 Q-30 7 -20 9 T0 9 T20 9 T40 9 T60 9 T80 9 T100 9 T120 9 V20 H-40z" mask="url(#mask)" fill="url(#gradient)"> 
+            <animateTransform
+                attributeName="transform"
+                begin="0s"
+                dur="1.5s"
+                type="translate"
+                from="0,0"
+                to="40,0"
+                repeatCount="indefinite" />
+          </path>
+        </pattern>
+      </defs>
+      <text text-anchor="middle" x="50" y="12" font-size="10" fill="url(#wave)"  fill-opacity="0.8">HomePage</text>
+      <text text-anchor="middle" x="50" y="12" font-size="10" fill="url(#gradient)" fill-opacity="0.2">HomePage</text>
+    </svg>
+
+      <!-- <div class="threeD">Welcome to the Homepage !</div> -->
+      
 
       <div id="logo">
         <!-- <img src="/images/LivosLogoComplet.png"> -->
       </div>
 
-      <div id="tache-fond">
+      <!-- <div id="tache-fond">
         <img src="/web/images/tache-bg.png">
       </div>
       <div id="tache-fond2">
         <img src="/web/images/tache-bg.png">
-      </div>
+      </div> -->
   
       <div id="voting-session">
         <div id="text-voting-session">
@@ -30,44 +55,52 @@
         
         <div class="Open">
           <!-- <div><p>Open Votations :</p></div> -->
-          <div class="voteOpen">
+          <!-- <div class="voteOpen">
             {{range $key, $value := .VotingInstanceTabOpen}} <p>
               <h4>{{$key}} : {{$value.Status}} => </h4>
             </p> {{end}}
-          </div>
-          <div class="buttonsOpen">
-            {{range $key, $value := .VotingInstanceTabOpen}} <p>
-              <span><input type="button" name="param" value="Room {{$key}}" onclick="self.location.href='/election?id='+'{{$key}}'" ></span>
-              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
+          </div> -->
+          
+          {{range $key, $value := .VotingInstanceTabOpen}}
+          <div class="buttonsOpen">  
+            <a href="/election?id={{$key}}" class="button4" >Room {{$key}}</a>
+            <a href="/manage?id={{$key}}"><img src="/web/images/parametre.png"></a>
+            <div class="formInside">
               <form method="post"> 
                 <input type="hidden" name="id" id="id" value="{{$key}}">
                 <input type="hidden" name="status" id="status" value="{{$value.Status}}">
-                <span><input type="submit" name="param" value="to close the room"></span>
+                <input type="submit" name="param" value="Close">
               </form>
-            </p> {{end}}
+            </div>
           </div>
+          {{end}}
         </div>
         <div class="Close">
-          <div class="voteClose">
+          <!-- <div class="voteClose">
             {{range $key, $value := .VotingInstanceTabClose}} <p>
               <h4>{{$key}} : {{$value.Status}} => </h4>
             </p> {{end}} 
-          </div>
-          <div class="buttonsClose">
-            {{range $key, $value := .VotingInstanceTabClose}} <p>
-              <span><input type="button" name="param" value="Room {{$key}}" onclick="self.location.href='/results?id='+'{{$key}}'" ></span>
-              <span><input type="button" name="param" value="Parameters of {{$key}}" onclick="self.location.href='/manage?id='+'{{$key}}'" ></span>
-              <form method="post"> 
-                <input type="hidden" name="id" id="id" value="{{$key}}">
-                <input type="hidden" name="status" id="status" value="{{$value.Status}}">
-                <span><input type="submit" name="param" value="to open the room"></span>
-              </form>
-            </p>{{end}}
-          </div>
+          </div> -->
+          
+          {{range $key, $value := .VotingInstanceTabClose}}
+            <div class="buttonsClose">
+              <a href="/results?id={{$key}}" class="button4">Room {{$key}}</a>
+              <a href="/manage?id={{$key}}"><img src="/web/images/parametre.png"></a>
+              <!--  -->
+              <div class="formInside">
+                <form method="post"> 
+                  <input type="hidden" name="id" id="id" value="{{$key}}">
+                  <input type="hidden" name="status" id="status" value="{{$value.Status}}">
+                  <input type="submit" name="param" value="Open">
+                </form>
+              </div>
+            </div>
+          {{end}}
         </div>
       </div>
+      
       <div class="createRoom">
-        <input type="button" name="param" value="Create Voting Rooms" onclick="self.location.href='/createVotes'" >
+        <a href="/createVotes" class="button4" >Create a new Voting Room</a>
       </div>
   </body>
 </html>
