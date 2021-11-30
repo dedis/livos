@@ -30,8 +30,8 @@
           </path>
         </pattern>
       </defs>
-      <text text-anchor="middle" x="50" y="12" font-size="10" fill="url(#wave)"  fill-opacity="0.8">HomePage</text>
-      <text text-anchor="middle" x="50" y="12" font-size="10" fill="url(#gradient)" fill-opacity="0.2">HomePage</text>
+      <text text-anchor="middle" x="50" y="12" font-size="10" fill="url(#wave)"  fill-opacity="0.8">{{.Title}}</text>
+      <text text-anchor="middle" x="50" y="12" font-size="10" fill="url(#gradient)" fill-opacity="0.2">{{.Title}}</text>
     </svg>
 
       <!-- <div class="threeD">Welcome to the Homepage !</div> -->
@@ -50,7 +50,7 @@
   
       <div id="voting-session">
         <div id="text-voting-session">
-          <h1>Voting Session</h1>
+          <h1>Voting Sessions : {{.Length_open}}<span style="color:#46b442;"> opened </span> / {{.Length_close}} <span style="color:#f03e26;"> closed </span> </h1>
         </div>
         
         <div class="Open">

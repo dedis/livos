@@ -119,13 +119,19 @@ body{
 }
 #text-voting-session{
 	height: 10%;
-	width: 50%;
+	width: 100%;
 	position: absolute;
 	display: flex;
 	justify-content: left;
 	align-items: top;
 	top: 10%;
+	font-weight:bold;
+	color:#e99941;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	text-decoration: underline;
 }
+
+
 
 form {
 	position: relative;
@@ -253,7 +259,7 @@ input[type="submit"]:focus {
 	justify-content: center;
 	align-items:center;
 	/* align-self: start; */
-	top: calc(42% - 100px);
+	top: calc(30% - 100px);
 	left: calc(80% - 100px);
 }
 
@@ -338,7 +344,7 @@ a.buttonParam:hover{
 
 /* HOMPAGE */
 
-svg{font-weight:bold;max-width:600px;height:auto;}
+svg{font-weight:bold;max-width:600px;height:auto;text-shadow: black 0.1em 0.1em 0.2em}
 
 /* .threeD {
 	color: #e99941;
