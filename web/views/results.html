@@ -10,23 +10,21 @@
     <title>Livos</title>
   </head>
   <body>
-      <h1>Welcome in the  results of the election number : {{.Election.Id}}.</h1>
-      <h2>Votation Question : {{.Election.Config.Description}}</h2>
+      <h1 class="title">Welcome in the  results of the election {{.Election.Id}}.</h1>
+      <h2 class="title">Votation Question : {{.Election.Config.Description}}</h2>
       
       <div id="logo">
         <!-- <img src="/images/LivosLogoComplet.png"> -->
       </div>
       
-      <div class="space">
-        <div id="boxBlue">
-          <h4>
-            Results of the votes: <br><br><br>
-            {{range $key, $value := .Results}} <p>
-                Proportion of {{$key}} votes : {{$value}} %
-            </p><br> {{end}}
-            <!-- Proportion of blank votes : {{.Blanks}} % -->
-          </h4>
-        </div>
+      <div id="boxBlue">
+        <h4>
+          Results of the votes: <br><br><br>
+          {{range $key, $value := .Results}} <p>
+              Proportion of {{$key}} votes : {{$value}} %
+          </p><br> {{end}}
+          <!-- Proportion of blank votes : {{.Blanks}} % -->
+        </h4>
       </div>
       
       <div class="exitButton">

@@ -64,7 +64,7 @@ body{
     top:  3px;
     left: 3px;
 }
-#formulaire{
+/* #formulaire{
     width: 500px;
     height: 500px;
     position: absolute;
@@ -73,9 +73,10 @@ body{
     align-items:stretch;
     top: calc(50%  - 250px);
     left: calc(50% - 250px);
-}
+} */
+
 form {
-    width  : 100%;
+    width  : 50%;
     height : 90%;
     position: absolute;
     display: flex;
@@ -83,43 +84,86 @@ form {
     align-items:flex-start;
     border-radius: 20%;
     top: calc(50% - 200px);
-    left: 0;
-    box-shadow:10px 5px 5px grey ;
-    background: #84C8F6;
+    left: 26%;
+    box-shadow:8px 4px 4px grey ;
+    /* background: #84C8F6, 50%; */
 }
 form.form-example {
+    width  : 50%;
+    height : 65%;
     display:grid;
-    padding-top: 15%;
+    padding-top: 5%;
+    justify-content: center;
+	align-items: center;
+	border: 3px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+    font-weight: bold;
+	outline: none;
+	background: none;
+	padding: 5px;
 }
 div.form-example {
     display: table-row;
 }
+
+div input {
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
+	color: black;
+}
+
+div textarea {
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
+	resize: none;
+	color: black;
+}
+
+::placeholder { 
+	color: black;
+	opacity: 0.75;
+}
+
 label {
     padding-bottom: 10px;
     display: inline-block;
     justify-content: center;
     align-items:center;
+    font-weight:bold;
 }
-label[for="status"]{
-	white-space:pre;
-	flex: none;
-	padding-bottom: 10px;
-	display:inline-block;
-}
+
 h4{
     position: absolute;
     left: 7%;
     top: 20%;
 }
+
 div.votingChoice{
     align-items:center;
     justify-content: left;
     display:flex;
 }
+
 div.delegation{
     align-items:center;
     justify-content: left;
     display: flex;
+}
+
+.title {
+	top: 25px;
+	font-weight:bold;
+	color:#000000;
+	text-shadow: #e99941 0.1em 0.1em 0.2em;
 }
 
 .exitButton{
@@ -127,8 +171,9 @@ div.delegation{
 	display:flex;
 	justify-content: flex-end;
 	align-items:flex-end;
-    top: calc(80% - 100px);
-    right: 8%;
+    /* top: calc(80% - 100px); */
+    top: 20%;
+    right: 5%;
     bottom: 10%;
 }
 
@@ -138,14 +183,14 @@ div.delegation{
 	display:table;
 	justify-content:left;
 	align-self: left;
-    background: #84C8F6;
-    border-radius: 20%;
-    left: 4%;
+    border: 3px solid #000;
+	border-radius: 10px;
+    font-weight: bold;
+    left: 3%;
     top: 25%;
     padding-top: 2%;
-    box-shadow:10px 5px 5px grey ;
+    box-shadow: 7px 4px 4px grey ;
 }
-
 
 a.button4{
 	display:inline-block;
@@ -170,4 +215,39 @@ a.button4:hover{
 	transition: transform 1s;
 }
 
+input[type=submit]{
+	display:inline-block;
+	padding:0.3em 1.2em;
+	margin:0 0.1em 0.1em 0;
+	border:0.16em solid rgba(255,255,255,0);
+	border-radius:2em;
+	border-color: #000000;
+	box-sizing: border-box;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#000000;
+	background: linear-gradient(-45deg, #52b9ff, #a9b9cf);
+	text-shadow: 0 0.04em 0.04em rgba(112, 111, 111, 0.35);
+	text-align:center;
+	transition: all 1s;
+}
 
+input[type=submit]:hover{
+	border-color: #000000;
+	background: linear-gradient(-45deg,#a9b9cf,  #e99941);
+	transition: transform 1s;
+}
+
+select{
+    border-radius: 0.5em;
+	font-weight: bold;
+	padding: 3px;
+    background-color: #a9b9cf;
+    border: 0.15em solid #000000;
+}
+
+option{
+    border-radius: 0.5em;
+    font-weight: bold;
+    padding: 3px;
+}

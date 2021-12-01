@@ -75,7 +75,7 @@ body{
     top:  3px;
     left: 3px;
 }
-#formulaire{
+/* #formulaire{
     width: 500px;
     height: 500px;
     position: absolute;
@@ -84,41 +84,78 @@ body{
     align-items: center;
     top: calc(50%  - 250px);
     left: calc(50% - 250px);
-}
+} */
+
 form {
-    width  : 100%;
-    height : 90%;
+    width  : 50%;
+    height : 80%;
     position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 20%;
-    top: calc(50% - 200px);
-    left: 0;
-    box-shadow:10px 5px 5px grey ;
-    background: #84C8F6;
+    top: calc(43% - 200px);
+    left: 25%;
+    box-shadow:8px 4px 4px rgb(95, 94, 94) ;
+    /* background: #84C8F6; */
 }
+
 form.form-example {
     display: table;
-    padding-top: 10%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+	justify-content: center;
+	align-items: center;
+	border: 3px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
 }
 div.form-example {
     display: table-row;
 }
+
+div input {
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
+	color: black;
+}
+
+div textarea {
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
+	resize: none;
+	color: black;
+}
+
+::placeholder { 
+	color: black;
+	opacity: 0.75;
+}
+
 label {
-    padding-bottom: 10px;
+    padding-bottom: 5px;
     display: inline-block;
     justify-content: center;
     align-items:center;
+    font-weight:bold;
 }
-label[for="status"]{
-	white-space:pre-wrap;
-	flex: none;
-	padding-bottom: 10px;
-	display:inline-block;
-}
-textarea{
-    resize: none;
+
+.title {
+	top: 25px;
+	font-weight:bold;
+	color:#000000;
+	text-shadow: #e99941 0.1em 0.1em 0.2em;
 }
 
 .exitButton{
@@ -127,7 +164,7 @@ textarea{
 	justify-content: flex-end;
 	align-items:flex-end;
     top: calc(80% - 100px);
-    right: 8%;
+    right: 5%;
     bottom: 10%;
 }
 

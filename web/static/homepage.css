@@ -31,7 +31,7 @@ html,body{
 		height: 100%;
 	}
 body{
-	background: linear-gradient(-45deg, #e99941, #52b9ff, #287cc2, #dd45b7);
+	background: linear-gradient(-45deg,#e99941,  #52b9ff,  #45adf9, #287cc2, #f31ebf);
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
 	/* background-color: #E9E9E9; */
@@ -125,9 +125,9 @@ body{
 	justify-content: left;
 	align-items: top;
 	top: 10%;
-	font-weight:bold;
-	color:#e99941;
-	text-shadow: black 0.1em 0.1em 0.2em;
+	/* font-weight:bold; */
+	color:#000000;
+	text-shadow: #949392 0.1em 0.1em 0.2em;
 	text-decoration: underline;
 }
 

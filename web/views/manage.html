@@ -10,8 +10,8 @@
     <title>Livos</title>
   </head>
   <body>
-      <h2>Welcome in the parameters of the election number : {{.Election.Id}}.</h2>
-      <h3>Votation Question : {{.Election.Config.Description}}</h3>
+      <h2 class="title">Welcome in the parameters of the election {{.Election.Id}}.</h2>
+      <h3 class="title">Votation Question : {{.Election.Config.Description}}</h3>
 
       <div id="logo">
         <!-- <img src="/images/LivosLogoComplet.png"> -->
@@ -24,10 +24,12 @@
             <label for="title">Title: </label>
             <input type="text" name="title" id="title" value={{.Election.Config.Title}}>
           </div>
+          
 
-          <div class="form-example">
-            
-            <label for="status">Select a status :</label>
+          <br>
+
+          <!-- <div class="form-example">
+            <label for="status" style="background: none;">Select a status :</label>
             <span>
               <input type="radio" name="status" id="open" value="open">
               <label for="status">Open</label>
@@ -36,12 +38,14 @@
               <input type="radio" name="status" id="close" value="close">
               <label for="status">Close</label>
             </span>
-          </div>
+          </div> -->
 
           <div class="form-example">
             <label for="desc">Description: </label>
             <textarea type="text" name="desc" id="desc" rows="3" cols="30" maxlength="150" placeholder={{.Election.Config.Description}}></textarea>
           </div>
+
+          <br>
 
           <div class="form-example">
             <label for="votersList">Voters List: </label>

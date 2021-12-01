@@ -71,75 +71,88 @@ body{
 	top:  3px;
 	left: 3px;
 }
-#side-text{
-	width: 100px;
-	height :100px;
-	font-size: 1.4em;
-	position: absolute;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	top: calc(50%  - 50px);
-	left: 50%;
-}
-
-#tache-fond{
-	width: 500px;
-	height: 500px;
-	position: absolute;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	left: 80%;
-}
-#tache-fond2{
-	width: 500px;
-	height: 500px;
-	position: absolute;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	left: 0;
-	top: 55%;
-	transform: rotate(180deg);
-}
 
 form {
-	width  : 30%;
-    height : 60%;
+	width  : 50%;
+    height : 65%;
 	position: absolute;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	border-radius: 20%;
-	top: calc(47% - 200px);
-	left: 35%;
-	box-shadow:10px 5px 5px grey ;
-	background: #84C8F6;
+	top: calc(43% - 200px);
+	left: 25%;
+	box-shadow:8px 4px 4px rgb(95, 94, 94) ;
+	/* background: #84C8F6; */
 }
+
 form.form-example {
 	display: table;
 	padding-top: 2%;
 	padding-bottom: 2%;
+	justify-content: center;
+	align-items: center;
+	border: 3px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
 }
 
 div.form-example {
-	display: table-row;
+	display: table-row;	
 }
+
+div input {
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
+	color: black;
+}
+
+div textarea {
+	border: 2px solid #000;
+	border-radius: 10px;
+	font-size: 1em;
+	outline: none;
+	background: none;
+	padding: 5px;
+	resize: none;
+	color: black;
+}
+
+::placeholder { 
+	color: black;
+	opacity: 0.75;
+}
+
 label {
-	padding-bottom: 10px;
+	padding-bottom: 5px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	font-weight:bold;
 }
-label[for="status"]{
+
+label[for="status"] {
 	white-space:pre-wrap;
 	flex: none;
-	padding-bottom: 10px;
+	padding: 5px;
 	display:inline-block;
+	border-radius: 100px;
+	background: hsl(0, 0%, 90%, 50%);
+	font-weight:bold;
 }
-textarea{
-	resize: none;
+
+.title {
+	top: 25px;
+	font-weight:bold;
+	color:#000000;
+	text-shadow: #e99941 0.1em 0.1em 0.2em;
 }
 
 .exitButton{
@@ -148,7 +161,7 @@ textarea{
 	justify-content: flex-end;
 	align-items:flex-end;
     top: calc(80% - 100px);
-    right: 8%;
+    right: 5%;
     bottom: 10%;
 }
 
@@ -197,13 +210,3 @@ input[type=submit]:hover{
 	background: linear-gradient(-45deg,#a9b9cf,  #e99941);
 	transition: transform 1s;
 }
-
-
-
-
-
-
-
-
-
-
