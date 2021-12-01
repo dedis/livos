@@ -115,7 +115,7 @@ body{
 	justify-content:start;
 	align-items: baseline;
 	left: 10%;
-	top: 15%;
+	top: 10%;
 }
 #text-voting-session{
 	height: 10%;
@@ -146,19 +146,19 @@ form {
 
 .Open{
 	width: 30vw;
-	height: 70vh;
+	height: 68vh;
 	position: absolute;
 	display: table-row-group;
 	justify-content: center;
 	align-items: flex-start;
-	top:20%;
-	border-radius: 5em;
-	border-right: 10em, solid, #dd45b7;
+	top:22%;
+	border-radius: 2em;
+	background: #a9ceff;
 }
 
 .Close{
 	width: 30vw;
-	height: 70vh;
+	height: 68vh;
 	position: absolute;
 	display:table-row;
 	justify-content: center;
@@ -167,9 +167,9 @@ form {
 	/* animation-delay: 1s;
 	animation-fill-mode: both; */
 	left: 30vw;
-	top:20%;
-	border-radius: 5em;
-	border-left: 2em, solid, #e99941;
+	top:22%;
+	border-radius: 2em;
+	background: #a9ceff;
 }
 .formInside{
 	position: absolute;
@@ -189,6 +189,8 @@ form {
 	justify-content: start;
 	align-items: flex-start;
 	position: relative;
+	left: 10%;
+	top: 5%;
 }
 
 .buttonsClose{
@@ -198,6 +200,8 @@ form {
 	justify-content: start;
 	align-items: flex-start;
 	position: relative;
+	left: 10%;
+	top: 5%;
 }
 .Open input[type=submit]{
 	padding:0.2em 1em;
