@@ -10,8 +10,8 @@
     <title>Livos</title>
   </head>
   <body>
-      <h1>Welcome in the election number : {{.Election.Id}}</h1>
-      <h3>Votation Question : {{.Election.Config.Description}}</h3>
+      <h1 class="title">Welcome in the election {{.Election.Id}}</h1>
+      <h3 class="title">Votation Question : {{.Election.Config.Description}}</h3>
       
       <div id="logo">
         <!-- <img src="/images/LivosLogoComplet.png"> -->
@@ -26,63 +26,62 @@
         {{end}}
       </div>
       
-      <div id="formulaire">
-        <form method="post" class="form-example" >
-          
-          <div class="votingChoice">
-            <div class="form-example">
-              <label for="voter">List of voters : </label>
-                <select name="voter" id="voter">
-                  {{range $key, $value := .Election.Config.Voters}}
-                    <option>{{$value.UserID}}</option>
-                  {{end}}
-                </select>
-            </div>
-  
-            <div class="form-example">
-              <label for="yesPercent">Quantity for YES: </label>
-              <input type="number" name="yesPercent" id="yesPercent" min="0">
-            </div>
-  
-            <div class="form-example">
-              <label for="noPercent">Quantity for NO: </label>
-              <input type="number" name="noPercent" id="noPercent" min="0">
-            </div>
-          </div>
-
-          <div class="delegation">
-            <div class="form-example">
-              <label for="voterSender">Delegate from : </label>
-                <select name="voterSender" id="voterSender">
-                  {{range $key, $value := .Election.Config.Voters}}
-                    <option>{{$value.UserID}}</option>
-                  {{end}}
-                </select>
-            </div>
-  
-            <div class="form-example">
-              <label for="voterReceiver">Delegate to : </label>
-                <select name="voterReceiver" id="voterReceiver">
-                  {{range $key, $value := .Election.Config.Voters}}
-                    <option>{{$value.UserID}}</option>
-                  {{end}}
-                </select>
-            </div>
-  
-            <div class="form-example">
-              <label for="percent">Quantity: </label>
-              <input type="number" name="quantity" id="quantity" min="0">
-            </div>
+      <form method="post" class="form-example" >
+        
+        <div class="votingChoice">
+          <div class="form-example">
+            <label for="voter">List of voters : </label>
+              <select name="voter" id="voter">
+                {{range $key, $value := .Election.Config.Voters}}
+                  <option>{{$value.UserID}}</option>
+                {{end}}
+              </select>
           </div>
 
           <div class="form-example">
-            <input type="submit" name="Validate" id="Validate" value="Validate">
-          </div>
-          <div class="exitButton">
-            <input type="button" name="Homepage" id="Homepage" value="Go to Homepage" onclick="self.location.href='/homepage'">
+            <label for="yesPercent">Quantity for YES: </label>
+            <input type="number" name="yesPercent" id="yesPercent" min="0">
           </div>
 
-        </form>
+          <div class="form-example">
+            <label for="noPercent">Quantity for NO: </label>
+            <input type="number" name="noPercent" id="noPercent" min="0">
+          </div>
+        </div>
+
+        <div class="delegation">
+          <div class="form-example">
+            <label for="voterSender">Delegate from : </label>
+              <select name="voterSender" id="voterSender">
+                {{range $key, $value := .Election.Config.Voters}}
+                  <option>{{$value.UserID}}</option>
+                {{end}}
+              </select>
+          </div>
+
+          <div class="form-example">
+            <label for="voterReceiver">Delegate to : </label>
+              <select name="voterReceiver" id="voterReceiver">
+                {{range $key, $value := .Election.Config.Voters}}
+                  <option>{{$value.UserID}}</option>
+                {{end}}
+              </select>
+          </div>
+
+          <div class="form-example">
+            <label for="percent">Quantity: </label>
+            <input type="number" name="quantity" id="quantity" min="0">
+          </div>
+        </div>
+
+        <div class="form-example">
+          <input type="submit" name="Validate" class="button4" id="validate" value="Validate !">
+        </div>
+      </form>
+
+      <div class="exitButton">
+        <a href="/homepage" class="button4" >Back to Homepage</a>
       </div>
+
   </body>
 </html>

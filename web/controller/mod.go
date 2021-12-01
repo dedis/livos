@@ -76,15 +76,23 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	length_open := len(VotingInstanceTabOpen)
+	length_close := len(VotingInstanceTabClose)
+
 	data := struct {
 		Title                  string
 		VotingInstanceTab      map[string]voting.VotingInstance
 		VotingInstanceTabOpen  map[string]voting.VotingInstance
 		VotingInstanceTabClose map[string]voting.VotingInstance
+		Length_open            int
+		Length_close           int
 	}{Title: "HomePage",
 		VotingInstanceTab:      c.vs.GetVotingInstanceList(),
 		VotingInstanceTabOpen:  VotingInstanceTabOpen,
-		VotingInstanceTabClose: VotingInstanceTabClose}
+		VotingInstanceTabClose: VotingInstanceTabClose,
+		Length_open:            length_open,
+		Length_close:           length_close,
+	}
 
 	if req.Method == "POST" {
 		id := req.FormValue("id")
