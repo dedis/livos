@@ -13,7 +13,7 @@ type VotingSystem interface {
 
 	GetVotingInstanceList() map[string]VotingInstance
 
-	NewUser(userID string, delegTo map[string]Liquid, delegFrom map[string]Liquid, histoChoice []Choice) (User, error)
+	NewUser(userID string, delegTo map[string]Liquid, delegFrom map[string]Liquid, histoChoice []Choice, typeOfUser TypeOfUser) (User, error)
 
 	//override the method print?
 }
@@ -87,7 +87,17 @@ type User struct {
 
 	//history of choices that were cast
 	HistoryOfChoice []Choice
+
+	TypeOfUser TypeOfUser
 }
+
+type TypeOfUser int
+
+const (
+	YesVoter TypeOfUser = iota
+	NoVoter
+	None
+)
 
 // type User interface {
 // 	CheckVotingPower() bool

@@ -411,7 +411,7 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 			voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
 			histoChoice := make([]voting.Choice, 0)
 			for idx, name := range voterListParsed {
-				u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice)
+				u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice, voting.None)
 				if err != nil {
 					http.Error(w, "User creation is incorrect", http.StatusInternalServerError)
 				}
@@ -508,7 +508,7 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 		voterListParsedintoUser := make([]*voting.User, len(voterListParsed))
 		histoChoice := make([]voting.Choice, 0)
 		for idx, name := range voterListParsed {
-			u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice)
+			u, err := c.vs.NewUser(name, delegTo, delegFrom, histoChoice, voting.None)
 			//userListParsed = append(userListParsed, u)
 			if err != nil {
 				http.Error(w, "User creation is incorrect"+err.Error(), http.StatusInternalServerError)
