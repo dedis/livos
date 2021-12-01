@@ -51,6 +51,17 @@ body{
 	}
 }
 
+#logo{
+    width: 255px;
+    height :81px;
+    background-image: url(/web/images/LivosLogoComplet.png);
+    background-size:cover;
+    background-position: left top;
+    position: absolute;
+    top:  3px;
+    left: 3px;
+}
+
 #header-left{
 	width: 200px;
 	height: 100px;
@@ -84,6 +95,7 @@ form {
 	left: 25%;
 	box-shadow:8px 4px 4px rgb(95, 94, 94) ;
 	/* background: #84C8F6; */
+	background: #a9ceff;
 }
 
 form.form-example {
@@ -96,12 +108,11 @@ form.form-example {
 	border-radius: 10px;
 	font-size: 1em;
 	outline: none;
-	background: none;
 	padding: 5px;
 }
 
 div.form-example {
-	display: table-row;	
+	display: table-row;
 }
 
 div input {
@@ -143,6 +154,7 @@ label[for="status"] {
 	flex: none;
 	padding: 5px;
 	display:inline-block;
+	/* border: 0.1em; */
 	border-radius: 100px;
 	background: hsl(0, 0%, 90%, 50%);
 	font-weight:bold;

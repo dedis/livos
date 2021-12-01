@@ -80,9 +80,9 @@ body{
     border: 3px solid #000;
     font-size: 1em;
     font-weight: bold;
-    background: none;
     padding: 5px;
     /* background: #84C8F6; */
+    background: #a9ceff;
 }
 
 .title {

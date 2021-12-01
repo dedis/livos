@@ -97,7 +97,7 @@ form {
     top: calc(43% - 200px);
     left: 25%;
     box-shadow:8px 4px 4px rgb(95, 94, 94) ;
-    /* background: #84C8F6; */
+    background: #a9ceff;
 }
 
 form.form-example {
@@ -110,8 +110,8 @@ form.form-example {
 	border-radius: 10px;
 	font-size: 1em;
 	outline: none;
-	background: none;
 	padding: 5px;
+    background-color: #c7cfd4, 75%;
 }
 div.form-example {
     display: table-row;

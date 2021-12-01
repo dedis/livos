@@ -37,3 +37,7 @@
 [0m2021.12.01 00:30:40 WARN  Build server is not auto-connectable.[0m
 [0m2021.12.01 00:30:40 WARN  no build tool detected in workspace 'C:\Users\etien\Documents\Livos\livos'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
 [0m2021.12.01 00:38:02 INFO  shutting down Metals[0m
+[0m2021.12.01 16:20:12 INFO  Started: Metals version 0.10.9 in workspace 'C:\Users\etien\Documents\Livos\livos' for client Visual Studio Code 1.62.3.[0m
+[0m2021.12.01 16:20:13 INFO  time: initialize in 1.54s[0m
+[0m2021.12.01 16:20:14 WARN  Build server is not auto-connectable.[0m
+[0m2021.12.01 16:20:14 WARN  no build tool detected in workspace 'C:\Users\etien\Documents\Livos\livos'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m

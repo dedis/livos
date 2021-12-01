@@ -86,7 +86,7 @@ form {
     top: calc(50% - 200px);
     left: 26%;
     box-shadow:8px 4px 4px grey ;
-    /* background: #84C8F6, 50%; */
+    background: #a9ceff;
 }
 form.form-example {
     width  : 50%;
@@ -100,8 +100,8 @@ form.form-example {
 	font-size: 1em;
     font-weight: bold;
 	outline: none;
-	background: none;
 	padding: 5px;
+    background: #a9ceff;
 }
 div.form-example {
     display: table-row;
@@ -190,6 +190,7 @@ div.delegation{
     top: 25%;
     padding-top: 2%;
     box-shadow: 7px 4px 4px grey ;
+    background: #a9ceff;
 }
 
 a.button4{
