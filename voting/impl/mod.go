@@ -114,6 +114,13 @@ func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
 	return nil
 }
 
+func (vi *VotingInstance) CheckVotingPowerOfUser(user *voting.User) bool {
+	if user.VotingPower < 0 {
+		return false
+	}
+	return true
+}
+
 //Check if all the voters have used all their voting power (usefull for simulation)
 func (vi *VotingInstance) CheckVotingPowerOfVoters() bool {
 	for _, user := range vi.Config.Voters {

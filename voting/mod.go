@@ -43,6 +43,8 @@ type VotingInstance interface {
 
 	CheckVotingPower(user *User) error
 
+	CheckVotingPowerOfUser(user *User) bool
+
 	SetVote(user *User, choice Choice) error
 
 	DelegTo(user *User, other *User, quantity Liquid) error
@@ -96,6 +98,8 @@ type TypeOfUser int
 const (
 	YesVoter TypeOfUser = iota
 	NoVoter
+	IndeciseVoter
+	ThresholdVoter
 	None
 )
 
