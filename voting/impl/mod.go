@@ -254,9 +254,9 @@ func (vs VotingSystem) Delete(id string) error {
 	return nil
 }
 
-//Return a list of all the voting instance
+//Return a list of all the voting instance that are open
 func (vs VotingSystem) ListVotings() []string {
-	listeDeVotes := make([]string, len(vs.VotingInstancesList))
+	listeDeVotes := make([]string, 0)
 	for key := range vs.VotingInstancesList {
 		if vs.VotingInstancesList[key].GetStatus() == "open" {
 			listeDeVotes = append(listeDeVotes, key)

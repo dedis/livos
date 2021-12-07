@@ -65,8 +65,18 @@ func TestVotingInstanceCreate(t *testing.T) {
 
 	require.Equal(t, config.Description, "Quick description", "The config description of the votingInstance just created is incorrect, got: %s, want %s.", config.Description, "Quick description")
 
-	_, err = NewVotingConfig(voters, "", "Quick description", candidats)
+}
+
+func TestNewVotingConfig(t *testing.T) {
+	voteConfig, _ := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	require.Equal(t, voteConfig.Voters, voters)
+	require.Equal(t, voteConfig.Title, "TestVotingTitle")
+	require.Equal(t, voteConfig.Description, "Quick description")
+	require.Equal(t, voteConfig.Candidates, candidats)
+
+	_, err := NewVotingConfig(voters, "", "Quick description", candidats)
 	require.Equal(t, err.Error(), "Title is empty")
+
 }
 
 func TestCreateAndAdd(t *testing.T) {
@@ -81,6 +91,15 @@ func TestCreateAndAdd(t *testing.T) {
 
 	vi, _ := VoteSystem.CreateAndAdd("Session01", voteConfig, "open")
 	require.Equal(t, VoteSystem.VotingInstancesList["Session01"], vi, "Creation of the voting instance is incorrect")
+}
+
+func TestListVoting(t *testing.T) {
+	vi1, _ := VoteSystem.CreateAndAdd("Session01", voteConfig, "open")
+	vi2, _ := VoteSystem.CreateAndAdd("Session02", voteConfig, "open")
+	vi3, _ := VoteSystem.CreateAndAdd("Session03", voteConfig, "open")
+	verifListVotingSystem := []string{vi1.GetVotingID(), vi2.GetVotingID(), vi3.GetVotingID()}
+	listeVotingSystems := VoteSystem.ListVotings()
+	require.Equal(t, verifListVotingSystem, listeVotingSystems)
 }
 
 func TestCloseVoting(t *testing.T) {
@@ -107,6 +126,11 @@ func TestCreationOfLiquid(t *testing.T) {
 	require.Equal(t, err.Error(), "Init value is incorrect: was -10, must be positive.")
 }
 
+func TestAdditionOfLiquid(t *testing.T) {
+	additionOfLiquids, _ := AddLiquid(liquid_100, liquid_150)
+	require.Equal(t, additionOfLiquids.Percentage, 250.)
+}
+
 func TestNewChoice(t *testing.T) {
 	tabChoice := map[string]voting.Liquid{}
 	tabChoice["yes"] = liquid_100
@@ -130,6 +154,14 @@ func TestSetVote(t *testing.T) {
 	choiceGuillaume2, _ := NewChoice(yesChoice)
 	vi.SetVote(&userGuillaume, choiceGuillaume2)
 	require.Equal(t, userGuillaume.HistoryOfChoice[len(userGuillaume.HistoryOfChoice)-1], choiceGuillaume2)
+}
+
+func TestDelegTo(t *testing.T) {
+	vi.DelegTo(&userNoemien, &userEtienne, liquid_50)
+	require.Equal(t, 50., userEtienne.DelegatedFrom["Noemien"].Percentage)
+	require.Equal(t, 50., userNoemien.DelegatedTo["Etienne"].Percentage)
+	require.Equal(t, 50., userNoemien.VotingPower, "userNoemien false power")
+	require.Equal(t, 150., userEtienne.VotingPower, "userEtienne false power")
 }
 
 func TestGetResults(t *testing.T) {
@@ -202,7 +234,5 @@ func TestDelete(t *testing.T) {
 	VoteSystem2.Delete("Session02")
 	require.Equal(t, 0, len(VoteSystem2.VotingInstancesList), "Deletion of the voting instance incorrect. It's still there.")
 }
-
-//addLiquid
 
 //delegFrom

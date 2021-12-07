@@ -20,7 +20,7 @@ func Simulation2(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(5, 7)
+	var randomNumOfUser, err = random.IntRange(98, 101)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -28,19 +28,19 @@ func Simulation2(out io.Writer) {
 	//Random creating of a user and adds it to the list of voters
 	var voters = make([]*voting.User, 0)
 	for i := 0; i < randomNumOfUser; i++ {
-		var chooseType, err1 = random.IntRange(1, 4)
+		var chooseType, err1 = random.IntRange(1, 101)
 		if err1 != nil {
 			xerrors.Errorf(err.Error())
 		}
-		switch chooseType {
-		case 1:
+		switch {
+		case chooseType < 50:
 			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
-		case 2:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter)
+		case chooseType < 75:
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
@@ -165,15 +165,66 @@ func Simulation2(out io.Writer) {
 			// 	fmt.Println(err.Error())
 			// }
 
-			fmt.Println(user.UserID, " a voté pour ", quantity, "%")
+			fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
 		}
 	}
 
-	/* yesVote := func(user *voting.User, i int){
+	yesVote := func(user *voting.User) {
+		quantity := user.VotingPower
+		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		liquid_0, err := impl.NewLiquid(0)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 
+		choiceTab := make(map[string]voting.Liquid)
+
+		choiceTab["yes"] = quantity_to_Vote
+		choiceTab["no"] = liquid_0
+		//create choice
+		choice, err := impl.NewChoice(choiceTab)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		//set the choice
+		err = VoteInstance.SetVote(user, choice)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
 	}
-	noVote := func(user *voting.User, i int )
-	*/
+	noVote := func(user *voting.User) {
+		quantity := user.VotingPower
+		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		liquid_0, err := impl.NewLiquid(0)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		choiceTab := make(map[string]voting.Liquid)
+
+		choiceTab["no"] = quantity_to_Vote
+		choiceTab["yes"] = liquid_0
+		//create choice
+		choice, err := impl.NewChoice(choiceTab)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		//set the choice
+		err = VoteInstance.SetVote(user, choice)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
+	}
 
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
 		for i, user := range VoteInstance.GetConfig().Voters {
@@ -181,18 +232,30 @@ func Simulation2(out io.Writer) {
 			if user.VotingPower > 0 {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
+					yesVote(user)
 				case voting.NoVoter:
+					noVote(user)
 				case voting.None:
 					randomVote(user, i)
-
 				}
 			}
 		}
 	}
 
+	counterYesVoter := 0
+	counterNoVoter := 0
+	counterNormalVoter := 0
 	for _, user := range VoteInstance.GetConfig().Voters {
-		fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower)
+		fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
+		if user.TypeOfUser == 0 {
+			counterYesVoter++
+		} else if user.TypeOfUser == 1 {
+			counterNoVoter++
+		} else {
+			counterNormalVoter++
+		}
 	}
+	fmt.Println("Il y a ", counterYesVoter, "yesVoter,", counterNoVoter, "noVoter mais il reste", counterNormalVoter, "normalVoter")
 
 	results := VoteInstance.GetResults()
 	s := "%"
