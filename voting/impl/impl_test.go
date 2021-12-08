@@ -15,9 +15,9 @@ var VoteSystem = NewVotingSystem(nil, VoteList)
 //Creation of a empty list of choces (for history)
 var histoChoice = make([]voting.Choice, 0)
 
-var userNoemien, _ = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
-var userGuillaume, _ = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
-var userEtienne, _ = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
+var userNoemien, _ = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
+var userGuillaume, _ = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
+var userEtienne, _ = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 
 var voters = []*voting.User{&userNoemien, &userGuillaume, &userEtienne}
 var candidats = make([]string, 0)
@@ -36,7 +36,7 @@ var noChoice = make(map[string]voting.Liquid)
 var midChoice = make(map[string]voting.Liquid)
 
 func TestNewUser(t *testing.T) {
-	userNoemien, err := VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
+	userNoemien, err := VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -167,9 +167,9 @@ func TestDelegTo(t *testing.T) {
 func TestGetResults(t *testing.T) {
 	var histoChoice = make([]voting.Choice, 0)
 
-	var userN, _ = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
-	var userG, _ = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
-	var userE, _ = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
+	var userN, _ = VoteSystem.NewUser("Noemien", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
+	var userG, _ = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
+	var userE, _ = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 
 	var voters = []*voting.User{&userN, &userG, &userE}
 	var candidats = make([]string, 0)

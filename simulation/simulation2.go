@@ -34,32 +34,32 @@ func Simulation2(out io.Writer) {
 		}
 		switch {
 		case chooseType < 5:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter)
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
 		case chooseType < 10:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter)
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
 
 		case chooseType < 75:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndeciseVoter)
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndeciseVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
 		case chooseType < 90:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter)
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
 		default:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
@@ -376,13 +376,13 @@ func Simulation2(out io.Writer) {
 	counterNormalVoter := 0
 	for _, user := range VoteInstance.GetConfig().Voters {
 		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
-		if user.TypeOfUser == 0 {
+		if user.TypeOfUser == "YesVoter" {
 			counterYesVoter++
-		} else if user.TypeOfUser == 1 {
+		} else if user.TypeOfUser == "NoVoter" {
 			counterNoVoter++
-		} else if user.TypeOfUser == 2 {
+		} else if user.TypeOfUser == "IndeciseVoter" {
 			counterIndecisiveVoter++
-		} else if user.TypeOfUser == 3 {
+		} else if user.TypeOfUser == "ThresholdVoter" {
 			counterThresholdVoter++
 		} else {
 			counterNormalVoter++

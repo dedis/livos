@@ -14,6 +14,6 @@ func TestSimulation(t *testing.T) {
 	var fileText, err = os.Create("outputSimulation")
 	require.Equal(t, err, nil, "Cannot create output file for graph viz")
 	buffer := new(bytes.Buffer)
-	Simulation2(buffer)
+	Simulation_list_delegation(buffer)
 	fileText.Write(buffer.Bytes())
 }

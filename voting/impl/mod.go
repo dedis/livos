@@ -292,7 +292,7 @@ func NewVotingConfig(voters []*voting.User, title string, desc string, cand []st
 }
 
 //Create and return a new User
-func (vs VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, historyOfChoice []voting.Choice, typeOfUser voting.TypeOfUser) (voting.User, error) {
+func (vs VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, delegFrom map[string]voting.Liquid, historyOfChoice []voting.Choice, typeOfUser voting.TypeOfUser, preferenceDelegationList []*voting.User) (voting.User, error) {
 
 	// if votingPower > (float64(delegFrom)+1)*PERCENTAGE {
 	// 	return voting.Choice{}, xerrors.Errorf("Voting power is too much : %f", votingPower)
@@ -311,12 +311,13 @@ func (vs VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, 
 	// }
 
 	return voting.User{
-		UserID:          userID,
-		DelegatedTo:     delegTo,
-		DelegatedFrom:   delegFrom,
-		VotingPower:     PERCENTAGE,
-		HistoryOfChoice: historyOfChoice,
-		TypeOfUser:      typeOfUser,
+		UserID:                   userID,
+		DelegatedTo:              delegTo,
+		DelegatedFrom:            delegFrom,
+		VotingPower:              PERCENTAGE,
+		HistoryOfChoice:          historyOfChoice,
+		TypeOfUser:               typeOfUser,
+		PreferenceDelegationList: preferenceDelegationList,
 	}, nil
 }
 

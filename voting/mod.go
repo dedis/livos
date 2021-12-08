@@ -13,7 +13,7 @@ type VotingSystem interface {
 
 	GetVotingInstanceList() map[string]VotingInstance
 
-	NewUser(userID string, delegTo map[string]Liquid, delegFrom map[string]Liquid, histoChoice []Choice, typeOfUser TypeOfUser) (User, error)
+	NewUser(userID string, delegTo map[string]Liquid, delegFrom map[string]Liquid, histoChoice []Choice, typeOfUser TypeOfUser, preferenceDelegationList []*User) (User, error)
 
 	//override the method print?
 }
@@ -90,18 +90,37 @@ type User struct {
 	//history of choices that were cast
 	HistoryOfChoice []Choice
 
+	//type define behavior of the user
 	TypeOfUser TypeOfUser
+
+	//delegation preference list
+	PreferenceDelegationList []*User
 }
 
-type TypeOfUser int
+type TypeOfUser string
 
 const (
-	YesVoter TypeOfUser = iota
-	NoVoter
-	IndeciseVoter
-	ThresholdVoter
-	None
+	YesVoter       TypeOfUser = "YesVoter"
+	NoVoter        TypeOfUser = "NoVoter"
+	IndeciseVoter  TypeOfUser = "IndeciseVoter"
+	ThresholdVoter TypeOfUser = "ThresholdVoter"
+	None           TypeOfUser = "None"
 )
+
+// func (t TypeOfUser) String() string {
+// 	switch t {
+// 	case YesVoter:
+// 		return "YesVoter"
+// 	case NoVoter:
+// 		return "NoVoter"
+// 	case IndeciseVoter:
+// 		return "IndeciseVoter"
+// 	case ThresholdVoter:
+// 		return "ThresholdVoter"
+// 	default:
+// 		return "None"
+// 	}
+// }
 
 // type User interface {
 // 	CheckVotingPower() bool
