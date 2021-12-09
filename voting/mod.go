@@ -100,6 +100,7 @@ const (
 	NoVoter
 	IndeciseVoter
 	ThresholdVoter
+	NonResponsibleVoter
 	None
 )
 
