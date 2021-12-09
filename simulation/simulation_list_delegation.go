@@ -47,7 +47,7 @@ func Simulation_list_delegation(out io.Writer) {
 			voters = append(voters, &user)
 
 		case chooseType < 60:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndeciseVoter, make([]*voting.User, 0))
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, make([]*voting.User, 0))
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
@@ -409,7 +409,7 @@ func Simulation_list_delegation(out io.Writer) {
 					yesVote(user)
 				case voting.NoVoter:
 					noVote(user)
-				case voting.IndeciseVoter:
+				case voting.IndecisiveVoter:
 					IndecisiveVote(user, i)
 				case voting.ThresholdVoter:
 					var threshold = 600
