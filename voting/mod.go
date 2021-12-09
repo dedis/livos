@@ -100,11 +100,12 @@ type User struct {
 type TypeOfUser string
 
 const (
-	YesVoter       TypeOfUser = "YesVoter"
-	NoVoter        TypeOfUser = "NoVoter"
-	IndeciseVoter  TypeOfUser = "IndeciseVoter"
-	ThresholdVoter TypeOfUser = "ThresholdVoter"
-	None           TypeOfUser = "None"
+	YesVoter            TypeOfUser = "YesVoter"
+	NoVoter             TypeOfUser = "NoVoter"
+	IndecisiveVoter     TypeOfUser = "IndeciseVoter"
+	ThresholdVoter      TypeOfUser = "ThresholdVoter"
+	NonResponsibleVoter TypeOfUser = "NonResponsibleVoter"
+	None                TypeOfUser = "None"
 )
 
 // func (t TypeOfUser) String() string {
