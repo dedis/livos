@@ -28,7 +28,7 @@ func Simulation(out io.Writer) {
 	//Random creating of a user and adds it to the list of voters
 	var voters = make([]*voting.User, 0)
 	for i := 0; i < randomNumOfUser; i++ {
-		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None)
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
