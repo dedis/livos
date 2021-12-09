@@ -46,13 +46,13 @@ func Simulation2(out io.Writer) {
 			}
 			voters = append(voters, &user)
 
-		case chooseType < 75:
+		case chooseType < 60:
 			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
-		case chooseType < 90:
+		case chooseType < 80:
 			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
@@ -328,11 +328,9 @@ func Simulation2(out io.Writer) {
 
 	results := VoteInstance.GetResults()
 	s := "%"
-
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, results["yes"], s, results["no"], s, time.Now().Format("2 Jan 06 - 15:04:05"))
-	fmt.Fprintf(out, "label = <Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVOter, %v IndecisiveVoter and %v NormalVoter>;", counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["yes"], s, results["no"], s, time.Now(), counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
@@ -379,13 +377,13 @@ func Simulation2(out io.Writer) {
 		for _, choice := range cumulativeHistoryOfChoice {
 			if choice.VoteValue["yes"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>>   color=\"%s\" penwidth=%v];\n",
+					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
 					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes, choice.VoteValue["yes"].Percentage/60)
 			}
 
 			if choice.VoteValue["no"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#cf1111'><b>%v</b></font><br/> color=\"%s\" penwidth=%v];\n",
+					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
 					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo, choice.VoteValue["no"].Percentage/60)
 			}
 		}
