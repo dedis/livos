@@ -7,6 +7,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20211101210129-f9bde24e5ca2 // indirect
 	github.com/mazen160/go-random v0.0.0-20210308102632-d2b501c85c03 // indirect
 	github.com/stretchr/testify v1.7.0
+	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.etcd.io/bbolt v1.3.6 // direct
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
