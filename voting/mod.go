@@ -102,9 +102,10 @@ type TypeOfUser string
 const (
 	YesVoter            TypeOfUser = "YesVoter"
 	NoVoter             TypeOfUser = "NoVoter"
-	IndecisiveVoter     TypeOfUser = "IndeciseVoter"
+	IndecisiveVoter     TypeOfUser = "IndecisiveVoter"
 	ThresholdVoter      TypeOfUser = "ThresholdVoter"
 	NonResponsibleVoter TypeOfUser = "NonResponsibleVoter"
+	ResponsibleVoter    TypeOfUser = "ResponsibleVoter"
 	None                TypeOfUser = "None"
 )
 

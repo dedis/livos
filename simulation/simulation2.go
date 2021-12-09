@@ -52,14 +52,20 @@ func Simulation2(out io.Writer) {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
-		case chooseType < 80:
+		case chooseType < 70:
 			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
-		case chooseType < 90:
+		case chooseType < 80:
 			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, nil)
+			if err != nil {
+				xerrors.Errorf(err.Error())
+			}
+			voters = append(voters, &user)
+		case chooseType < 90:
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ResponsibleVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
 			}
@@ -175,7 +181,7 @@ func Simulation2(out io.Writer) {
 		fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID, "il était", user.TypeOfUser)
 	}
 	randomVote := func(user *voting.User, i int) {
-		randomAction, err := random.IntRange(1, 4)
+		randomAction, err := random.IntRange(1, 3)
 		if err != nil {
 			fmt.Println(err.Error(), "fail to do randomAction")
 		}
@@ -214,14 +220,21 @@ func Simulation2(out io.Writer) {
 			//Vote action
 
 			quantity := user.VotingPower
-			var randomNumberToChooseYesOrNo, err = random.IntRange(0, 2)
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-			}
-			if randomNumberToChooseYesOrNo == 0 {
-				yesVote(user, quantity)
-			} else {
+			if len(user.HistoryOfChoice) == 0 {
+				yesOrNo, err := random.IntRange(1, 3)
+				if err != nil {
+					fmt.Println(err.Error(), "fail to do yesOrNo ")
+				}
+
+				if yesOrNo == 1 {
+					yesVote(user, quantity)
+				} else {
+					noVote(user, quantity)
+				}
+			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
 				noVote(user, quantity)
+			} else {
+				yesVote(user, quantity)
 			}
 
 		}
@@ -278,6 +291,45 @@ func Simulation2(out io.Writer) {
 			IndecisiveVote(user, i)
 		}
 	}
+	ResponsibleVoter := func(user *voting.User, i int) {
+		randomAction, err := random.IntRange(1, 3)
+		if err != nil {
+			fmt.Println(err.Error(), "fail to do randomAction")
+		}
+
+		if len(user.HistoryOfChoice) != 0 {
+			randomAction = 2
+		} else if user.DelegatedTo != nil {
+			randomAction = 1
+		}
+
+		if randomAction == 1 {
+			//Delegation action
+			IndecisiveVote(user, i)
+
+		} else if randomAction == 2 {
+			//Vote action
+
+			quantity := user.VotingPower
+			if len(user.HistoryOfChoice) == 0 {
+				yesOrNo, err := random.IntRange(1, 3)
+				if err != nil {
+					fmt.Println(err.Error(), "fail to do yesOrNo ")
+				}
+
+				if yesOrNo == 1 {
+					yesVote(user, quantity)
+				} else {
+					noVote(user, quantity)
+				}
+			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
+				noVote(user, quantity)
+			} else {
+				yesVote(user, quantity)
+			}
+
+		}
+	}
 
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
 		for i, user := range VoteInstance.GetConfig().Voters {
@@ -295,6 +347,8 @@ func Simulation2(out io.Writer) {
 					ThresholdVote(user, i, threshold)
 				case voting.NonResponsibleVoter:
 					NonResponsibleVoter(user, i)
+				case voting.ResponsibleVoter:
+					ResponsibleVoter(user, i)
 				case voting.None:
 					randomVote(user, i)
 				}
@@ -308,29 +362,32 @@ func Simulation2(out io.Writer) {
 	counterThresholdVoter := 0
 	counterNormalVoter := 0
 	counterNonResponsibleVoter := 0
+	counterResponsibleVoter := 0
 	for _, user := range VoteInstance.GetConfig().Voters {
 		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
 		if user.TypeOfUser == "YesVoter" {
 			counterYesVoter++
 		} else if user.TypeOfUser == "NoVoter" {
 			counterNoVoter++
-		} else if user.TypeOfUser == "IndeciseVoter" {
+		} else if user.TypeOfUser == "IndecisiveVoter" {
 			counterIndecisiveVoter++
 		} else if user.TypeOfUser == "ThresholdVoter" {
 			counterThresholdVoter++
 		} else if user.TypeOfUser == "NonResponsibleVoter" {
 			counterNonResponsibleVoter++
+		} else if user.TypeOfUser == "ResponsibleVoter" {
+			counterResponsibleVoter++
 		} else {
 			counterNormalVoter++
 		}
 	}
-	fmt.Println("Il y a ", counterYesVoter, "yesVoter,", counterNoVoter, "noVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter", counterIndecisiveVoter, "IndecisiveVoter mais il reste", counterNormalVoter, "normalVoter")
+	fmt.Println("Il y a ", counterYesVoter, "yesVoter,", counterNoVoter, "noVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter mais il reste", counterNormalVoter, "normalVoter")
 
 	results := VoteInstance.GetResults()
 	s := "%"
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["yes"], s, results["no"], s, time.Now(), counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["yes"], s, results["no"], s, time.Now(), counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
