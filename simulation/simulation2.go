@@ -16,6 +16,8 @@ import (
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
 func Simulation2(out io.Writer) {
 
+	const InitialVotingPower = 100.
+
 	var VoteList = make(map[string]voting.VotingInstance)
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
@@ -148,6 +150,7 @@ func Simulation2(out io.Writer) {
 		}
 		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
 	}
+
 	IndecisiveVote := func(user *voting.User, i int) {
 
 		//Delegation action
@@ -226,6 +229,7 @@ func Simulation2(out io.Writer) {
 
 		}
 	}
+
 	ThresholdVote := func(user *voting.User, i int, threshold int) {
 
 		var thresholdComparator = 0.
@@ -262,16 +266,15 @@ func Simulation2(out io.Writer) {
 		}
 	}
 	NonResponsibleVoter := func(user *voting.User, i int) {
-
 		if len(user.HistoryOfChoice) == 0 {
 			var randomNumberToChooseYesOrNo, err = random.IntRange(0, 2)
 			if err != nil {
 				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
 			}
 			if randomNumberToChooseYesOrNo == 0 {
-				yesVote(user, 100.)
+				yesVote(user, InitialVotingPower)
 			} else {
-				noVote(user, 100.)
+				noVote(user, InitialVotingPower)
 			}
 		} else {
 			//Delegation action
