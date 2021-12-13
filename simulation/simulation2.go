@@ -399,16 +399,18 @@ func Simulation2(out io.Writer) {
 		colorDeleg := "#8A2BE2"
 
 		/* colorOfUser := "#FFFFFF"
-		if user.TypeOfUser == 0 { //YesVoter
+		if user.TypeOfUser == "YesVoter" { //YesVoter
 			colorOfUser = "#42D03F"
-		} else if user.TypeOfUser == 1 { //NoVoter
+		} else if user.TypeOfUser == "NoVoter" { //NoVoter
 			colorOfUser = "#FC5A5A"
-		} else if user.TypeOfUser == 2 { //IndecisiveVoter
+		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
 			colorOfUser = "#B7FCFF"
-		} else if user.TypeOfUser == 3 { //ThresholdVoter
+		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
 			colorOfUser = "#6BA7E8"
-		} else if user.TypeOfUser == 4 { //NonResponsibleVoter
+		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
 			colorOfUser = "#6066D3"
+		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
+			colorOfUser = "#111111"
 		} else { //NormalVoter
 			colorOfUser = "#FFFFFF"
 		} */
