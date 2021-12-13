@@ -70,11 +70,12 @@ func Simulation_list_delegation(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 1
+	YesNumber := 7
 	NoNumber := 0
-	IndecisiveNumber := 10
+	IndecisiveNumber := 0
 	ThresholdNumber := 0
-	TotalNumber := YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
+	NonResponsibleNumber := 0
+	TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
 	for i = 0; i < YesNumber; i++ {
@@ -105,6 +106,13 @@ func Simulation_list_delegation(out io.Writer) {
 		}
 		voters = append(voters, &user)
 	}
+	for i = i; i < NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
+		}
+		voters = append(voters, &user)
+	}
 
 	//filling the preference list for delegation
 	for i, user := range voters {
@@ -112,29 +120,32 @@ func Simulation_list_delegation(out io.Writer) {
 		if err != nil {
 			fmt.Println(err.Error(), "fail to do randomAction")
 		}
-		for i = 0; i < randomNumberOfPreference; i++ {
+		for j := 0; j < randomNumberOfPreference; j++ {
 			//random index creation (must NOT be == to index of current user)
 			randomDelegateToIndex, err := random.IntRange(0, len(voters))
 			if err != nil {
 				fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
 			}
-			checkAlreadyHaveInPreferenceList := func() bool {
+			checkAlreadyHaveInPreferenceList := func(randIndex int) bool {
 				for _, u := range user.PreferenceDelegationList {
-					if voters[randomDelegateToIndex] == u {
+					if voters[randIndex] == u {
 						return true
 					}
 				}
 				return false
 			}
 
-			for ok := true; ok; ok = (randomDelegateToIndex == i && checkAlreadyHaveInPreferenceList()) {
+			for randomDelegateToIndex == i || checkAlreadyHaveInPreferenceList(randomDelegateToIndex) {
 				randomDelegateToIndex, err = random.IntRange(0, len(voters))
 				if err != nil {
 					fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
 				}
+				//randomDelegateToIndex = randIndex
 			}
+
 			user.PreferenceDelegationList = append(user.PreferenceDelegationList, voters[randomDelegateToIndex])
 		}
+
 		fmt.Print("The preference list of "+user.UserID, " is : ")
 		for _, user := range user.PreferenceDelegationList {
 			fmt.Print(user.UserID + ", ")
@@ -158,11 +169,21 @@ func Simulation_list_delegation(out io.Writer) {
 			g.Add(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[0]))
 		}
 	}
-	IsThereCycle := graph.Acyclic(g)
+	IsThereCycle := !graph.Acyclic(g)
 	if IsThereCycle {
 		fmt.Println("There is a cycle !!!")
 	} else {
 		fmt.Println("There is no cycle :) ")
+	}
+	//changer les preferences listes des personnes jusqu'a ne plus avoir de cycle
+	for i, u := range voters {
+		if len(u.PreferenceDelegationList) > 1 {
+			g.Delete(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[0]))
+			g.Add(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[1]))
+			if graph.Acyclic(g) {
+				//redo
+			}
+		}
 	}
 
 	//candidats
@@ -280,8 +301,8 @@ func Simulation_list_delegation(out io.Writer) {
 		}
 	}
 
-	yesVote := func(user *voting.User) {
-		quantity := user.VotingPower
+	yesVote := func(user *voting.User, votingPower float64) {
+		quantity := votingPower
 		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
 		if err != nil {
 			fmt.Println(err.Error())
@@ -308,9 +329,8 @@ func Simulation_list_delegation(out io.Writer) {
 		}
 		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
 	}
-
-	noVote := func(user *voting.User) {
-		quantity := user.VotingPower
+	noVote := func(user *voting.User, votingPower float64) {
+		quantity := votingPower
 		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
 		if err != nil {
 			fmt.Println(err.Error())
@@ -461,20 +481,39 @@ func Simulation_list_delegation(out io.Writer) {
 		}
 	}
 
+	NonResponsibleVoter := func(user *voting.User, i int) {
+		if len(user.HistoryOfChoice) == 0 {
+			var randomNumberToChooseYesOrNo, err = random.IntRange(0, 2)
+			if err != nil {
+				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
+			}
+			if randomNumberToChooseYesOrNo == 0 {
+				yesVote(user, 100.)
+			} else {
+				noVote(user, 100.)
+			}
+		} else {
+			//Delegation action
+			IndecisiveVote(user, i)
+		}
+	}
+
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
 		for i, user := range VoteInstance.GetConfig().Voters {
 
 			if user.VotingPower > 0 {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
-					yesVote(user)
+					yesVote(user, user.VotingPower)
 				case voting.NoVoter:
-					noVote(user)
+					noVote(user, user.VotingPower)
 				case voting.IndecisiveVoter:
 					IndecisiveVote(user, i)
 				case voting.ThresholdVoter:
 					var threshold = 600
 					ThresholdVote(user, i, threshold)
+				case voting.NonResponsibleVoter:
+					NonResponsibleVoter(user, i)
 				case voting.None:
 					randomVote(user, i)
 				}
