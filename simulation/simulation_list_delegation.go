@@ -187,13 +187,13 @@ func Simulation_list_delegation(out io.Writer) {
 	}
 
 	//candidats
-	var candidats = make([]string, 3)
+	var candidats = make([]*voting.Candidate, 3)
 
 	//empty list of votes
 	//var votes = make(map[string]voting.Choice)
 
 	//creation of votingConfig
-	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Sunny day everyday ?", candidats)
+	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Sunny day everyday ?", candidats, "YesOrNoQuestion")
 	if err != nil {
 		fmt.Println(err.Error())
 	}

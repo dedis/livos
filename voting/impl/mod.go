@@ -55,7 +55,7 @@ func (vi *VotingInstance) SetVoters(users []*voting.User) error {
 }
 
 //Set the candidates of the voting instance
-func (vi *VotingInstance) SetCandidates(candidates []string) error {
+func (vi *VotingInstance) SetCandidates(candidates []*voting.Candidate) error {
 	vi.Config.Candidates = candidates
 	return nil
 }
@@ -63,6 +63,12 @@ func (vi *VotingInstance) SetCandidates(candidates []string) error {
 //Set the description of the voting instance
 func (vi *VotingInstance) SetDescription(description string) error {
 	vi.Config.Description = description
+	return nil
+}
+
+//Set the type of Voting config candidate or yes/no question
+func (vi *VotingInstance) SetTypeOfVotingConfig(typeOfVotingConfig string) error {
+	vi.Config.TypeOfVotingConfig = voting.TypeOfVotingConfig(typeOfVotingConfig)
 	return nil
 }
 
@@ -78,22 +84,37 @@ func (vi *VotingInstance) GetConfig() voting.VotingConfig {
 
 //Give the result of the choices of the voting instance in the form: map[no:50 yes:50]
 func (vi *VotingInstance) GetResults() map[string]float64 {
-	results := make(map[string]float64, len(vi.Config.Voters))
-	var yesPower float64 = 0
-	var noPower float64 = 0
-	for _, user := range vi.Config.Voters {
-		for _, choice := range user.HistoryOfChoice {
-			yesPower += choice.VoteValue["yes"].Percentage
-			noPower += choice.VoteValue["no"].Percentage
+	if vi.Config.TypeOfVotingConfig == "YesOrNoQuestion" {
+		results := make(map[string]float64, len(vi.Config.Voters))
+		var yesPower float64 = 0
+		var noPower float64 = 0
+		for _, user := range vi.Config.Voters {
+			for _, choice := range user.HistoryOfChoice {
+				yesPower += choice.VoteValue["yes"].Percentage
+				noPower += choice.VoteValue["no"].Percentage
+			}
 		}
-	}
-	//in order to get 4 and not 4.6666666... for example
-	// var temp1 = float64(int(yesPower/float64(counter))*100) / 100
-	// var temp2 = float64(int(noPower/float64(counter))*100) / 100
-	results["yes"] = yesPower / float64(len(vi.Config.Voters))
-	results["no"] = noPower / float64(len(vi.Config.Voters))
+		//in order to get 4 and not 4.6666666... for example
+		// var temp1 = float64(int(yesPower/float64(counter))*100) / 100
+		// var temp2 = float64(int(noPower/float64(counter))*100) / 100
+		results["yes"] = yesPower / float64(len(vi.Config.Voters))
+		results["no"] = noPower / float64(len(vi.Config.Voters))
 
-	return results
+		return results
+	} else {
+		resultsCandidate := make(map[string]float64, len(vi.Config.Candidates))
+
+		for _, candidate := range vi.Config.Candidates {
+			var candidateResult float64 = 0
+			for _, user := range vi.Config.Voters {
+				for _, choice := range user.HistoryOfChoice {
+					candidateResult += choice.VoteValue[candidate.CandidateID].Percentage
+				}
+			}
+			resultsCandidate[candidate.CandidateID] = candidateResult / float64(len(vi.Config.Voters))
+		}
+		return resultsCandidate
+	}
 }
 
 //Return the user object from the string passed in argument
@@ -106,19 +127,22 @@ func (vi *VotingInstance) GetUser(userID string) (*voting.User, error) {
 	return nil, xerrors.Errorf("Cannot find the user. UserId is incorrect.")
 }
 
+//Return the candidate object from the string passed in argument
+func (vi *VotingInstance) GetCandidate(candidateID string) (*voting.Candidate, error) {
+	for _, value := range vi.Config.Candidates {
+		if value.CandidateID == candidateID {
+			return value, nil
+		}
+	}
+	return nil, xerrors.Errorf("Cannot find the Candidate. CandidateID is incorrect.")
+}
+
 //Check that the voting power of a user is always positive
 func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
 	if user.VotingPower < 0 {
 		return xerrors.Errorf("Value of voting power is negative: Was %d, must be more or equal than 0", int(user.VotingPower))
 	}
 	return nil
-}
-
-func (vi *VotingInstance) CheckVotingPowerOfUser(user *voting.User) bool {
-	if user.VotingPower < 0 {
-		return false
-	}
-	return true
 }
 
 //Check if all the voters have used all their voting power (usefull for simulation)
@@ -278,16 +302,20 @@ func (vs VotingSystem) GetVotingInstance(id string) voting.VotingInstance {
 }
 
 //Create and return a new voting configuration
-func NewVotingConfig(voters []*voting.User, title string, desc string, cand []string) (voting.VotingConfig, error) {
+func NewVotingConfig(voters []*voting.User, title string, desc string, cand []*voting.Candidate, typeOfVotingConfig voting.TypeOfVotingConfig) (voting.VotingConfig, error) {
 	if title == "" {
 		return voting.VotingConfig{}, xerrors.Errorf("Title is empty")
 	}
+	if typeOfVotingConfig != "CandidateQuestion" && typeOfVotingConfig != "YesOrNoQuestion" {
+		return voting.VotingConfig{}, xerrors.Errorf("TypeOfVotingCOnfig Incorrect")
+	}
 
 	return voting.VotingConfig{
-		Voters:      voters,
-		Title:       title,
-		Description: desc,
-		Candidates:  cand,
+		Voters:             voters,
+		Title:              title,
+		Description:        desc,
+		Candidates:         cand,
+		TypeOfVotingConfig: typeOfVotingConfig,
 	}, nil
 }
 
@@ -318,6 +346,14 @@ func (vs VotingSystem) NewUser(userID string, delegTo map[string]voting.Liquid, 
 		HistoryOfChoice:          historyOfChoice,
 		TypeOfUser:               typeOfUser,
 		PreferenceDelegationList: preferenceDelegationList,
+	}, nil
+}
+
+//Create and return a new Candidate
+func (vs VotingSystem) NewCandidate(candidateID string) (voting.Candidate, error) {
+
+	return voting.Candidate{
+		CandidateID: candidateID,
 	}, nil
 }
 

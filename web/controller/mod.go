@@ -76,6 +76,12 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	CandidateOrYesNo := make(map[voting.VotingInstance]string)
+
+	for _, value := range VotingInstanceTabOpen {
+		CandidateOrYesNo[value] = string(value.GetConfig().TypeOfVotingConfig)
+	}
+
 	length_open := len(VotingInstanceTabOpen)
 	length_close := len(VotingInstanceTabClose)
 
@@ -86,12 +92,14 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		VotingInstanceTabClose map[string]voting.VotingInstance
 		Length_open            int
 		Length_close           int
+		CandidateOrYesNo       map[voting.VotingInstance]string
 	}{Title: "HomePage",
 		VotingInstanceTab:      c.vs.GetVotingInstanceList(),
 		VotingInstanceTabOpen:  VotingInstanceTabOpen,
 		VotingInstanceTabClose: VotingInstanceTabClose,
 		Length_open:            length_open,
 		Length_close:           length_close,
+		CandidateOrYesNo:       CandidateOrYesNo,
 	}
 
 	if req.Method == "POST" {
@@ -403,8 +411,8 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		if title != "" {
 			c.vs.GetVotingInstanceList()[id].SetTitle(title)
 		}
-		status := req.FormValue("status")
-		c.vs.GetVotingInstanceList()[id].SetStatus(status)
+		typeofConfig := req.FormValue("typeOfConfig")
+		c.vs.GetVotingInstanceList()[id].SetTypeOfVotingConfig(typeofConfig)
 
 		description := req.FormValue("desc")
 		if description != "" {
@@ -432,7 +440,17 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		candidats := req.FormValue("candidates")
 		candidatesParsed := strings.Split(candidats, ",")
 		if candidats != "" {
-			c.vs.GetVotingInstanceList()[id].SetCandidates(candidatesParsed)
+			voterListParsedintoCandidate := make([]*voting.Candidate, len(candidatesParsed))
+			fmt.Println("List of candidats", voterListParsedintoCandidate)
+			for idx, name := range candidatesParsed {
+				u, err := c.vs.NewCandidate(name)
+				if err != nil {
+					http.Error(w, "Candidate creation is incorrect", http.StatusInternalServerError)
+				}
+				voterListParsedintoCandidate[idx] = &u
+			}
+			fmt.Println("List of candidats", voterListParsedintoCandidate)
+			c.vs.GetVotingInstanceList()[id].SetCandidates(voterListParsedintoCandidate)
 
 		}
 
@@ -486,6 +504,12 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 			http.Error(w, "failed to get status: ", http.StatusInternalServerError)
 			return
 		}
+		typeofConfig := req.FormValue("typeOfConfig")
+		if typeofConfig == "" {
+			http.Error(w, "failed to get typeOfConfig: ", http.StatusInternalServerError)
+			return
+		}
+
 		description := req.FormValue("desc")
 		if description == "" {
 			http.Error(w, "failed to get description: ", http.StatusInternalServerError)
@@ -504,12 +528,20 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 
 		fmt.Println("List of voters : ", voterListParsed)
 		candidats := req.FormValue("candidates")
-		// if candidats == "" {
-		// 	http.Error(w, "failed to get list of candidates: ", http.StatusInternalServerError)
-		// 	return
-		// }
 		candidats = strings.ReplaceAll(candidats, " ", "")
 		candidatesParsed := strings.Split(candidats, ",")
+		voterListParsedintoCandidate := make([]*voting.Candidate, len(candidatesParsed))
+		if candidats != "" {
+			for idx, name := range candidatesParsed {
+				u, err := c.vs.NewCandidate(name)
+				if err != nil {
+					http.Error(w, "Candidate creation is incorrect", http.StatusInternalServerError)
+				}
+				voterListParsedintoCandidate[idx] = &u
+			}
+			c.vs.GetVotingInstanceList()[id].SetCandidates(voterListParsedintoCandidate)
+
+		}
 
 		delegTo := make(map[string]voting.Liquid)
 		delegFrom := make(map[string]voting.Liquid)
@@ -527,7 +559,7 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 			voterListParsedintoUser[idx] = &u //&userListParsed[idx]
 		}
 
-		votingConfig, err := impl.NewVotingConfig(voterListParsedintoUser, title, description, candidatesParsed)
+		votingConfig, err := impl.NewVotingConfig(voterListParsedintoUser, title, description, voterListParsedintoCandidate, voting.TypeOfVotingConfig(typeofConfig))
 		if err != nil {
 			http.Error(w, "NewVotingConfig is incorrect"+err.Error(), http.StatusInternalServerError)
 		}
