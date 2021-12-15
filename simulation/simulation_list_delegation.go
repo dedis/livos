@@ -70,11 +70,11 @@ func Simulation_list_delegation(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 7
-	NoNumber := 0
-	IndecisiveNumber := 0
-	ThresholdNumber := 0
-	NonResponsibleNumber := 0
+	YesNumber := 10
+	NoNumber := 10
+	IndecisiveNumber := 10
+	ThresholdNumber := 10
+	NonResponsibleNumber := 10
 	TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -175,15 +175,54 @@ func Simulation_list_delegation(out io.Writer) {
 	} else {
 		fmt.Println("There is no cycle :) ")
 	}
-	//changer les preferences listes des personnes jusqu'a ne plus avoir de cycle
-	for i, u := range voters {
-		if len(u.PreferenceDelegationList) > 1 {
-			g.Delete(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[0]))
-			g.Add(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[1]))
-			if graph.Acyclic(g) {
-				//redo
+
+	// var list = make([]int, 0)
+	// list = append(list, 1, 2, 1)
+	// fmt.Println("LIST :::::::  ", list)
+	// fmt.Println("FIRST ELEMENT IS  ", list[0])
+	// list = list[1:len(list)]
+	// fmt.Println("NEWLIST ::::::: ->>> ", list)
+	// fmt.Println("FIRST ELEMENT IS  ", list[0])
+
+	var stateDelegation = make([](struct {
+		curr     int
+		test     int
+		max_size int
+	}), len(voters))
+	for j, user := range voters {
+		stateDelegation[j] = struct {
+			curr     int
+			test     int
+			max_size int
+		}{0, 0, len(user.PreferenceDelegationList) - 1}
+	}
+
+	fmt.Print(stateDelegation)
+
+	for !graph.Acyclic(g) {
+		//changer les preferences listes des personnes jusqu'a ne plus avoir de cycle
+		for i, u := range voters {
+			if stateDelegation[i].test < stateDelegation[i].max_size {
+				g.Delete(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[stateDelegation[i].curr]))
+				g.Add(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[stateDelegation[i].test+1]))
+				stateDelegation[i].test = stateDelegation[i].test + 1
+				if graph.Acyclic(g) {
+					stateDelegation[i].curr = stateDelegation[i].test
+					break
+				} else {
+					g.Delete(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[stateDelegation[i].test]))
+					g.Add(i, findIndexInListOfUser(voters, u.PreferenceDelegationList[stateDelegation[i].curr]))
+				}
 			}
 		}
+	}
+
+	IsThereCycle2 := !graph.Acyclic(g)
+	if IsThereCycle2 {
+		fmt.Println("There is still a cycle !!!")
+	} else {
+		fmt.Println("There is now no cycle :) ")
+		fmt.Print(stateDelegation)
 	}
 
 	//candidats
