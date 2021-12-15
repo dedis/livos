@@ -313,6 +313,7 @@ func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Req
 	}
 
 }
+
 func (c Controller) HandleShowElectionCandidate(w http.ResponseWriter, req *http.Request) {
 
 	err := req.ParseForm()
@@ -567,12 +568,38 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	var listOfVoters = ""
+	for _, user := range electionAdd.GetConfig().Voters {
+		if listOfVoters == "" {
+			listOfVoters = listOfVoters + user.UserID
+		} else {
+			listOfVoters = listOfVoters + "," + user.UserID
+		}
+	}
+
+	var listOfCandidats = ""
+	for _, cand := range electionAdd.GetConfig().Candidates {
+		if listOfCandidats == "" {
+			listOfCandidats = listOfCandidats + cand.CandidateID
+		} else {
+			listOfCandidats = listOfCandidats + "," + cand.CandidateID
+		}
+	}
+
+	var description = electionAdd.GetConfig().Description
+
 	data := struct {
-		Election voting.VotingInstance
-		id       string
+		Election        voting.VotingInstance
+		id              string
+		ListOfVoters    string
+		ListOfCandidats string
+		Description     string
 	}{
-		Election: electionAdd,
-		id:       id,
+		Election:        electionAdd,
+		id:              id,
+		ListOfVoters:    listOfVoters,
+		ListOfCandidats: listOfCandidats,
+		Description:     description,
 	}
 
 	if req.Method == "POST" {
