@@ -172,14 +172,14 @@ div.delegation{
 	justify-content: flex-end;
 	align-items:flex-end;
     /* top: calc(80% - 100px); */
-    top: 20%;
-    right: 5%;
+    top: 80%;
+    right: 25%;
     bottom: 10%;
 }
 
 .listOfVoters{
     width  : 20%;
-    position: relative;
+    position: absolute;
 	display:table;
 	justify-content:left;
 	align-self: left;
@@ -187,14 +187,14 @@ div.delegation{
 	border-radius: 10px;
     font-weight: bold;
     left: 3%;
-    top: 25%;
+    top: 20%;
     padding-top: 2%;
     box-shadow: 7px 4px 4px grey ;
     background: #a9ceff;
 }
 .listOfCandidates{
     width  : 20%;
-    position: relative;
+    position: absolute;
 	display:table;
 	justify-content:left;
 	align-self: left;
@@ -202,7 +202,7 @@ div.delegation{
 	border-radius: 10px;
     font-weight: bold;
     left: 77%;
-    top: 10%;
+    top: 20%;
     padding-top: 2%;
     box-shadow: 7px 4px 4px grey ;
     background: #a9ceff;

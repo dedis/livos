@@ -19,24 +19,25 @@
 
       <div class="listOfVoters">
         <h3>
-          List of Voters :<br>
+          List of Voters :
         </h3>
+        <br>
         {{range $key, $value := .Election.Config.Voters}}
-          <br><h3>{{$value.UserID}} has {{$value.VotingPower}}% left.</h3> <br>
+          <h3>{{$value.UserID}} has {{$value.VotingPower}}% left.</h3><br>
         {{end}}
       </div>
       
       <div class="listOfCandidates">
         <h3>
-          List of Candidate :<br>
+          List of Candidate :
         </h3>
+        <br>
         {{range $key, $value := .Election.Config.Candidates}}
-          <br><h3>{{$value.CandidateID}}</h3> <br>
+          <h3>{{$value.CandidateID}}</h3><br>
         {{end}}
       </div>
 
       <form method="post" class="form-example" >
-        
         <div class="votingChoice">
           <div class="form-example">
             <label for="voter">List of voters : </label>

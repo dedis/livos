@@ -173,7 +173,7 @@ form {
 }
 .formInside{
 	position: absolute;
-	left:25%;
+	left:28%;
 }
 .voteOpen{
 	left: -10%;
@@ -244,10 +244,9 @@ form {
 	color: #000000;
 	background: linear-gradient(-45deg,#46b442, #a9b9cf);
 	border-color: #000000;
-	-webkit-transition: all 0.5s ease;
-	-ms-transition: all 0.5s ease;
+	-webkit-transition: all 0.3s ease;
+	-ms-transition: all 0.3s ease;
 	transition: all 1s ease;
-	transition: transform 1s;
 }
 
 input[type="submit"]:focus {
@@ -264,7 +263,7 @@ input[type="submit"]:focus {
 	align-items:center;
 	/* align-self: start; */
 	top: calc(30% - 100px);
-	left: calc(80% - 100px);
+	left: calc(83% - 100px);
 }
 
 a.button4{
@@ -318,6 +317,7 @@ a.buttonParam:hover{
 	height: 35px;
 	position: relative;
 	transition: 0.5s;
+	left:10px;
 }
 .buttonsClose > a img:hover{
 	transition: transform 0.5s;

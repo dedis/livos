@@ -160,6 +160,17 @@ label[for="status"] {
 	font-weight:bold;
 }
 
+label[for="typeOfConfig"] {
+	white-space:pre-wrap;
+	flex: none;
+	padding: 5px;
+	display:inline-block;
+	/* border: 0.1em; */
+	border-radius: 100px;
+	background: hsl(0, 0%, 90%, 50%);
+	font-weight:bold;
+}
+
 .title {
 	top: 25px;
 	font-weight:bold;
