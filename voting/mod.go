@@ -15,6 +15,8 @@ type VotingSystem interface {
 
 	NewUser(userID string, delegTo map[string]Liquid, delegFrom map[string]Liquid, histoChoice []Choice, typeOfUser TypeOfUser, preferenceDelegationList []*User) (User, error)
 
+	NewCandidate(candidateID string) (Candidate, error)
+
 	//override the method print?
 }
 
@@ -37,13 +39,15 @@ type VotingInstance interface {
 
 	SetVoters(users []*User) error
 
-	SetCandidates(candidates []string) error
+	SetCandidates(candidates []*Candidate) error
+
+	SetTypeOfVotingConfig(typeOfVotingConfig string) error
 
 	GetUser(string) (*User, error)
 
-	CheckVotingPower(user *User) error
+	GetCandidate(string) (*Candidate, error)
 
-	CheckVotingPowerOfUser(user *User) bool
+	CheckVotingPower(user *User) error
 
 	SetVote(user *User, choice Choice) error
 
@@ -60,8 +64,17 @@ type VotingConfig struct {
 	Title       string
 	Description string
 	// Candidates is a list of userID (can be empty if yes/no question)
-	Candidates []string
+	Candidates []*Candidate
+
+	//work like a boolean to see if the votingConfig is a yes/no question or a candidate one
+	TypeOfVotingConfig TypeOfVotingConfig
 }
+type TypeOfVotingConfig string
+
+const (
+	CandidateQuestion TypeOfVotingConfig = "CandidateQuestion"
+	YesOrNoQuestion   TypeOfVotingConfig = "YesOrNoQuestion"
+)
 
 type Choice struct {
 	// VoteValue contains map the YES/NO answer to the percentage of voting
@@ -95,6 +108,13 @@ type User struct {
 
 	//delegation preference list
 	PreferenceDelegationList []*User
+}
+
+type Candidate struct {
+	//name of the candidat
+	CandidateID string
+
+	//It could aso have a party, a programm, a type of candidate
 }
 
 type TypeOfUser string

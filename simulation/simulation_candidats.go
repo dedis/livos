@@ -14,7 +14,7 @@ import (
 
 // GenerateItemsGraphviz creates a graphviz representation of the items. One can
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
-func Simulation2(out io.Writer) {
+func Simulation_candidats(out io.Writer) {
 
 	const InitialVotingPower = 100.
 
@@ -41,14 +41,7 @@ func Simulation2(out io.Writer) {
 				xerrors.Errorf(err.Error())
 			}
 			voters = append(voters, &user)
-		case chooseType < 10:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-
-		case chooseType < 60:
+		case chooseType < 50:
 			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, nil)
 			if err != nil {
 				xerrors.Errorf(err.Error())
@@ -83,13 +76,18 @@ func Simulation2(out io.Writer) {
 	}
 
 	//candidats
-	var candidats = make([]*voting.Candidate, 3)
+	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
+	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
+	var candidatJeanMi, _ = VoteSystem.NewCandidate("JeanMi")
+	var candidatMacron, _ = VoteSystem.NewCandidate("Macron")
+
+	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatJeanMi, &candidatMacron}
 
 	//empty list of votes
 	//var votes = make(map[string]voting.Choice)
 
 	//creation of votingConfig
-	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Sunny day everyday ?", candidats, "YesOrNoQuestion")
+	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Who are you gonna elect as a President ?", candidats, "CandidateQuestion")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -106,43 +104,22 @@ func Simulation2(out io.Writer) {
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		liquid_0, err := impl.NewLiquid(0)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
 
 		choiceTab := make(map[string]voting.Liquid)
 
-		choiceTab["yes"] = quantity_to_Vote
-		choiceTab["no"] = liquid_0
-		//create choice
-		choice, err := impl.NewChoice(choiceTab)
-		if err != nil {
-			fmt.Println(err.Error())
+		candidateChoice, err := random.IntRange(0, len(candidats))
+
+		switch {
+		case candidateChoice == 0:
+			choiceTab["Trump"] = quantity_to_Vote
+		case candidateChoice == 1:
+			choiceTab["Obama"] = quantity_to_Vote
+		case candidateChoice == 2:
+			choiceTab["JeanMi"] = quantity_to_Vote
+		default:
+			choiceTab["Macron"] = quantity_to_Vote
 		}
 
-		//set the choice
-		err = VoteInstance.SetVote(user, choice)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
-	}
-	noVote := func(user *voting.User, votingPower float64) {
-		quantity := votingPower
-		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		liquid_0, err := impl.NewLiquid(0)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		choiceTab := make(map[string]voting.Liquid)
-
-		choiceTab["no"] = quantity_to_Vote
-		choiceTab["yes"] = liquid_0
 		//create choice
 		choice, err := impl.NewChoice(choiceTab)
 		if err != nil {
@@ -223,22 +200,7 @@ func Simulation2(out io.Writer) {
 			//Vote action
 
 			quantity := user.VotingPower
-			if len(user.HistoryOfChoice) == 0 {
-				yesOrNo, err := random.IntRange(1, 3)
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do yesOrNo ")
-				}
-
-				if yesOrNo == 1 {
-					yesVote(user, quantity)
-				} else {
-					noVote(user, quantity)
-				}
-			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-				noVote(user, quantity)
-			} else {
-				yesVote(user, quantity)
-			}
+			yesVote(user, quantity)
 
 		}
 	}
@@ -259,36 +221,12 @@ func Simulation2(out io.Writer) {
 			//Vote action
 
 			quantity := user.VotingPower
-
-			if len(user.HistoryOfChoice) == 0 {
-				yesOrNo, err := random.IntRange(1, 3)
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do yesOrNo ")
-				}
-
-				if yesOrNo == 1 {
-					yesVote(user, quantity)
-				} else {
-					noVote(user, quantity)
-				}
-			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-				noVote(user, quantity)
-			} else {
-				yesVote(user, quantity)
-			}
+			yesVote(user, quantity)
 		}
 	}
 	NonResponsibleVoter := func(user *voting.User, i int) {
 		if len(user.HistoryOfChoice) == 0 {
-			var randomNumberToChooseYesOrNo, err = random.IntRange(0, 2)
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-			}
-			if randomNumberToChooseYesOrNo == 0 {
-				yesVote(user, InitialVotingPower)
-			} else {
-				noVote(user, InitialVotingPower)
-			}
+			yesVote(user, InitialVotingPower)
 		} else {
 			//Delegation action
 			IndecisiveVote(user, i)
@@ -314,23 +252,7 @@ func Simulation2(out io.Writer) {
 			//Vote action
 
 			quantity := user.VotingPower
-			if len(user.HistoryOfChoice) == 0 {
-				yesOrNo, err := random.IntRange(1, 3)
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do yesOrNo ")
-				}
-
-				if yesOrNo == 1 {
-					yesVote(user, quantity)
-				} else {
-					noVote(user, quantity)
-				}
-			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-				noVote(user, quantity)
-			} else {
-				yesVote(user, quantity)
-			}
-
+			yesVote(user, quantity)
 		}
 	}
 
@@ -341,8 +263,6 @@ func Simulation2(out io.Writer) {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
 					yesVote(user, user.VotingPower)
-				case voting.NoVoter:
-					noVote(user, user.VotingPower)
 				case voting.IndecisiveVoter:
 					IndecisiveVote(user, i)
 				case voting.ThresholdVoter:
@@ -360,7 +280,6 @@ func Simulation2(out io.Writer) {
 	}
 
 	counterYesVoter := 0
-	counterNoVoter := 0
 	counterIndecisiveVoter := 0
 	counterThresholdVoter := 0
 	counterNormalVoter := 0
@@ -370,8 +289,6 @@ func Simulation2(out io.Writer) {
 		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
 		if user.TypeOfUser == "YesVoter" {
 			counterYesVoter++
-		} else if user.TypeOfUser == "NoVoter" {
-			counterNoVoter++
 		} else if user.TypeOfUser == "IndecisiveVoter" {
 			counterIndecisiveVoter++
 		} else if user.TypeOfUser == "ThresholdVoter" {
@@ -384,13 +301,13 @@ func Simulation2(out io.Writer) {
 			counterNormalVoter++
 		}
 	}
-	fmt.Println("There is ", counterYesVoter, "yesVoter,", counterNoVoter, "noVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter and", counterNormalVoter, "normalVoter")
+	fmt.Println("There is ", counterYesVoter, "yesVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter and", counterNormalVoter, "normalVoter")
 
 	results := VoteInstance.GetResults()
 	s := "%"
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["yes"], s, results["no"], s, time.Now(), counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Macron = %.4v %s, Trump = %.4v %s, JeanMi = %.4v %s et Obama = %.4v %s,<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["Macron"], s, results["Trump"], s, results["JeanMi"], s, results["Obama"], s, time.Now(), counterYesVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
@@ -398,6 +315,8 @@ func Simulation2(out io.Writer) {
 	for _, user := range VoteInstance.GetConfig().Voters {
 
 		colorVoteYes := "#22bd27"
+		colorObama := "#42D03F"
+		colorJeanMi := "#FC5A5A"
 		colorVoteNo := "#cf1111"
 		colorDeleg := "#8A2BE2"
 
@@ -437,16 +356,25 @@ func Simulation2(out io.Writer) {
 
 		//creation of the arrows for the votes
 		for _, choice := range cumulativeHistoryOfChoice {
-			if choice.VoteValue["yes"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes, choice.VoteValue["yes"].Percentage/60)
-			}
-
-			if choice.VoteValue["no"].Percentage != 0. {
+			if choice.VoteValue["Trump"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
 					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo, choice.VoteValue["no"].Percentage/60)
+					user.UserID, "Trump", choice.VoteValue["Trump"].Percentage, colorVoteNo, choice.VoteValue["Trump"].Percentage/60)
+			}
+			if choice.VoteValue["Obama"].Percentage != 0. {
+				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+					"[ label = < <font color='#42D03F'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "Obama", choice.VoteValue["Obama"].Percentage, colorObama, choice.VoteValue["Obama"].Percentage/60)
+			}
+			if choice.VoteValue["JeanMi"].Percentage != 0. {
+				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+					"[ label = < <font color='#FC5A5A'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "JeanMi", choice.VoteValue["JeanMi"].Percentage, colorJeanMi, choice.VoteValue["JeanMi"].Percentage/60)
+			}
+			if choice.VoteValue["Macron"].Percentage != 0. {
+				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "Macron", choice.VoteValue["Macron"].Percentage, colorVoteYes, choice.VoteValue["Macron"].Percentage/60)
 			}
 		}
 

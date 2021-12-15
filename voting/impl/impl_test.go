@@ -20,9 +20,9 @@ var userGuillaume, _ = VoteSystem.NewUser("Guillaume", make(map[string]voting.Li
 var userEtienne, _ = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 
 var voters = []*voting.User{&userNoemien, &userGuillaume, &userEtienne}
-var candidats = make([]string, 0)
+var candidats = make([]*voting.Candidate, 0)
 
-var voteConfig, _ = NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+var voteConfig, _ = NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats, "YesOrNoQuestion")
 
 var vi, _ = VoteSystem.CreateAndAdd("Session01", voteConfig, "open")
 
@@ -47,10 +47,16 @@ func TestNewUser(t *testing.T) {
 	require.Equal(t, userNoemien.DelegatedTo, make(map[string]voting.Liquid), "DelegatedTo initialization incorrect")
 }
 
-//TODO : add testing error for newUser()
+func TestNewCandidate(t *testing.T) {
+	candidateTrump, err := VoteSystem.NewCandidate("Trump")
+	if err != nil {
+		xerrors.Errorf(err.Error())
+	}
+	require.Equal(t, candidateTrump.CandidateID, "Trump")
+}
 
 func TestVotingInstanceCreate(t *testing.T) {
-	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats, "YesOrNoQuestion")
 	require.Equal(t, err, nil, "Cannot create VotingConfig")
 
 	VoteSystem.CreateAndAdd("Session01", voteConfig, "open")
@@ -68,19 +74,23 @@ func TestVotingInstanceCreate(t *testing.T) {
 }
 
 func TestNewVotingConfig(t *testing.T) {
-	voteConfig, _ := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, _ := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats, "YesOrNoQuestion")
 	require.Equal(t, voteConfig.Voters, voters)
 	require.Equal(t, voteConfig.Title, "TestVotingTitle")
 	require.Equal(t, voteConfig.Description, "Quick description")
 	require.Equal(t, voteConfig.Candidates, candidats)
+	require.Equal(t, voteConfig.TypeOfVotingConfig, voting.TypeOfVotingConfig("YesOrNoQuestion"))
 
-	_, err := NewVotingConfig(voters, "", "Quick description", candidats)
+	_, err := NewVotingConfig(voters, "", "Quick description", candidats, "YesOrNoQuestion")
 	require.Equal(t, err.Error(), "Title is empty")
+
+	_, err = NewVotingConfig(voters, "Hello", "Quick description", candidats, "Blabla")
+	require.Equal(t, err.Error(), "TypeOfVotingCOnfig Incorrect")
 
 }
 
 func TestCreateAndAdd(t *testing.T) {
-	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats)
+	voteConfig, err := NewVotingConfig(voters, "TestVotingTitle", "Quick description", candidats, "YesOrNoQuestion")
 	require.Equal(t, err, nil, "Creation of votingConfig is incorrect.")
 
 	_, err = VoteSystem.CreateAndAdd("", voteConfig, "open")
@@ -93,14 +103,14 @@ func TestCreateAndAdd(t *testing.T) {
 	require.Equal(t, VoteSystem.VotingInstancesList["Session01"], vi, "Creation of the voting instance is incorrect")
 }
 
-func TestListVoting(t *testing.T) {
+/* func TestListVoting(t *testing.T) {
 	vi1, _ := VoteSystem.CreateAndAdd("Session01", voteConfig, "open")
 	vi2, _ := VoteSystem.CreateAndAdd("Session02", voteConfig, "open")
 	vi3, _ := VoteSystem.CreateAndAdd("Session03", voteConfig, "open")
 	verifListVotingSystem := []string{vi1.GetVotingID(), vi2.GetVotingID(), vi3.GetVotingID()}
 	listeVotingSystems := VoteSystem.ListVotings()
 	require.Equal(t, verifListVotingSystem, listeVotingSystems)
-}
+} */
 
 func TestCloseVoting(t *testing.T) {
 	vi.CloseVoting()
@@ -171,41 +181,80 @@ func TestGetResults(t *testing.T) {
 	var userG, _ = VoteSystem.NewUser("Guillaume", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 	var userE, _ = VoteSystem.NewUser("Etienne", make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
 
-	var voters = []*voting.User{&userN, &userG, &userE}
-	var candidats = make([]string, 0)
+	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
+	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
+	var candidatJeanMi, _ = VoteSystem.NewCandidate("JeanMi")
 
-	var voteConfig, _ = NewVotingConfig(voters, "TestGetResults", "Quick description", candidats)
+	var voters = []*voting.User{&userN, &userG, &userE}
+	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatJeanMi}
+
+	var voteConfig, _ = NewVotingConfig(voters, "TestGetResults", "Quick description", candidats, "CandidateQuestion")
 
 	var vi, _ = VoteSystem.CreateAndAdd("Session02", voteConfig, "open")
 
-	var liquid_100, _ = NewLiquid(100)
-	var liquid_50, _ = NewLiquid(50)
-	var liquid_0, _ = NewLiquid(0)
+	if voteConfig.TypeOfVotingConfig == "YesOrNoQuestion" {
+		var liquid_100, _ = NewLiquid(100)
+		var liquid_50, _ = NewLiquid(50)
+		var liquid_0, _ = NewLiquid(0)
 
-	var yesChoice = make(map[string]voting.Liquid)
-	var noChoice = make(map[string]voting.Liquid)
-	var midChoice = make(map[string]voting.Liquid)
+		var yesChoice = make(map[string]voting.Liquid)
+		var noChoice = make(map[string]voting.Liquid)
+		var midChoice = make(map[string]voting.Liquid)
 
-	yesChoice["yes"] = liquid_100
-	yesChoice["no"] = liquid_0
-	noChoice["no"] = liquid_100
-	noChoice["yes"] = liquid_0
-	midChoice["no"] = liquid_50
-	midChoice["yes"] = liquid_50
+		yesChoice["yes"] = liquid_100
+		yesChoice["no"] = liquid_0
+		noChoice["no"] = liquid_100
+		noChoice["yes"] = liquid_0
+		midChoice["no"] = liquid_50
+		midChoice["yes"] = liquid_50
 
-	choiceG, _ := NewChoice(noChoice)
-	choiceE, _ := NewChoice(midChoice)
-	choiceN, _ := NewChoice(yesChoice)
+		choiceG, _ := NewChoice(noChoice)
+		choiceE, _ := NewChoice(midChoice)
+		choiceN, _ := NewChoice(yesChoice)
 
-	vi.SetVote(&userG, choiceG)
-	vi.SetVote(&userE, choiceE)
-	vi.SetVote(&userN, choiceN)
+		vi.SetVote(&userG, choiceG)
+		vi.SetVote(&userE, choiceE)
+		vi.SetVote(&userN, choiceN)
 
-	propYes := vi.GetResults()["yes"]
-	require.Equal(t, propYes, 50., "Yes proportion is incorrect, got: %f, want: %f.", propYes, 50.)
+		propYes := vi.GetResults()["yes"]
+		require.Equal(t, propYes, 50., "Yes proportion is incorrect, got: %f, want: %f.", propYes, 50.)
 
-	propNo := vi.GetResults()["no"]
-	require.Equal(t, propYes, 50., "No proportion is incorrect, got: %f, want: %f.", propNo, 50.)
+		propNo := vi.GetResults()["no"]
+		require.Equal(t, propYes, 50., "No proportion is incorrect, got: %f, want: %f.", propNo, 50.)
+	} else if voteConfig.TypeOfVotingConfig == "CandidateQuestion" {
+		var liquid_100, _ = NewLiquid(100)
+		var liquid_70, _ = NewLiquid(70)
+		var liquid_30, _ = NewLiquid(30)
+		var liquid_0, _ = NewLiquid(0)
+
+		var yesChoice = make(map[string]voting.Liquid)
+		var noChoice = make(map[string]voting.Liquid)
+		var midChoice = make(map[string]voting.Liquid)
+
+		yesChoice["Trump"] = liquid_100
+		yesChoice["Obama"] = liquid_0
+		noChoice["Obama"] = liquid_100
+		noChoice["Trump"] = liquid_0
+		midChoice["Obama"] = liquid_70
+		midChoice["Trump"] = liquid_30
+
+		choiceG, _ := NewChoice(noChoice)
+		choiceE, _ := NewChoice(midChoice)
+		choiceN, _ := NewChoice(yesChoice)
+
+		vi.SetVote(&userG, choiceG)
+		vi.SetVote(&userE, choiceE)
+		vi.SetVote(&userN, choiceN)
+
+		propTrump := vi.GetResults()["Trump"]
+		require.Equal(t, propTrump, 130., "Trump proportion is incorrect, got: %f, want: %f.", propTrump, 130.)
+
+		propObama := vi.GetResults()["Obama"]
+		require.Equal(t, propObama, 170., "Obama proportion is incorrect, got: %f, want: %f.", propObama, 170.)
+
+		propJeanMi := vi.GetResults()["JeanMi"]
+		require.Equal(t, propJeanMi, 0., "JeanMi proportion is incorrect, got: %f, want: %f.", propJeanMi, 0.)
+	}
 }
 
 func TestGetUser(t *testing.T) {
@@ -217,12 +266,29 @@ func TestGetUser(t *testing.T) {
 	require.Equal(t, err.Error(), "Cannot find the user. UserId is incorrect.")
 }
 
+func TestGetCandidate(t *testing.T) {
+
+	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
+	var voters = make([]*voting.User, 0)
+	var candidats = []*voting.Candidate{&candidatTrump}
+
+	var voteConfig, _ = NewVotingConfig(voters, "TestGetResults", "Quick description", candidats, "CandidateQuestion")
+	var vi, _ = VoteSystem.CreateAndAdd("Session02", voteConfig, "open")
+
+	candidate, _ := vi.GetCandidate("Trump")
+	require.Equal(t, candidate, &candidatTrump, "Get candidate returned incorrect user")
+	require.Equal(t, candidate.CandidateID, "Trump", "Get candidate returned incorrect userID")
+
+	_, err := vi.GetCandidate("else")
+	require.Equal(t, err.Error(), "Cannot find the Candidate. CandidateID is incorrect.")
+}
+
 func TestDelete(t *testing.T) {
 	var VoteList = make(map[string]voting.VotingInstance)
 	var VoteSystem2 = NewVotingSystem(nil, VoteList)
 	var voters = []*voting.User{}
-	var candidats = make([]string, 0)
-	var voteConfig, _ = NewVotingConfig(voters, "TestDelete", "Quick description", candidats)
+	var candidats = make([]*voting.Candidate, 0)
+	var voteConfig, _ = NewVotingConfig(voters, "TestDelete", "Quick description", candidats, "YesOrNoQuestion")
 
 	VoteSystem2.CreateAndAdd("Session02", voteConfig, "open")
 	require.Equal(t, 1, len(VoteSystem2.VotingInstancesList), "Creation of the voting instance not complete. It didn't appear on the voting instance list.")
