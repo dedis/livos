@@ -236,7 +236,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			fmt.Println("ET APRES l'erreur : ")
+			//fmt.Println("ET APRES l'erreur : ")
 			//fmt.Println("::::::11 Result of the setchoice of guillaume", userVoter.MyChoice)
 
 			//cast the vote of the user
@@ -266,7 +266,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		liquidQuantity := voting.Liquid{}
 		Quantity := req.PostFormValue("quantity")
 		if Quantity == "" {
-			liquidNo, err = impl.NewLiquid(0)
+			liquidQuantity, err = impl.NewLiquid(0)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}

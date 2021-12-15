@@ -22,7 +22,7 @@ func Simulation_candidats(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(98, 101)
+	var randomNumOfUser, err = random.IntRange(20, 25)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -75,6 +75,52 @@ func Simulation_candidats(out io.Writer) {
 
 	}
 
+	/*
+		YesNumber := 10
+		NoNumber := 10
+		IndecisiveNumber := 10
+		ThresholdNumber := 10
+		NonResponsibleNumber := 10
+		TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
+
+		i := 0
+		for i = 0; i < YesNumber; i++ {
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter, make([]*voting.User, 0))
+			if err != nil {
+				xerrors.Errorf(err.Error())
+			}
+			voters = append(voters, &user)
+		}
+		for i = i; i < NoNumber+YesNumber; i++ {
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, make([]*voting.User, 0))
+			if err != nil {
+				xerrors.Errorf(err.Error())
+			}
+			voters = append(voters, &user)
+		}
+		for i = i; i < IndecisiveNumber+NoNumber+YesNumber; i++ {
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, make([]*voting.User, 0))
+			if err != nil {
+				xerrors.Errorf(err.Error())
+			}
+			voters = append(voters, &user)
+		}
+		for i = i; i < ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, make([]*voting.User, 0))
+			if err != nil {
+				xerrors.Errorf(err.Error())
+			}
+			voters = append(voters, &user)
+		}
+		for i = i; i < NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, make([]*voting.User, 0))
+			if err != nil {
+				xerrors.Errorf(err.Error())
+			}
+			voters = append(voters, &user)
+		}
+	*/
+
 	//candidats
 	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
 	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
@@ -108,6 +154,9 @@ func Simulation_candidats(out io.Writer) {
 		choiceTab := make(map[string]voting.Liquid)
 
 		candidateChoice, err := random.IntRange(0, len(candidats))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 
 		switch {
 		case candidateChoice == 0:
@@ -131,7 +180,7 @@ func Simulation_candidats(out io.Writer) {
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
+		fmt.Println(user.UserID, " a voté pour ", quantity, "% ", "il était", user.TypeOfUser)
 	}
 
 	IndecisiveVote := func(user *voting.User, i int) {
@@ -314,10 +363,10 @@ func Simulation_candidats(out io.Writer) {
 
 	for _, user := range VoteInstance.GetConfig().Voters {
 
-		colorVoteYes := "#22bd27"
-		colorObama := "#42D03F"
-		colorJeanMi := "#FC5A5A"
-		colorVoteNo := "#cf1111"
+		colorMacron := "#12B2F5"
+		colorObama := "#2AEF56"
+		colorJeanMi := "#FF78EC"
+		colorTrump := "#EAC224"
 		colorDeleg := "#8A2BE2"
 
 		/* colorOfUser := "#FFFFFF"
@@ -359,7 +408,7 @@ func Simulation_candidats(out io.Writer) {
 			if choice.VoteValue["Trump"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
 					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "Trump", choice.VoteValue["Trump"].Percentage, colorVoteNo, choice.VoteValue["Trump"].Percentage/60)
+					user.UserID, "Trump", choice.VoteValue["Trump"].Percentage, colorTrump, choice.VoteValue["Trump"].Percentage/60)
 			}
 			if choice.VoteValue["Obama"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
@@ -374,7 +423,7 @@ func Simulation_candidats(out io.Writer) {
 			if choice.VoteValue["Macron"].Percentage != 0. {
 				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
 					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "Macron", choice.VoteValue["Macron"].Percentage, colorVoteYes, choice.VoteValue["Macron"].Percentage/60)
+					user.UserID, "Macron", choice.VoteValue["Macron"].Percentage, colorMacron, choice.VoteValue["Macron"].Percentage/60)
 			}
 		}
 
