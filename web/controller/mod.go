@@ -66,6 +66,7 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	VotingInstanceTabOpen := make(map[string]voting.VotingInstance)
+
 	VotingInstanceTabClose := make(map[string]voting.VotingInstance)
 
 	for key, value := range c.vs.GetVotingInstanceList() {
@@ -74,12 +75,6 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		} else {
 			VotingInstanceTabClose[key] = value
 		}
-	}
-
-	CandidateOrYesNo := make(map[voting.VotingInstance]string)
-
-	for _, value := range VotingInstanceTabOpen {
-		CandidateOrYesNo[value] = string(value.GetConfig().TypeOfVotingConfig)
 	}
 
 	length_open := len(VotingInstanceTabOpen)
@@ -92,14 +87,12 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 		VotingInstanceTabClose map[string]voting.VotingInstance
 		Length_open            int
 		Length_close           int
-		CandidateOrYesNo       map[voting.VotingInstance]string
 	}{Title: "HomePage",
 		VotingInstanceTab:      c.vs.GetVotingInstanceList(),
 		VotingInstanceTabOpen:  VotingInstanceTabOpen,
 		VotingInstanceTabClose: VotingInstanceTabClose,
 		Length_open:            length_open,
 		Length_close:           length_close,
-		CandidateOrYesNo:       CandidateOrYesNo,
 	}
 
 	if req.Method == "POST" {
@@ -129,7 +122,7 @@ func (c Controller) HandleHomePage(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request) {
+func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Request) {
 
 	err := req.ParseForm()
 	if err != nil {
@@ -137,7 +130,7 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	t, err := template.ParseFS(c.views, "web/views/election.html")
+	t, err := template.ParseFS(c.views, "web/views/electionYesOrNoQuestion.html")
 	if err != nil {
 		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -302,7 +295,184 @@ func (c Controller) HandleShowElection(w http.ResponseWriter, req *http.Request)
 			//fmt.Println("JUST AFTER THE DELEG_TO")
 		}
 
-		http.Redirect(w, req, "/election?id="+id, http.StatusSeeOther)
+		http.Redirect(w, req, "/electionYesOrNoQuestion?id="+id, http.StatusSeeOther)
+	}
+
+	data := struct {
+		Election voting.VotingInstance
+		id       string
+	}{
+		Election: electionAdd,
+		id:       id,
+	}
+
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+func (c Controller) HandleShowElectionCandidate(w http.ResponseWriter, req *http.Request) {
+
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t, err := template.ParseFS(c.views, "web/views/electionCandidateQuestion.html")
+	if err != nil {
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id := req.Form.Get("id")
+	if id == "" {
+		http.Error(w, "failed to get id (id is null) ", http.StatusInternalServerError)
+		return
+	}
+
+	electionAdd, found := c.vs.GetVotingInstanceList()[id]
+	if !found {
+		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
+		return
+	}
+
+	if req.Method == "POST" {
+
+		// VOTING CHOICE : VOTER, YESCHOICE, NOCHOICE => CASTVOTE -----------------
+
+		//get the voter name for the vote to be cast
+		voter := req.PostFormValue("voter")
+		if voter == "" {
+			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
+			return
+		}
+
+		candidate := req.PostFormValue("candidate")
+		if candidate == "" {
+			http.Error(w, "failed to get candidate: ", http.StatusInternalServerError)
+			return
+		}
+
+		//get the value of the the vote to be cast for candidate
+		liquidVote := voting.Liquid{}
+		VoteChoice := req.PostFormValue("quantityPercent")
+		if VoteChoice == "" {
+			liquidVote, err = impl.NewLiquid(0)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		} else {
+			temp, err := strconv.ParseFloat(VoteChoice, 64)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+			liquidVote, err = impl.NewLiquid(temp)
+			if err != nil {
+				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
+			}
+		}
+
+		//get the user (object) from the retrieved name
+		//fmt.Println("VOTER IS ::: ", voter)
+		//fmt.Println("VOTER LIST is ::: ", electionAdd.Config.Voters)
+		userVoter, err := electionAdd.GetUser(voter)
+		if err != nil {
+			http.Error(w, "User cannot be found.", http.StatusInternalServerError)
+		}
+		//fmt.Println("error is :::", err.Error())
+		//fmt.Println("User is : ", userVoter)
+
+		//construct the choice from the Vote value above for candidate
+		choice := make(map[string]voting.Liquid)
+		choice[candidate] = liquidVote
+		choiceUser, err := impl.NewChoice(choice)
+		if err != nil {
+			http.Error(w, "Choice creation incorrect", http.StatusInternalServerError)
+		}
+
+		//set the choice to the user
+		//fmt.Println("::::::00 Result of the setchoice of guillaume", userVoter.MyChoice)
+		//fmt.Println(":::::: CHOICE USER choice of guillaume", choiceUser)
+
+		//fmt.Println("address de uservoter", &userVoter)
+
+		//fmt.Println("AVANT LE SET CHOICE : user = ", userVoter, "  choice = ", choiceUser)
+		if liquidVote.Percentage != 0. {
+			err = electionAdd.SetVote(userVoter, choiceUser)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			//fmt.Println("ET APRES l'erreur : ")
+			//fmt.Println("::::::11 Result of the setchoice of guillaume", userVoter.MyChoice)
+
+			//cast the vote of the user
+			// err = electionAdd.CastVote(userVoter)
+			// if err != nil {
+			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+			// }
+		}
+
+		// DELEGATION : VOTER1, VOTER2, QUANTITY => DELEG_TO -----------------
+
+		//get the voterSender name for the delegation
+		voterSender := req.PostFormValue("voterSender")
+		if voterSender == "" {
+			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
+			return
+		}
+
+		//get the voterReceiver name for the delegation
+		voterReceiver := req.PostFormValue("voterReceiver")
+		if voterReceiver == "" {
+			http.Error(w, "failed to get voter: ", http.StatusInternalServerError)
+			return
+		}
+
+		//get the QUANTITY value of the the vote to be cast
+		liquidQuantity := voting.Liquid{}
+		Quantity := req.PostFormValue("quantity")
+		if Quantity == "" {
+			liquidQuantity, err = impl.NewLiquid(0)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		} else {
+			temp, err := strconv.ParseFloat(Quantity, 64)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			liquidQuantity, err = impl.NewLiquid(temp)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}
+
+		//get the userSender (object) from the retrieved name
+		userSender, err := electionAdd.GetUser(voterSender)
+		if err != nil {
+			http.Error(w, "User cannot be found."+err.Error(), http.StatusInternalServerError)
+		}
+
+		//get the userReceiver (object) from the retrieved name
+		userReceiver, err := electionAdd.GetUser(voterReceiver)
+		if err != nil {
+			http.Error(w, "User cannot be found."+err.Error(), http.StatusInternalServerError)
+		}
+
+		if liquidQuantity.Percentage != 0. {
+			//fmt.Println("JUST BEFORE THE DELEG_TO")
+			err = electionAdd.DelegTo(userSender, userReceiver, liquidQuantity)
+			if err != nil {
+				http.Error(w, "DelegTo incorrect"+err.Error(), http.StatusInternalServerError)
+			}
+			//fmt.Println("JUST AFTER THE DELEG_TO")
+		}
+
+		http.Redirect(w, req, "/electionCandidateQuestion?id="+id, http.StatusSeeOther)
 	}
 
 	data := struct {
@@ -411,8 +581,6 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		if title != "" {
 			c.vs.GetVotingInstanceList()[id].SetTitle(title)
 		}
-		typeofConfig := req.FormValue("typeOfConfig")
-		c.vs.GetVotingInstanceList()[id].SetTypeOfVotingConfig(typeofConfig)
 
 		description := req.FormValue("desc")
 		if description != "" {
@@ -538,10 +706,10 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 					http.Error(w, "Candidate creation is incorrect", http.StatusInternalServerError)
 				}
 				voterListParsedintoCandidate[idx] = &u
+				fmt.Println("List of candidates : ", &voterListParsedintoCandidate)
 			}
-			c.vs.GetVotingInstanceList()[id].SetCandidates(voterListParsedintoCandidate)
-
 		}
+		fmt.Println("CandidatParsed passed")
 
 		delegTo := make(map[string]voting.Liquid)
 		delegFrom := make(map[string]voting.Liquid)
@@ -558,6 +726,7 @@ func (c Controller) HandleCreateVotingRoom(w http.ResponseWriter, req *http.Requ
 			fmt.Println("The user created is : ", u)
 			voterListParsedintoUser[idx] = &u //&userListParsed[idx]
 		}
+		fmt.Println("Creation of votingconfig is comming")
 
 		votingConfig, err := impl.NewVotingConfig(voterListParsedintoUser, title, description, voterListParsedintoCandidate, voting.TypeOfVotingConfig(typeofConfig))
 		if err != nil {

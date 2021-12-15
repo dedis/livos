@@ -192,6 +192,21 @@ div.delegation{
     box-shadow: 7px 4px 4px grey ;
     background: #a9ceff;
 }
+.listOfCandidates{
+    width  : 20%;
+    position: relative;
+	display:table;
+	justify-content:left;
+	align-self: left;
+    border: 3px solid #000;
+	border-radius: 10px;
+    font-weight: bold;
+    left: 77%;
+    top: 10%;
+    padding-top: 2%;
+    box-shadow: 7px 4px 4px grey ;
+    background: #a9ceff;
+}
 
 a.button4{
 	display:inline-block;

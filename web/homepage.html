@@ -54,9 +54,7 @@
           
           {{range $key, $value := .VotingInstanceTabOpen}}
           <div class="buttonsOpen">  
-            {{range $keyCandidate, $valueCandidate := .CandidateOrYesNo}}
-              <a href="/election{{$valueCandidate}}?id={{$key}}" class="button4" >Room {{$key}}</a>
-            {{end}}
+            <a href="/election{{$value.Config.TypeOfVotingConfig}}?id={{$key}}" class="button4" >Room {{$key}}</a>
             <a href="/manage?id={{$key}}"><img src="/web/images/parametre.png"></a>
             <div class="formInside">
               <form method="post"> 

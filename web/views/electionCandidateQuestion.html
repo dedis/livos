@@ -31,7 +31,7 @@
           List of Candidate :<br>
         </h3>
         {{range $key, $value := .Election.Config.Candidates}}
-          <br><h3>{{$value.CandidateID}}.</h3> <br>
+          <br><h3>{{$value.CandidateID}}</h3> <br>
         {{end}}
       </div>
 
@@ -48,8 +48,8 @@
           </div>
 
           <div class="form-example">
-            <label for="voter">List of Candidate : </label>
-              <select name="voter" id="voter">
+            <label for="candidate">List of Candidate : </label>
+              <select name="candidate" id="candidate">
                 {{range $key, $value := .Election.Config.Candidates}}
                   <option>{{$value.CandidateID}}</option>
                 {{end}}
@@ -57,8 +57,8 @@
           </div>
 
           <div class="form-example">
-            <label for="yesPercent">Quantity to vote: </label>
-            <input type="number" name="yesPercent" id="yesPercent" min="0">
+            <label for="quantityPercent">Quantity to vote: </label>
+            <input type="number" name="quantityPercent" id="quantityPercent" min="0">
           </div>
         </div>
 
