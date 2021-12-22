@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <link rel="stylesheet" href="/web/static/vide.css">
+
+    <title>Livos</title>
+  </head>
+  <body>
+
+      {{.Infograph}}
+      <script src= "github.com/mdaines/viz.js" >
+       let digraph = 'digraph { {{.Infograph}} }';
+        // for svg
+        let svgXml = Viz(digraph, { format: "svg"});
+        graphYesNo.body.innerHtml = svgXml;
+        // for img-element
+        let img = Viz(digraph, { format: "png-image-element"});
+        graphYesNo.body.append(img);
+      </script>
+
+      <div class="exitButton">
+        <a href="/homepage" class="button4" >Back to Homepage</a>
+      </div>
+
+  </body>
+</html>

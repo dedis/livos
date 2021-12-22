@@ -300,10 +300,10 @@ func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Req
 
 	data := struct {
 		Election voting.VotingInstance
-		id       string
+		Id       string
 	}{
 		Election: electionAdd,
-		id:       id,
+		Id:       id,
 	}
 
 	err = t.Execute(w, data)
@@ -311,6 +311,63 @@ func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Req
 		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+}
+func (c Controller) HandleGraphYesNo(w http.ResponseWriter, req *http.Request) {
+
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t, err := template.ParseFS(c.views, "web/views/graphYesNo.html")
+	if err != nil {
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id := req.Form.Get("id")
+	if id == "" {
+		http.Error(w, "failed to get id (id is null) ", http.StatusInternalServerError)
+		return
+	}
+
+	electionAdd, found := c.vs.GetVotingInstanceList()[id]
+	if !found {
+		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
+		return
+	}
+
+	stringConstruction := ""
+
+	for _, user := range electionAdd.GetConfig().Voters {
+		for _, choice := range user.HistoryOfChoice {
+			for name := range choice.VoteValue {
+				stringConstruction += user.UserID + " ->" + name + ";"
+			}
+		}
+		for nametodeleg := range user.DelegatedTo {
+			stringConstruction += user.UserID + " ->" + nametodeleg + ";"
+		}
+	}
+
+	data := struct {
+		Election  voting.VotingInstance
+		Id        string
+		Infograph string
+	}{
+		Election:  electionAdd,
+		Id:        id,
+		Infograph: stringConstruction,
+	}
+
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("this is the construction :", stringConstruction)
 
 }
 func (c Controller) HandleShowElectionCandidate(w http.ResponseWriter, req *http.Request) {
@@ -566,13 +623,26 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
 	}
+	voterList := ""
+	for _, voter := range electionAdd.GetConfig().Voters {
+		voterList = voterList + voter.UserID + ","
+	}
+
+	candidateList := ""
+	for _, candidat := range electionAdd.GetConfig().Candidates {
+		candidateList = candidateList + candidat.CandidateID + ","
+	}
 
 	data := struct {
-		Election voting.VotingInstance
-		id       string
+		Election      voting.VotingInstance
+		id            string
+		VoterList     string
+		CandidateList string
 	}{
-		Election: electionAdd,
-		id:       id,
+		Election:      electionAdd,
+		id:            id,
+		VoterList:     voterList,
+		CandidateList: candidateList,
 	}
 
 	if req.Method == "POST" {

@@ -6,6 +6,7 @@ require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/gopherjs/gopherjs v0.0.0-20211101210129-f9bde24e5ca2 // indirect
 	github.com/mazen160/go-random v0.0.0-20210308102632-d2b501c85c03 // indirect
+	github.com/mdaines/viz.js v2.1.2+incompatible // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869
 	go.etcd.io/bbolt v1.3.6 // direct
