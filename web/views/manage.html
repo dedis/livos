@@ -20,40 +20,28 @@
       <form method="post" class="form-example" >
 
         <div class="form-example">
-          <label for="title">Title: </label>
+          <label for="title">Title: </label><br>
           <input type="text" name="title" id="title" value={{.Election.Config.Title}}>
         </div>
-        
-
+      
         <br>
 
-        <!-- <div class="form-example">
-          <label for="status" style="background: none;">Select a status :</label>
-          <span>
-            <input type="radio" name="status" id="open" value="open">
-            <label for="status">Open</label>
-          </span>
-          <span>
-            <input type="radio" name="status" id="close" value="close">
-            <label for="status">Close</label>
-          </span>
-        </div> -->
-
         <div class="form-example">
-          <label for="desc">Description: </label>
-          <textarea type="text" name="desc" id="desc" rows="3" cols="30" maxlength="150" placeholder={{.Election.Config.Description}}></textarea>
+          <label for="desc">Description: </label><br>
+          <textarea type="text" name="desc" id="desc" rows="3" cols="30" maxlength="150">{{.Description}}</textarea>
         </div>
 
         <br>
 
         <div class="form-example">
-          <label for="votersList">Voters List: </label>
-          <textarea type="textarea" name="votersList" id="votersList" rows="3" cols="30" maxlength="150" placeholder={{.VoterList}}></textarea>
+          <label for="votersList">Voters List: </label><br>
+          <!-- placeholder="#Voter1, Voter2, Voter3..." -->
+          <textarea type="text" name="votersList" id="votersList" rows="3" cols="30" maxlength="150">{{.ListOfVoters}}</textarea>
         </div>
 
         <div class="form-example">
-          <label for="candidates">Candidates List: </label>
-          <textarea type="textarea" name="candidates" id="candidates" rows="3" cols="30" maxlength="150" placeholder={{.CandidateList}}></textarea>
+          <label for="candidates">Candidates List: </label><br>
+          <textarea type="textarea" name="candidates" id="candidates" rows="3" cols="30" maxlength="150">{{.ListOfCandidats}}</textarea>
         </div>
 
         <div class="form-example">
