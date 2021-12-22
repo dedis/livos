@@ -27,6 +27,8 @@ type VotingInstance interface {
 
 	GetResults() map[string]float64
 
+	GetResultsQuadraticVoting() map[string]float64
+
 	SetStatus(status string) error
 
 	GetStatus() string
