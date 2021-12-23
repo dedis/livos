@@ -13,7 +13,7 @@
   <body>
 
       {{.Infograph}}
-      <script src= "github.com/mdaines/viz.js" >
+      <!-- <script src= "github.com/mdaines/viz.js" >
        let digraph = 'digraph { {{.Infograph}} }';
         // for svg
         let svgXml = Viz(digraph, { format: "svg"});
@@ -21,8 +21,16 @@
         // for img-element
         let img = Viz(digraph, { format: "png-image-element"});
         graphYesNo.body.append(img);
-      </script>
+      </script> -->
 
+      <script src="/web/static/vizjs/viz.js"></script>
+      <script src="/web/static/vizjs/viz.lite.render.js"></script>
+      <script>
+        var viz = new Viz();
+        const element = await viz.renderSVGElement({{.Infograph}});
+        this.graphYesNo.innerHTML = "";
+        this.graphYesNo.appendChild(element);
+      </script>
       <div class="exitButton">
         <a href="/homepage" class="button4" >Back to Homepage</a>
       </div>

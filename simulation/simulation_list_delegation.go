@@ -591,10 +591,13 @@ func Simulation_list_delegation(out io.Writer) {
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
 	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, results["yes"], s, results["no"], s, time.Now().Format("2 Jan 06 - 15:04:05"))
-	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
-	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled];")
-	for j, user := range VoteInstance.GetConfig().Voters {
-		colorOfUser := "#FFFFFF"
+	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];\n")
+
+	fmt.Fprintf(out, "{\n")
+	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
+
+	for j := range VoteInstance.GetConfig().Voters {
+		/* colorOfUser := "#FFFFFF"
 		if user.TypeOfUser == "YesVoter" { //YesVoter
 			colorOfUser = "#42D03F"
 		} else if user.TypeOfUser == "NoVoter" { //NoVoter
@@ -609,10 +612,11 @@ func Simulation_list_delegation(out io.Writer) {
 			colorOfUser = "#111111"
 		} else { //NormalVoter
 			colorOfUser = "#FFFFFF"
-		}
+		} */
 		s := strconv.FormatInt(int64(j), 10)
-		fmt.Fprintf(out, "user%s [filledcolor=%s];\n", s, colorOfUser)
+		fmt.Fprintf(out, "user%s [fillcolor=%s label=\"user%s\"]\n", s, "red", s)
 	}
+	fmt.Fprintf(out, "}\n")
 
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
 

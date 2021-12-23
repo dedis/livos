@@ -624,15 +624,6 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
 	}
-	voterList := ""
-	for _, voter := range electionAdd.GetConfig().Voters {
-		voterList = voterList + voter.UserID + ","
-	}
-
-	candidateList := ""
-	for _, candidat := range electionAdd.GetConfig().Candidates {
-		candidateList = candidateList + candidat.CandidateID + ","
-	}
 
 	var listOfVoters = ""
 	for _, user := range electionAdd.GetConfig().Voters {
@@ -644,13 +635,18 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 	}
 
 	var listOfCandidats = ""
-	for _, cand := range electionAdd.GetConfig().Candidates {
-		if listOfCandidats == "" {
-			listOfCandidats = listOfCandidats + cand.CandidateID
-		} else {
-			listOfCandidats = listOfCandidats + "," + cand.CandidateID
+	fmt.Println(len(electionAdd.GetConfig().Candidates))
+	if len(electionAdd.GetConfig().Candidates) > 1 {
+		fmt.Println("i am in")
+		for _, cand := range electionAdd.GetConfig().Candidates {
+			if listOfCandidats == "" {
+				listOfCandidats = listOfCandidats + cand.CandidateID
+			} else {
+				listOfCandidats = listOfCandidats + "," + cand.CandidateID
+			}
 		}
 	}
+	fmt.Println("CAndidattttttttttttts:", listOfCandidats)
 
 	var description = electionAdd.GetConfig().Description
 
