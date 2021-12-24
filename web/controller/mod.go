@@ -341,15 +341,22 @@ func (c Controller) HandleGraphYesNo(w http.ResponseWriter, req *http.Request) {
 	}
 
 	stringConstruction := ""
+	liquid_0, _ := impl.NewLiquid(0.)
 
 	for _, user := range electionAdd.GetConfig().Voters {
 		for _, choice := range user.HistoryOfChoice {
-			for name := range choice.VoteValue {
-				stringConstruction += user.UserID + " ->" + name + ";"
+			for name, valueToVote := range choice.VoteValue {
+				if valueToVote.Percentage > liquid_0.Percentage {
+					stringConstruction += user.UserID + " ->" + name + ";"
+				}
 			}
 		}
-		for nametodeleg := range user.DelegatedTo {
-			stringConstruction += user.UserID + " ->" + nametodeleg + ";"
+		fmt.Println("userDeleg:", user.DelegatedTo)
+		for nametodeleg, valueToDeleg := range user.DelegatedTo {
+			fmt.Println("valuetoDeleg:", valueToDeleg.Percentage)
+			if valueToDeleg.Percentage > liquid_0.Percentage {
+				stringConstruction += user.UserID + " ->" + nametodeleg + ";"
+			}
 		}
 	}
 
@@ -639,16 +646,6 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	// voterList := ""
-	// for _, voter := range electionAdd.GetConfig().Voters {
-	// 	voterList = voterList + voter.UserID + ","
-	// }
-
-	// candidateList := ""
-	// for _, candidat := range electionAdd.GetConfig().Candidates {
-	// 	candidateList = candidateList + candidat.CandidateID + ","
-	// }
-
 	var listOfVoters = ""
 	for _, user := range electionAdd.GetConfig().Voters {
 		if listOfVoters == "" {
@@ -669,6 +666,7 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 			}
 		}
 	}
+	fmt.Println("CAndidattttttttttttts:", listOfCandidats)
 
 	var description = electionAdd.GetConfig().Description
 
