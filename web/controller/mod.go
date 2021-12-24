@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -578,6 +579,19 @@ func (c Controller) HandleShowResults(w http.ResponseWriter, req *http.Request) 
 	//fmt.Println("ELECTION ADD object: ", *electionAdd)
 	results := electionAdd.GetResults()
 
+	round := func(num float64) int {
+		return int(num + math.Copysign(0.5, num))
+	}
+
+	toFixed := func(num float64, precision int) float64 {
+		output := math.Pow(10, float64(precision))
+		return float64(round(num*output)) / output
+	}
+
+	for s, res := range results {
+		results[s] = toFixed(res, 2)
+	}
+
 	blanks := 100. - results["yes"] - results["no"]
 
 	data := struct {
@@ -624,15 +638,16 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
 		return
 	}
-	voterList := ""
-	for _, voter := range electionAdd.GetConfig().Voters {
-		voterList = voterList + voter.UserID + ","
-	}
 
-	candidateList := ""
-	for _, candidat := range electionAdd.GetConfig().Candidates {
-		candidateList = candidateList + candidat.CandidateID + ","
-	}
+	// voterList := ""
+	// for _, voter := range electionAdd.GetConfig().Voters {
+	// 	voterList = voterList + voter.UserID + ","
+	// }
+
+	// candidateList := ""
+	// for _, candidat := range electionAdd.GetConfig().Candidates {
+	// 	candidateList = candidateList + candidat.CandidateID + ","
+	// }
 
 	var listOfVoters = ""
 	for _, user := range electionAdd.GetConfig().Voters {
@@ -644,11 +659,14 @@ func (c Controller) HandleManageVoting(w http.ResponseWriter, req *http.Request)
 	}
 
 	var listOfCandidats = ""
-	for _, cand := range electionAdd.GetConfig().Candidates {
-		if listOfCandidats == "" {
-			listOfCandidats = listOfCandidats + cand.CandidateID
-		} else {
-			listOfCandidats = listOfCandidats + "," + cand.CandidateID
+
+	if len(electionAdd.GetConfig().Candidates) > 1 {
+		for _, cand := range electionAdd.GetConfig().Candidates {
+			if listOfCandidats == "" {
+				listOfCandidats = listOfCandidats + cand.CandidateID
+			} else {
+				listOfCandidats = listOfCandidats + "," + cand.CandidateID
+			}
 		}
 	}
 
