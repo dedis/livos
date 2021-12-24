@@ -391,8 +391,32 @@ func Simulation2(out io.Writer) {
 	fmt.Fprintf(out, "digraph network_activity {\n")
 	fmt.Fprintf(out, "labelloc=\"t\";")
 	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["yes"], s, results["no"], s, time.Now(), counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
-	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
-	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
+	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];\n")
+
+	fmt.Fprintf(out, "{\n")
+	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
+
+	for j, user := range VoteInstance.GetConfig().Voters {
+		colorOfUser := "black"
+		if user.TypeOfUser == "YesVoter" { //YesVoter
+			colorOfUser = "darkolivegreen"
+		} else if user.TypeOfUser == "NoVoter" { //NoVoter
+			colorOfUser = "darkorange1"
+		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
+			colorOfUser = "seashell4"
+		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
+			colorOfUser = "gold2"
+		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
+			colorOfUser = "hotpink1"
+		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
+			colorOfUser = "deepskyblue3"
+		} else { //NormalVoter
+			colorOfUser = "white"
+		}
+		s := strconv.FormatInt(int64(j), 10)
+		fmt.Fprintf(out, "user%s [fillcolor=\"%s\" label=\"user%s\"]\n", s, colorOfUser, s)
+	}
+	fmt.Fprintf(out, "}\n")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
 
 	for _, user := range VoteInstance.GetConfig().Voters {
@@ -400,23 +424,6 @@ func Simulation2(out io.Writer) {
 		colorVoteYes := "#22bd27"
 		colorVoteNo := "#cf1111"
 		colorDeleg := "#8A2BE2"
-
-		/* colorOfUser := "#FFFFFF"
-		if user.TypeOfUser == "YesVoter" { //YesVoter
-			colorOfUser = "#42D03F"
-		} else if user.TypeOfUser == "NoVoter" { //NoVoter
-			colorOfUser = "#FC5A5A"
-		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
-			colorOfUser = "#B7FCFF"
-		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
-			colorOfUser = "#6BA7E8"
-		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
-			colorOfUser = "#6066D3"
-		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
-			colorOfUser = "#111111"
-		} else { //NormalVoter
-			colorOfUser = "#FFFFFF"
-		} */
 
 		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
 		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
