@@ -344,17 +344,41 @@ func (c Controller) HandleGraphYesNo(w http.ResponseWriter, req *http.Request) {
 	liquid_0, _ := impl.NewLiquid(0.)
 
 	for _, user := range electionAdd.GetConfig().Voters {
+		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
+		new_vote_value := make(map[string]voting.Liquid)
 		for _, choice := range user.HistoryOfChoice {
-			for name, valueToVote := range choice.VoteValue {
-				if valueToVote.Percentage > liquid_0.Percentage {
-					stringConstruction += user.UserID + " ->" + name + ";"
+			for name, value := range choice.VoteValue {
+				new_vote_value[name], err = impl.AddLiquid(new_vote_value[name], value)
+				if err != nil {
+					fmt.Println(err.Error())
 				}
 			}
 		}
-		fmt.Println("userDeleg:", user.DelegatedTo)
-		for nametodeleg, valueToDeleg := range user.DelegatedTo {
-			fmt.Println("valuetoDeleg:", valueToDeleg.Percentage)
-			if valueToDeleg.Percentage > liquid_0.Percentage {
+		new_choice, err := impl.NewChoice(new_vote_value)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
+
+		for _, choice2 := range cumulativeHistoryOfChoice {
+			for name2, valueToVote := range choice2.VoteValue {
+				if valueToVote.Percentage > liquid_0.Percentage {
+					stringConstruction += user.UserID + " ->" + name2 + ";"
+				}
+			}
+		}
+		//fmt.Println("user name:", user.UserID)
+		//fmt.Println("userDeleg From:", user.DelegatedFrom)
+		//fmt.Println("userDeleg To:", user.DelegatedTo)
+
+		for nametodeleg := range user.DelegatedTo {
+			temp := false
+			for nameFromDeleg := range user.DelegatedFrom {
+				if user.UserID == nameFromDeleg {
+					temp = true
+				}
+			}
+			if temp {
 				stringConstruction += user.UserID + " ->" + nametodeleg + ";"
 			}
 		}
