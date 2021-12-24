@@ -12,25 +12,38 @@
   </head>
   <body>
 
+      
       {{.Infograph}}
-      <!-- <script src= "github.com/mdaines/viz.js" >
-       let digraph = 'digraph { {{.Infograph}} }';
+      <script src="/web/static/vizjs/viz.js"></script>
+      <script src="/web/static/vizjs/viz.lite.render.js"></script>
+      <!-- <script>
+       let digraph = 'digraph { a->b, }';
         // for svg
         let svgXml = Viz(digraph, { format: "svg"});
         graphYesNo.body.innerHtml = svgXml;
         // for img-element
         let img = Viz(digraph, { format: "png-image-element"});
         graphYesNo.body.append(img);
-      </script> -->
+      </script>  -->
 
-      <script src="/web/static/vizjs/viz.js"></script>
-      <script src="/web/static/vizjs/viz.lite.render.js"></script>
-      <script>
+      
+      <!-- <script>
         var viz = new Viz();
-        const element = await viz.renderSVGElement({{.Infograph}});
+        const element = await viz.renderSVGElement('a->b');
         this.graphYesNo.innerHTML = "";
         this.graphYesNo.appendChild(element);
+      </script> -->
+      <script>
+        var viz = new Viz();
+        var strtemp = {{.}};
+        viz.renderSVGElement('digraph '+strtemp)
+          .then(function(element) {
+            document.body.appendChild(element);
+          }).catch(error => {
+            viz = new Viz({workerURL})
+          });
       </script>
+
       <div class="exitButton">
         <a href="/homepage" class="button4" >Back to Homepage</a>
       </div>
