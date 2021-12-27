@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"time"
 
 	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
@@ -22,7 +21,7 @@ func Simulation_candidats(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(20, 25)
+	var randomNumOfUser, err = random.IntRange(10, 11)
 	if err != nil {
 		xerrors.Errorf(err.Error())
 	}
@@ -121,7 +120,7 @@ func Simulation_candidats(out io.Writer) {
 		}
 	*/
 
-	//candidats
+	//candidats inputs
 	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
 	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
 	var candidatJeanMi, _ = VoteSystem.NewCandidate("JeanMi")
@@ -158,16 +157,19 @@ func Simulation_candidats(out io.Writer) {
 			fmt.Println(err.Error())
 		}
 
-		switch {
-		case candidateChoice == 0:
-			choiceTab["Trump"] = quantity_to_Vote
-		case candidateChoice == 1:
-			choiceTab["Obama"] = quantity_to_Vote
-		case candidateChoice == 2:
-			choiceTab["JeanMi"] = quantity_to_Vote
-		default:
-			choiceTab["Macron"] = quantity_to_Vote
-		}
+		choiceTab[candidats[candidateChoice].CandidateID] = quantity_to_Vote
+
+		//MODIFY THE RESULTS NAME => IT HAS TO BE DYNAMIC COMPARED TO THE LIST OF CANDIDATES !!!
+		// switch {
+		// case candidateChoice == 0:
+		// 	choiceTab["Trump"] = quantity_to_Vote
+		// case candidateChoice == 1:
+		// 	choiceTab["Obama"] = quantity_to_Vote
+		// case candidateChoice == 2:
+		// 	choiceTab["JeanMi"] = quantity_to_Vote
+		// default:
+		// 	choiceTab["Macron"] = quantity_to_Vote
+		// }
 
 		//create choice
 		choice, err := impl.NewChoice(choiceTab)
@@ -334,7 +336,7 @@ func Simulation_candidats(out io.Writer) {
 	counterNormalVoter := 0
 	counterNonResponsibleVoter := 0
 	counterResponsibleVoter := 0
-	for _, user := range VoteInstance.GetConfig().Voters {
+	for _, user := range voters {
 		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
 		if user.TypeOfUser == "YesVoter" {
 			counterYesVoter++
@@ -352,88 +354,6 @@ func Simulation_candidats(out io.Writer) {
 	}
 	fmt.Println("There is ", counterYesVoter, "yesVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter and", counterNormalVoter, "normalVoter")
 
-	results := VoteInstance.GetResults()
-	s := "%"
-	fmt.Fprintf(out, "digraph network_activity {\n")
-	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Macron = %.4v %s, Trump = %.4v %s, JeanMi = %.4v %s et Obama = %.4v %s,<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(voters)+2, results["Macron"], s, results["Trump"], s, results["JeanMi"], s, results["Obama"], s, time.Now(), counterYesVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
-	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];")
-	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 fillcolor=gold];")
-	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
-
-	for _, user := range VoteInstance.GetConfig().Voters {
-
-		colorMacron := "#12B2F5"
-		colorObama := "#2AEF56"
-		colorJeanMi := "#FF78EC"
-		colorTrump := "#EAC224"
-		colorDeleg := "#8A2BE2"
-
-		/* colorOfUser := "#FFFFFF"
-		if user.TypeOfUser == "YesVoter" { //YesVoter
-			colorOfUser = "#42D03F"
-		} else if user.TypeOfUser == "NoVoter" { //NoVoter
-			colorOfUser = "#FC5A5A"
-		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
-			colorOfUser = "#B7FCFF"
-		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
-			colorOfUser = "#6BA7E8"
-		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
-			colorOfUser = "#6066D3"
-		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
-			colorOfUser = "#111111"
-		} else { //NormalVoter
-			colorOfUser = "#FFFFFF"
-		} */
-
-		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
-		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
-		new_vote_value := make(map[string]voting.Liquid)
-		for _, choice := range user.HistoryOfChoice {
-			for name, value := range choice.VoteValue {
-				new_vote_value[name], err = impl.AddLiquid(new_vote_value[name], value)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-			}
-		}
-		new_choice, err := impl.NewChoice(new_vote_value)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
-
-		//creation of the arrows for the votes
-		for _, choice := range cumulativeHistoryOfChoice {
-			if choice.VoteValue["Trump"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "Trump", choice.VoteValue["Trump"].Percentage, colorTrump, choice.VoteValue["Trump"].Percentage/60)
-			}
-			if choice.VoteValue["Obama"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#42D03F'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "Obama", choice.VoteValue["Obama"].Percentage, colorObama, choice.VoteValue["Obama"].Percentage/60)
-			}
-			if choice.VoteValue["JeanMi"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#FC5A5A'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "JeanMi", choice.VoteValue["JeanMi"].Percentage, colorJeanMi, choice.VoteValue["JeanMi"].Percentage/60)
-			}
-			if choice.VoteValue["Macron"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "Macron", choice.VoteValue["Macron"].Percentage, colorMacron, choice.VoteValue["Macron"].Percentage/60)
-			}
-		}
-
-		for other, quantity := range user.DelegatedTo {
-			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-				user.UserID, other, quantity.Percentage, colorDeleg, quantity.Percentage/60)
-		}
-	}
-
-	fmt.Fprintf(out, "}\n")
+	VoteInstance.ConstructTextForGraphCandidates(out, VoteInstance.GetResults())
 
 }

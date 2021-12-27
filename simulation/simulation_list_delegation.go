@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"time"
 
 	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
@@ -70,11 +69,11 @@ func Simulation_list_delegation(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 10
-	NoNumber := 10
-	IndecisiveNumber := 10
-	ThresholdNumber := 10
-	NonResponsibleNumber := 10
+	YesNumber := 5
+	NoNumber := 5
+	IndecisiveNumber := 5
+	ThresholdNumber := 5
+	NonResponsibleNumber := 5
 	TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -585,86 +584,6 @@ func Simulation_list_delegation(out io.Writer) {
 		fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower)
 	}
 
-	results := VoteInstance.GetResults()
-	s := "%"
-
-	fmt.Fprintf(out, "digraph network_activity {\n")
-	fmt.Fprintf(out, "labelloc=\"t\";")
-	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated %s)</font>>;", len(voters)+2, results["yes"], s, results["no"], s, time.Now().Format("2 Jan 06 - 15:04:05"))
-	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];\n")
-
-	fmt.Fprintf(out, "{\n")
-	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
-
-	for j := range VoteInstance.GetConfig().Voters {
-		/* colorOfUser := "#FFFFFF"
-		if user.TypeOfUser == "YesVoter" { //YesVoter
-			colorOfUser = "#42D03F"
-		} else if user.TypeOfUser == "NoVoter" { //NoVoter
-			colorOfUser = "#FC5A5A"
-		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
-			colorOfUser = "#B7FCFF"
-		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
-			colorOfUser = "#6BA7E8"
-		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
-			colorOfUser = "#6066D3"
-		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
-			colorOfUser = "#111111"
-		} else { //NormalVoter
-			colorOfUser = "#FFFFFF"
-		} */
-		s := strconv.FormatInt(int64(j), 10)
-		fmt.Fprintf(out, "user%s [fillcolor=%s label=\"user%s\"]\n", s, "red", s)
-	}
-	fmt.Fprintf(out, "}\n")
-
-	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
-
-	for _, user := range VoteInstance.GetConfig().Voters {
-
-		colorVoteYes := "#22bd27"
-		colorVoteNo := "#cf1111"
-		colorDeleg := "#8A2BE2"
-
-		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
-		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
-		new_vote_value := make(map[string]voting.Liquid)
-		for _, choice := range user.HistoryOfChoice {
-			for name, value := range choice.VoteValue {
-				new_vote_value[name], err = impl.AddLiquid(new_vote_value[name], value)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-			}
-		}
-		new_choice, err := impl.NewChoice(new_vote_value)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
-
-		//creation of the arrows for the votes
-		for _, choice := range cumulativeHistoryOfChoice {
-			if choice.VoteValue["yes"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes, choice.VoteValue["yes"].Percentage/40)
-			}
-
-			if choice.VoteValue["no"].Percentage != 0. {
-				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo, choice.VoteValue["no"].Percentage/40)
-			}
-		}
-
-		for other, quantity := range user.DelegatedTo {
-			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-				user.UserID, other, quantity.Percentage, colorDeleg, quantity.Percentage/40)
-		}
-	}
-
-	fmt.Fprintf(out, "}\n")
+	VoteInstance.ConstructTextForGraph(out)
 
 }

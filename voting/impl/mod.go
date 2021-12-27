@@ -1,7 +1,11 @@
 package impl
 
 import (
+	"fmt"
+	"io"
 	"math"
+	"strconv"
+	"time"
 
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
@@ -229,6 +233,226 @@ func (vi *VotingInstance) SetVote(user *voting.User, choice voting.Choice) error
 	}
 
 	return nil
+}
+
+func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results map[string]float64) {
+
+	counterYesVoter := 0
+	counterNoVoter := 0
+	counterIndecisiveVoter := 0
+	counterThresholdVoter := 0
+	counterNormalVoter := 0
+	counterNonResponsibleVoter := 0
+	counterResponsibleVoter := 0
+	for _, user := range vi.GetConfig().Voters {
+		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
+		if user.TypeOfUser == "YesVoter" {
+			counterYesVoter++
+		} else if user.TypeOfUser == "NoVoter" {
+			counterNoVoter++
+		} else if user.TypeOfUser == "IndecisiveVoter" {
+			counterIndecisiveVoter++
+		} else if user.TypeOfUser == "ThresholdVoter" {
+			counterThresholdVoter++
+		} else if user.TypeOfUser == "NonResponsibleVoter" {
+			counterNonResponsibleVoter++
+		} else if user.TypeOfUser == "ResponsibleVoter" {
+			counterResponsibleVoter++
+		} else {
+			counterNormalVoter++
+		}
+	}
+
+	s := "%"
+	fmt.Fprintf(out, "digraph network_activity {\n")
+	fmt.Fprintf(out, "labelloc=\"t\";")
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.   Results are : ", len(vi.GetConfig().Voters)+len(vi.GetConfig().Candidates))
+	for _, cand := range vi.GetConfig().Candidates {
+		fmt.Fprintf(out, "%s = %.4v %s,", cand.CandidateID, results[cand.CandidateID], s)
+	}
+	fmt.Fprintf(out, "<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", time.Now(), counterYesVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
+	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];\n")
+	fmt.Fprintf(out, "{\n")
+	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
+
+	for j, user := range vi.GetConfig().Voters {
+		colorOfUser := "black"
+		if user.TypeOfUser == "YesVoter" { //YesVoter
+			colorOfUser = "darkolivegreen"
+		} else if user.TypeOfUser == "NoVoter" { //NoVoter
+			colorOfUser = "darkorange1"
+		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
+			colorOfUser = "seashell4"
+		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
+			colorOfUser = "gold2"
+		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
+			colorOfUser = "hotpink1"
+		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
+			colorOfUser = "deepskyblue3"
+		} else { //NormalVoter
+			colorOfUser = "white"
+		}
+		s := strconv.FormatInt(int64(j), 10)
+		fmt.Fprintf(out, "user%s [fillcolor=\"%s\" label=\"user%s\"]\n", s, colorOfUser, s)
+	}
+	fmt.Fprintf(out, "}\n")
+	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
+
+	for _, user := range vi.GetConfig().Voters {
+
+		colorDeleg := "#8A2BE2"
+
+		//bruteforce tab with all different possible colors
+		var color = []string{"#12B2F5", "#2AEF56", "#FF78EC", "#EAC224", "#F53024", "#A107DE", "#112AE8", "#FF8F00"}
+
+		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
+		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
+		new_vote_value := make(map[string]voting.Liquid)
+		for _, choice := range user.HistoryOfChoice {
+			for name, value := range choice.VoteValue {
+				var err error
+				new_vote_value[name], err = AddLiquid(new_vote_value[name], value)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
+		}
+		new_choice, err := NewChoice(new_vote_value)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
+
+		for index, cand := range vi.GetConfig().Candidates {
+			for _, choice := range cumulativeHistoryOfChoice {
+				if choice.VoteValue[cand.CandidateID].Percentage != 0. {
+					fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+						"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+						user.UserID, cand.CandidateID, choice.VoteValue[cand.CandidateID].Percentage, color[index%len(color)], choice.VoteValue[cand.CandidateID].Percentage/60)
+				}
+			}
+		}
+
+		for other, quantity := range user.DelegatedTo {
+			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+				user.UserID, other, quantity.Percentage, colorDeleg, quantity.Percentage/60)
+		}
+	}
+
+	fmt.Fprintf(out, "}\n")
+
+}
+
+//Write the necessary information for GraphViz in the buffer given in parameter
+func (vi *VotingInstance) ConstructTextForGraph(out io.Writer) {
+
+	counterYesVoter := 0
+	counterNoVoter := 0
+	counterIndecisiveVoter := 0
+	counterThresholdVoter := 0
+	counterNormalVoter := 0
+	counterNonResponsibleVoter := 0
+	counterResponsibleVoter := 0
+	for _, user := range vi.GetConfig().Voters {
+		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
+		if user.TypeOfUser == "YesVoter" {
+			counterYesVoter++
+		} else if user.TypeOfUser == "NoVoter" {
+			counterNoVoter++
+		} else if user.TypeOfUser == "IndecisiveVoter" {
+			counterIndecisiveVoter++
+		} else if user.TypeOfUser == "ThresholdVoter" {
+			counterThresholdVoter++
+		} else if user.TypeOfUser == "NonResponsibleVoter" {
+			counterNonResponsibleVoter++
+		} else if user.TypeOfUser == "ResponsibleVoter" {
+			counterResponsibleVoter++
+		} else {
+			counterNormalVoter++
+		}
+	}
+
+	results := vi.GetResults()
+	s := "%"
+	fmt.Fprintf(out, "digraph network_activity {\n")
+	fmt.Fprintf(out, "labelloc=\"t\";")
+	fmt.Fprintf(out, "label = <Votation Diagram of %d nodes.    Results are Yes = %.4v %s, No = %.4v %s<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v NoVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", len(vi.GetConfig().Voters)+2, results["yes"], s, results["no"], s, time.Now(), counterYesVoter, counterNoVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
+	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];\n")
+	fmt.Fprintf(out, "{\n")
+	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
+
+	for j, user := range vi.GetConfig().Voters {
+		colorOfUser := "black"
+		if user.TypeOfUser == "YesVoter" { //YesVoter
+			colorOfUser = "darkolivegreen"
+		} else if user.TypeOfUser == "NoVoter" { //NoVoter
+			colorOfUser = "darkorange1"
+		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
+			colorOfUser = "seashell4"
+		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
+			colorOfUser = "gold2"
+		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
+			colorOfUser = "hotpink1"
+		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
+			colorOfUser = "deepskyblue3"
+		} else { //NormalVoter
+			colorOfUser = "white"
+		}
+		s := strconv.FormatInt(int64(j), 10)
+		fmt.Fprintf(out, "user%s [fillcolor=\"%s\" label=\"user%s\"]\n", s, colorOfUser, s)
+	}
+	fmt.Fprintf(out, "}\n")
+	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
+
+	for _, user := range vi.GetConfig().Voters {
+
+		colorVoteYes := "#22bd27"
+		colorVoteNo := "#cf1111"
+		colorDeleg := "#8A2BE2"
+
+		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
+		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
+		new_vote_value := make(map[string]voting.Liquid)
+		for _, choice := range user.HistoryOfChoice {
+			for name, value := range choice.VoteValue {
+				var err error
+				new_vote_value[name], err = AddLiquid(new_vote_value[name], value)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
+		}
+		new_choice, err := NewChoice(new_vote_value)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
+
+		//creation of the arrows for the votes
+		for _, choice := range cumulativeHistoryOfChoice {
+			if choice.VoteValue["yes"].Percentage != 0. {
+				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+					"[ label = < <font color='#22bd27'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "YES", choice.VoteValue["yes"].Percentage, colorVoteYes, choice.VoteValue["yes"].Percentage/60)
+			}
+
+			if choice.VoteValue["no"].Percentage != 0. {
+				fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+					"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+					user.UserID, "NO", choice.VoteValue["no"].Percentage, colorVoteNo, choice.VoteValue["no"].Percentage/60)
+			}
+		}
+
+		for other, quantity := range user.DelegatedTo {
+			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
+				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+				user.UserID, other, quantity.Percentage, colorDeleg, quantity.Percentage/60)
+		}
+	}
+
+	fmt.Fprintf(out, "}\n")
+
 }
 
 //Transfer of voting power between 2 users
