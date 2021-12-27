@@ -12,37 +12,44 @@
   </head>
   <body>
 
+    <script src="/web/static/vizjs/viz.js"></script>
+    <script src="/web/static/vizjs/viz.lite.render.js"></script>
+
       
-      {{.Infograph}}
-      <script src="/web/static/vizjs/viz.js"></script>
-      <script src="/web/static/vizjs/viz.lite.render.js"></script>
-      <!-- <script>
-       let digraph = 'digraph { a->b, }';
+
+      <!-- <script src= "github.com/mdaines/viz.js" >
+       let digraph = 'digraph {a -> b;}';
         // for svg
-        let svgXml = Viz(digraph, { format: "svg"});
+        let svgXml = Viz(digraph, { format: "pdf"});
         graphYesNo.body.innerHtml = svgXml;
         // for img-element
         let img = Viz(digraph, { format: "png-image-element"});
         graphYesNo.body.append(img);
-      </script>  -->
+      </script>
 
-      
-      <!-- <script>
+      <script>
         var viz = new Viz();
-        const element = await viz.renderSVGElement('a->b');
+        const element = await viz.renderSVGElement('digraph {a -> b;}');
         this.graphYesNo.innerHTML = "";
         this.graphYesNo.appendChild(element);
       </script> -->
+
+      s: <input type="text" name="s" id="s" value={{.Infograph}}><br>
+      <button onclick="Render(document.getElementById('s').value)">Render</button>
+
       <script>
-        var viz = new Viz();
-        var strtemp = {{.}};
-        viz.renderSVGElement('digraph '+strtemp)
-          .then(function(element) {
-            document.body.appendChild(element);
-          }).catch(error => {
-            viz = new Viz({workerURL})
-          });
+        function Render(stringData) {
+          var viz = new Viz();
+          viz.renderSVGElement('digraph {' + stringData + '}')
+            .then(function(element) {
+              document.body.appendChild(element);
+            }).catch(error => {
+              viz = new Viz({workerURL})
+            });
+        }
       </script>
+
+
 
       <div class="exitButton">
         <a href="/homepage" class="button4" >Back to Homepage</a>

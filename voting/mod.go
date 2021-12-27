@@ -1,5 +1,9 @@
 package voting
 
+import (
+	"io"
+)
+
 //the voting interface and struct definition
 
 type VotingSystem interface {
@@ -28,6 +32,10 @@ type VotingInstance interface {
 	GetResults() map[string]float64
 
 	GetResultsQuadraticVoting() map[string]float64
+
+	ConstructTextForGraph(out io.Writer)
+
+	ConstructTextForGraphCandidates(out io.Writer, results map[string]float64)
 
 	SetStatus(status string) error
 
