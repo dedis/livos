@@ -342,6 +342,7 @@ func (c Controller) HandleGraphYesNo(w http.ResponseWriter, req *http.Request) {
 
 	stringConstruction := ""
 	liquid_0, _ := impl.NewLiquid(0.)
+	stringConstruction += "node [style=filled];yes[color=green];no[color=red];"
 
 	for _, user := range electionAdd.GetConfig().Voters {
 		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
@@ -363,15 +364,17 @@ func (c Controller) HandleGraphYesNo(w http.ResponseWriter, req *http.Request) {
 		for _, choice2 := range cumulativeHistoryOfChoice {
 			for name2, valueToVote := range choice2.VoteValue {
 				if valueToVote.Percentage > liquid_0.Percentage {
-					stringConstruction += user.UserID + " ->" + name2 + ";"
+					if name2 == "yes" {
+						stringConstruction += user.UserID + " ->" + name2 + "[color=green, label=" + strconv.FormatInt(int64(valueToVote.Percentage), 10) + "]" + ";"
+					} else {
+						stringConstruction += user.UserID + " ->" + name2 + "[color=red, label=" + strconv.FormatInt(int64(valueToVote.Percentage), 10) + "]" + ";"
+					}
+
 				}
 			}
 		}
-		//fmt.Println("user name:", user.UserID)
-		//fmt.Println("userDeleg From:", user.DelegatedFrom)
-		//fmt.Println("userDeleg To:", user.DelegatedTo)
 
-		for nametodeleg := range user.DelegatedTo {
+		for nametodeleg, valueToDeleg := range user.DelegatedTo {
 			temp := false
 			for nameFromDeleg := range user.DelegatedFrom {
 				if user.UserID == nameFromDeleg {
@@ -379,7 +382,101 @@ func (c Controller) HandleGraphYesNo(w http.ResponseWriter, req *http.Request) {
 				}
 			}
 			if temp {
-				stringConstruction += user.UserID + " ->" + nametodeleg + ";"
+				stringConstruction += user.UserID + " ->" + nametodeleg + "[color=purple, label=" + strconv.FormatInt(int64(valueToDeleg.Percentage), 10) + "]" + ";"
+			}
+		}
+	}
+
+	data := struct {
+		Election  voting.VotingInstance
+		Id        string
+		Infograph string
+	}{
+		Election:  electionAdd,
+		Id:        id,
+		Infograph: stringConstruction,
+	}
+
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "failed to execute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("this is the construction :", stringConstruction)
+
+}
+
+func (c Controller) HandleGraphCandidates(w http.ResponseWriter, req *http.Request) {
+
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, "failed to parse the form: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t, err := template.ParseFS(c.views, "web/views/graphCandidates.html")
+	if err != nil {
+		http.Error(w, "failed to load template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id := req.Form.Get("id")
+	if id == "" {
+		http.Error(w, "failed to get id (id is null) ", http.StatusInternalServerError)
+		return
+	}
+
+	electionAdd, found := c.vs.GetVotingInstanceList()[id]
+	if !found {
+		http.Error(w, "Election not found: "+id, http.StatusInternalServerError)
+		return
+	}
+
+	stringConstruction := ""
+	liquid_0, _ := impl.NewLiquid(0.)
+	stringConstruction += "node [style=filled];"
+	listOfCOlorCand := []string{"", "firebrick", "magenta", "darkseagreen", "darkolivegreen"}
+	colorOfCand := ""
+
+	for l, cand := range electionAdd.GetConfig().Candidates {
+		colorOfCand = listOfCOlorCand[int(math.Ceil(float64(l+1)/2))] + strconv.FormatInt(int64(2*l%4)+1, 10)
+		stringConstruction += cand.CandidateID + "[color=" + colorOfCand + "];"
+	}
+
+	for _, user := range electionAdd.GetConfig().Voters {
+		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
+		new_vote_value := make(map[string]voting.Liquid)
+		for _, choice := range user.HistoryOfChoice {
+			for name, value := range choice.VoteValue {
+				new_vote_value[name], err = impl.AddLiquid(new_vote_value[name], value)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
+		}
+		new_choice, err := impl.NewChoice(new_vote_value)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
+
+		for _, choice2 := range cumulativeHistoryOfChoice {
+			for name2, valueToVote := range choice2.VoteValue {
+				if valueToVote.Percentage > liquid_0.Percentage {
+					stringConstruction += user.UserID + " ->" + name2 + "[color=" + colorOfCand + ", label=" + strconv.FormatInt(int64(valueToVote.Percentage), 10) + "]" + ";"
+				}
+			}
+		}
+
+		for nametodeleg, valueToDeleg := range user.DelegatedTo {
+			temp := false
+			for nameFromDeleg := range user.DelegatedFrom {
+				if user.UserID == nameFromDeleg {
+					temp = true
+				}
+			}
+			if temp {
+				stringConstruction += user.UserID + " ->" + nametodeleg + "[color=purple, label=" + strconv.FormatInt(int64(valueToDeleg.Percentage), 10) + "]" + ";"
 			}
 		}
 	}
@@ -567,10 +664,10 @@ func (c Controller) HandleShowElectionCandidate(w http.ResponseWriter, req *http
 
 	data := struct {
 		Election voting.VotingInstance
-		id       string
+		Id       string
 	}{
 		Election: electionAdd,
-		id:       id,
+		Id:       id,
 	}
 
 	err = t.Execute(w, data)

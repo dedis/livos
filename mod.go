@@ -149,6 +149,7 @@ func main() {
 	mux.HandleFunc("/electionCandidateQuestion", ctrl.HandleShowElectionCandidate)
 	mux.HandleFunc("/electionYesOrNoQuestion", ctrl.HandleShowElectionYesNo)
 	mux.HandleFunc("/graphYesNo", ctrl.HandleGraphYesNo)
+	mux.HandleFunc("/graphCandidates", ctrl.HandleGraphCandidates)
 	mux.HandleFunc("/results", ctrl.HandleShowResults)
 	mux.HandleFunc("/manage", ctrl.HandleManageVoting)
 	mux.HandleFunc("/createVotes", ctrl.HandleCreateVotingRoom)

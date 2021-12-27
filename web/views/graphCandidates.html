@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <link rel="stylesheet" href="/web/static/vide.css">
+
+    <title>Livos</title>
+  </head>
+  <body>
+
+    <script src="/web/static/vizjs/viz.js"></script>
+    <script src="/web/static/vizjs/viz.lite.render.js"></script>
+
+      s: <input type="text" name="s" id="s" value={{.Infograph}}><br>
+      <button onclick="Render(document.getElementById('s').value)">Render</button>
+
+      <script>
+        function Render(stringData) {
+          var viz = new Viz();
+          viz.renderSVGElement('digraph {' + stringData + '}')
+            .then(function(element) {
+              document.body.appendChild(element);
+            }).catch(error => {
+              viz = new Viz({workerURL})
+            });
+        }
+      </script>
+
+
+
+      <div class="exitButton">
+        <a href="/homepage" class="button4" >Back to Homepage</a>
+      </div>
+
+  </body>
+</html>
