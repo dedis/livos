@@ -295,6 +295,11 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 		s := strconv.FormatInt(int64(j), 10)
 		fmt.Fprintf(out, "user%s [fillcolor=\"%s\" label=\"user%s\"]\n", s, colorOfUser, s)
 	}
+	listOfCOlorCand := []string{"", "magenta", "darkseagreen", "darkolivegreen", "firebrick"}
+	for k, cand := range vi.GetConfig().Candidates {
+		colorOfCand := listOfCOlorCand[int(math.Ceil(float64(k+1)/4))] + strconv.FormatInt(int64(k%4)+1, 10)
+		fmt.Fprintf(out, "%s [fillcolor=\"%s\" label=\"%s\"]\n", cand.CandidateID, colorOfCand, cand.CandidateID)
+	}
 	fmt.Fprintf(out, "}\n")
 	fmt.Fprintf(out, "edge [fontname = \"helvetica\"];\n")
 
