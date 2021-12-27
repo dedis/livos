@@ -596,25 +596,25 @@ func Simulation_list_delegation(out io.Writer) {
 	fmt.Fprintf(out, "{\n")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
 
-	for j := range VoteInstance.GetConfig().Voters {
-		/* colorOfUser := "#FFFFFF"
+	for j, user := range VoteInstance.GetConfig().Voters {
+		colorOfUser := "black"
 		if user.TypeOfUser == "YesVoter" { //YesVoter
-			colorOfUser = "#42D03F"
+			colorOfUser = "atomic tangerine"
 		} else if user.TypeOfUser == "NoVoter" { //NoVoter
-			colorOfUser = "#FC5A5A"
+			colorOfUser = "barbie pink"
 		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
-			colorOfUser = "#B7FCFF"
+			colorOfUser = "african violet"
 		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
-			colorOfUser = "#6BA7E8"
+			colorOfUser = "bud green"
 		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
-			colorOfUser = "#6066D3"
+			colorOfUser = "baby blue"
 		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
-			colorOfUser = "#111111"
+			colorOfUser = "air superiority blue"
 		} else { //NormalVoter
-			colorOfUser = "#FFFFFF"
-		} */
+			colorOfUser = "white"
+		}
 		s := strconv.FormatInt(int64(j), 10)
-		fmt.Fprintf(out, "user%s [fillcolor=%s label=\"user%s\"]\n", s, "red", s)
+		fmt.Fprintf(out, "user%s [fillcolor=%s label=\"user%s\"]\n", s, colorOfUser, s)
 	}
 	fmt.Fprintf(out, "}\n")
 
