@@ -74,6 +74,7 @@ func Simulation_list_delegation(out io.Writer) {
 	IndecisiveNumber := 5
 	ThresholdNumber := 5
 	NonResponsibleNumber := 5
+	ResponsibleNumber := 5
 	TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -84,29 +85,36 @@ func Simulation_list_delegation(out io.Writer) {
 		}
 		voters = append(voters, &user)
 	}
-	for i = i; i < NoNumber+YesNumber; i++ {
+	for ; i < NoNumber+YesNumber; i++ {
 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, make([]*voting.User, 0))
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
 		voters = append(voters, &user)
 	}
-	for i = i; i < IndecisiveNumber+NoNumber+YesNumber; i++ {
+	for ; i < IndecisiveNumber+NoNumber+YesNumber; i++ {
 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, make([]*voting.User, 0))
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
 		voters = append(voters, &user)
 	}
-	for i = i; i < ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+	for ; i < ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, make([]*voting.User, 0))
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
 		voters = append(voters, &user)
 	}
-	for i = i; i < NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+	for ; i < NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
+		}
+		voters = append(voters, &user)
+	}
+	for ; i < ResponsibleNumber+NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ResponsibleVoter, make([]*voting.User, 0))
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
@@ -242,318 +250,26 @@ func Simulation_list_delegation(out io.Writer) {
 		fmt.Println(err.Error())
 	}
 
-	randomVote := func(user *voting.User, i int) {
-		randomAction, err := random.IntRange(1, 4)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do randomAction")
-		}
-
-		if randomAction == 1 {
-			//Delegation action
-			quantity_to_deleg, err := impl.NewLiquid(float64(user.VotingPower))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do quantity to deleg")
-			}
-			if len(user.PreferenceDelegationList) > 0 {
-				err = VoteInstance.DelegTo(user, user.PreferenceDelegationList[0], quantity_to_deleg)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-				fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", user.PreferenceDelegationList[0].UserID, "il était", user.TypeOfUser)
-			} else {
-				//random index creation (must NOT be == to index of current user)
-				randomDelegateToIndex, err := random.IntRange(0, len(voters))
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
-				}
-				for ok := true; ok; ok = (randomDelegateToIndex == i) {
-					randomDelegateToIndex, err = random.IntRange(0, len(voters))
-					if err != nil {
-						fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-					}
-				}
-				err = VoteInstance.DelegTo(user, voters[randomDelegateToIndex], quantity_to_deleg)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-
-				fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID, "il était ", user.TypeOfUser)
-			}
-		} else if randomAction == 2 {
-			//Vote action
-
-			quantity := user.VotingPower
-			quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			liquid_0, err := impl.NewLiquid(0)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			choiceTab := make(map[string]voting.Liquid)
-
-			if len(user.HistoryOfChoice) == 0 {
-				yesOrNo, err := random.IntRange(1, 3)
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do yesOrNo ")
-				}
-
-				if yesOrNo == 1 {
-					choiceTab["yes"] = quantity_to_Vote
-					choiceTab["no"] = liquid_0
-				} else {
-					choiceTab["yes"] = liquid_0
-					choiceTab["no"] = quantity_to_Vote
-				}
-			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-				choiceTab["yes"] = liquid_0
-				choiceTab["no"] = quantity_to_Vote
-			} else {
-				choiceTab["yes"] = quantity_to_Vote
-				choiceTab["no"] = liquid_0
-			}
-
-			//quantity to vote
-
-			//create choice
-			choice, err := impl.NewChoice(choiceTab)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			//set the choice
-			err = VoteInstance.SetVote(user, choice)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			//cast the vote
-			// err = VoteInstance.CastVote(user)
-			// if err != nil {
-			// 	fmt.Println(err.Error())
-			// }
-
-			fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
-		}
-	}
-
-	yesVote := func(user *voting.User, votingPower float64) {
-		quantity := votingPower
-		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		liquid_0, err := impl.NewLiquid(0)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		choiceTab := make(map[string]voting.Liquid)
-
-		choiceTab["yes"] = quantity_to_Vote
-		choiceTab["no"] = liquid_0
-		//create choice
-		choice, err := impl.NewChoice(choiceTab)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		//set the choice
-		err = VoteInstance.SetVote(user, choice)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
-	}
-	noVote := func(user *voting.User, votingPower float64) {
-		quantity := votingPower
-		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		liquid_0, err := impl.NewLiquid(0)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		choiceTab := make(map[string]voting.Liquid)
-
-		choiceTab["no"] = quantity_to_Vote
-		choiceTab["yes"] = liquid_0
-		//create choice
-		choice, err := impl.NewChoice(choiceTab)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		//set the choice
-		err = VoteInstance.SetVote(user, choice)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
-	}
-
-	IndecisiveVote := func(user *voting.User, i int) {
-		//Delegation action
-		quantity_to_deleg, err := impl.NewLiquid(float64(user.VotingPower))
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do quantity to deleg")
-		}
-		if len(user.PreferenceDelegationList) > 0 {
-			err = VoteInstance.DelegTo(user, user.PreferenceDelegationList[0], quantity_to_deleg)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", user.PreferenceDelegationList[0].UserID, "il était", user.TypeOfUser)
-		} else {
-			//random index creation (must NOT be == to index of current user)
-			randomDelegateToIndex, err := random.IntRange(0, len(voters))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
-			}
-			for ok := true; ok; ok = (randomDelegateToIndex == i) {
-				randomDelegateToIndex, err = random.IntRange(0, len(voters))
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-				}
-			}
-			err = VoteInstance.DelegTo(user, voters[randomDelegateToIndex], quantity_to_deleg)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID, "il était ", user.TypeOfUser)
-		}
-	}
-
-	ThresholdVote := func(user *voting.User, i int, threshold int) {
-
-		var thresholdCOmparator = user.VotingPower
-
-		if thresholdCOmparator > float64(threshold) {
-			//Delegation action
-			quantity_to_deleg, err := impl.NewLiquid(float64(user.VotingPower))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do quantity to deleg")
-			}
-			if len(user.PreferenceDelegationList) > 0 {
-				err = VoteInstance.DelegTo(user, user.PreferenceDelegationList[0], quantity_to_deleg)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-				fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", user.PreferenceDelegationList[0].UserID, "il était", user.TypeOfUser)
-			} else {
-				//random index creation (must NOT be == to index of current user)
-				randomDelegateToIndex, err := random.IntRange(0, len(voters))
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
-				}
-				for ok := true; ok; ok = (randomDelegateToIndex == i) {
-					randomDelegateToIndex, err = random.IntRange(0, len(voters))
-					if err != nil {
-						fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-					}
-				}
-				err = VoteInstance.DelegTo(user, voters[randomDelegateToIndex], quantity_to_deleg)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-
-				fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID, "il était ", user.TypeOfUser)
-			}
-
-		} else {
-			//Vote action
-
-			quantity := user.VotingPower
-			quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			liquid_0, err := impl.NewLiquid(0)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			choiceTab := make(map[string]voting.Liquid)
-
-			if len(user.HistoryOfChoice) == 0 {
-				yesOrNo, err := random.IntRange(1, 3)
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do yesOrNo ")
-				}
-
-				if yesOrNo == 1 {
-					choiceTab["yes"] = quantity_to_Vote
-					choiceTab["no"] = liquid_0
-				} else {
-					choiceTab["yes"] = liquid_0
-					choiceTab["no"] = quantity_to_Vote
-				}
-			} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-				choiceTab["yes"] = liquid_0
-				choiceTab["no"] = quantity_to_Vote
-			} else {
-				choiceTab["yes"] = quantity_to_Vote
-				choiceTab["no"] = liquid_0
-			}
-
-			//quantity to vote
-
-			//create choice
-			choice, err := impl.NewChoice(choiceTab)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			//set the choice
-			err = VoteInstance.SetVote(user, choice)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
-		}
-	}
-
-	NonResponsibleVoter := func(user *voting.User, i int) {
-		if len(user.HistoryOfChoice) == 0 {
-			var randomNumberToChooseYesOrNo, err = random.IntRange(0, 2)
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-			}
-			if randomNumberToChooseYesOrNo == 0 {
-				yesVote(user, 100.)
-			} else {
-				noVote(user, 100.)
-			}
-		} else {
-			//Delegation action
-			IndecisiveVote(user, i)
-		}
-	}
-
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
 		for i, user := range VoteInstance.GetConfig().Voters {
 
 			if user.VotingPower > 0 {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
-					yesVote(user, user.VotingPower)
+					VoteInstance.YesVote(user, user.VotingPower)
 				case voting.NoVoter:
-					noVote(user, user.VotingPower)
+					VoteInstance.NoVote(user, user.VotingPower)
 				case voting.IndecisiveVoter:
-					IndecisiveVote(user, i)
+					VoteInstance.IndecisiveVote(user, i)
 				case voting.ThresholdVoter:
 					var threshold = 600
-					ThresholdVote(user, i, threshold)
+					VoteInstance.ThresholdVote(user, i, threshold)
 				case voting.NonResponsibleVoter:
-					NonResponsibleVoter(user, i)
+					VoteInstance.NonResponsibleVote(user, i)
+				case voting.ResponsibleVoter:
+					VoteInstance.ResponsibleVote(user, i)
 				case voting.None:
-					randomVote(user, i)
+					VoteInstance.RandomVote(user, i)
 				}
 			}
 		}

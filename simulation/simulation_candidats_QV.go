@@ -143,185 +143,23 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) {
 		fmt.Println(err.Error())
 	}
 
-	yesVote := func(user *voting.User, votingPower float64) {
-		quantity := votingPower
-		quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		choiceTab := make(map[string]voting.Liquid)
-
-		candidateChoice, err := random.IntRange(0, len(candidats))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		switch {
-		case candidateChoice == 0:
-			choiceTab["Trump"] = quantity_to_Vote
-		case candidateChoice == 1:
-			choiceTab["Obama"] = quantity_to_Vote
-		case candidateChoice == 2:
-			choiceTab["JeanMi"] = quantity_to_Vote
-		default:
-			choiceTab["Macron"] = quantity_to_Vote
-		}
-
-		//create choice
-		choice, err := impl.NewChoice(choiceTab)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		//set the choice
-		err = VoteInstance.SetVote(user, choice)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		fmt.Println(user.UserID, " a voté pour ", quantity, "% ", "il était", user.TypeOfUser)
-	}
-
-	IndecisiveVote := func(user *voting.User, i int) {
-
-		//Delegation action
-
-		//random index creation (must NOT be == to index of current user)
-		randomDelegateToIndex, err := random.IntRange(0, len(voters))
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
-		}
-		for ok := true; ok; ok = (randomDelegateToIndex == i) {
-			randomDelegateToIndex, err = random.IntRange(0, len(voters))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-			}
-		}
-		quantity_to_deleg, err := impl.NewLiquid(float64(user.VotingPower))
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do quantity to deleg")
-		}
-		err = VoteInstance.DelegTo(user, voters[randomDelegateToIndex], quantity_to_deleg)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID, "il était", user.TypeOfUser)
-	}
-	randomVote := func(user *voting.User, i int) {
-		randomAction, err := random.IntRange(1, 3)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do randomAction")
-		}
-
-		if randomAction == 1 {
-			//Delegation action
-
-			//random index creation (must NOT be == to index of current user)
-			randomDelegateToIndex, err := random.IntRange(0, len(voters))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
-			}
-			for ok := true; ok; ok = (randomDelegateToIndex == i) {
-				randomDelegateToIndex, err = random.IntRange(0, len(voters))
-				if err != nil {
-					fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-				}
-			}
-			randomQuantityToDelegate, err := random.IntRange(1, int(user.VotingPower/10)+1)
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomQuantityToDelegate")
-			}
-			randomQuantityToDelegate *= 10
-			quantity_to_deleg, err := impl.NewLiquid(float64(randomQuantityToDelegate))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do quantity to deleg")
-			}
-			err = VoteInstance.DelegTo(user, voters[randomDelegateToIndex], quantity_to_deleg)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", voters[randomDelegateToIndex].UserID, "il était", user.TypeOfUser)
-
-		} else if randomAction == 2 {
-			//Vote action
-
-			quantity := user.VotingPower
-			yesVote(user, quantity)
-
-		}
-	}
-
-	ThresholdVote := func(user *voting.User, i int, threshold int) {
-
-		var thresholdComparator = 0.
-		for i := range user.HistoryOfChoice {
-			thresholdComparator += user.HistoryOfChoice[i].VoteValue["yes"].Percentage
-			thresholdComparator += user.HistoryOfChoice[i].VoteValue["no"].Percentage
-		}
-
-		if thresholdComparator > float64(threshold) {
-			//Delegation action
-			IndecisiveVote(user, i)
-
-		} else {
-			//Vote action
-
-			quantity := user.VotingPower
-			yesVote(user, quantity)
-		}
-	}
-	NonResponsibleVoter := func(user *voting.User, i int) {
-		if len(user.HistoryOfChoice) == 0 {
-			yesVote(user, InitialVotingPower)
-		} else {
-			//Delegation action
-			IndecisiveVote(user, i)
-		}
-	}
-	ResponsibleVoter := func(user *voting.User, i int) {
-		randomAction, err := random.IntRange(1, 3)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do randomAction")
-		}
-
-		if len(user.HistoryOfChoice) != 0 {
-			randomAction = 2
-		} else if user.DelegatedTo != nil {
-			randomAction = 1
-		}
-
-		if randomAction == 1 {
-			//Delegation action
-			IndecisiveVote(user, i)
-
-		} else if randomAction == 2 {
-			//Vote action
-
-			quantity := user.VotingPower
-			yesVote(user, quantity)
-		}
-	}
-
 	for ok := true; ok; ok = VoteInstance.CheckVotingPowerOfVoters() {
 		for i, user := range VoteInstance.GetConfig().Voters {
-
 			if user.VotingPower > 0 {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
-					yesVote(user, user.VotingPower)
+					VoteInstance.CandidateVote(user, user.VotingPower)
 				case voting.IndecisiveVoter:
-					IndecisiveVote(user, i)
+					VoteInstance.IndecisiveVoteCandidate(user, i)
 				case voting.ThresholdVoter:
 					var threshold = 600
-					ThresholdVote(user, i, threshold)
+					VoteInstance.ThresholdVoteCandidate(user, i, threshold)
 				case voting.NonResponsibleVoter:
-					NonResponsibleVoter(user, i)
+					VoteInstance.NonResponsibleVoteCandidate(user, i)
 				case voting.ResponsibleVoter:
-					ResponsibleVoter(user, i)
+					VoteInstance.ResponsibleVoteCandidate(user, i)
 				case voting.None:
-					randomVote(user, i)
+					VoteInstance.RandomVoteCandidate(user, i)
 				}
 			}
 		}
@@ -349,7 +187,7 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) {
 			counterNormalVoter++
 		}
 	}
-	fmt.Println("There is ", counterYesVoter, "yesVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter and", counterNormalVoter, "normalVoter")
+	fmt.Println("There is ", counterYesVoter, "YesVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter and", counterNormalVoter, "normalVoter")
 
 	//PREMIER GRAPH
 

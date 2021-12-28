@@ -51,6 +51,18 @@ type VotingInstance interface {
 
 	ResponsibleVote(user *User, i int)
 
+	CandidateVote(user *User, votingPower float64)
+
+	IndecisiveVoteCandidate(user *User, i int)
+
+	RandomVoteCandidate(user *User, i int)
+
+	ThresholdVoteCandidate(user *User, i int, threshold int)
+
+	NonResponsibleVoteCandidate(user *User, i int)
+
+	ResponsibleVoteCandidate(user *User, i int)
+
 	SetStatus(status string) error
 
 	GetStatus() string
