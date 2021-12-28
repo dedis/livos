@@ -41,7 +41,7 @@ type VotingInstance interface {
 
 	NoVote(user *User, votingPower float64)
 
-	IndecisiveVote(user *User, i int)
+	IndecisiveVote(user *User, i int, quantityToDeleg float64)
 
 	RandomVote(user *User, i int)
 
@@ -51,9 +51,9 @@ type VotingInstance interface {
 
 	ResponsibleVote(user *User, i int)
 
-	CandidateVote(user *User, votingPower float64)
+	CandidateVote(user *User, i int, votingPower float64)
 
-	IndecisiveVoteCandidate(user *User, i int)
+	IndecisiveVoteCandidate(user *User, i int, quantityToDeleg float64)
 
 	RandomVoteCandidate(user *User, i int)
 
