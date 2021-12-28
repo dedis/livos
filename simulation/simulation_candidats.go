@@ -159,18 +159,6 @@ func Simulation_candidats(out io.Writer) {
 
 		choiceTab[candidats[candidateChoice].CandidateID] = quantity_to_Vote
 
-		//MODIFY THE RESULTS NAME => IT HAS TO BE DYNAMIC COMPARED TO THE LIST OF CANDIDATES !!!
-		// switch {
-		// case candidateChoice == 0:
-		// 	choiceTab["Trump"] = quantity_to_Vote
-		// case candidateChoice == 1:
-		// 	choiceTab["Obama"] = quantity_to_Vote
-		// case candidateChoice == 2:
-		// 	choiceTab["JeanMi"] = quantity_to_Vote
-		// default:
-		// 	choiceTab["Macron"] = quantity_to_Vote
-		// }
-
 		//create choice
 		choice, err := impl.NewChoice(choiceTab)
 		if err != nil {
@@ -186,7 +174,6 @@ func Simulation_candidats(out io.Writer) {
 	}
 
 	IndecisiveVote := func(user *voting.User, i int) {
-
 		//Delegation action
 
 		//random index creation (must NOT be == to index of current user)

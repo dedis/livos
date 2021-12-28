@@ -37,6 +37,20 @@ type VotingInstance interface {
 
 	ConstructTextForGraphCandidates(out io.Writer, results map[string]float64)
 
+	YesVote(user *User, votingPower float64)
+
+	NoVote(user *User, votingPower float64)
+
+	IndecisiveVote(user *User, i int)
+
+	RandomVote(user *User, i int)
+
+	ThresholdVote(user *User, i int, threshold int)
+
+	NonResponsibleVote(user *User, i int)
+
+	ResponsibleVote(user *User, i int)
+
 	SetStatus(status string) error
 
 	GetStatus() string
