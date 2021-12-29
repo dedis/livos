@@ -930,7 +930,7 @@ func (vi *VotingInstance) ResponsibleVoteCandidate(user *voting.User, i int, vot
 		var total_Percentage_Delegated float64 = 1 - total_Percentage_Voted
 
 		if total_Percentage_Delegated != 0 {
-			vi.IndecisiveVoteCandidate(user, i, total_Percentage_Delegated)
+			vi.IndecisiveVoteCandidate(user, i, total_Percentage_Delegated*votingPower)
 		}
 
 	} else {
