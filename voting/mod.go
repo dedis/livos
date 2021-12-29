@@ -43,6 +43,8 @@ type VotingInstance interface {
 
 	IndecisiveVote(user *User, i int, quantityToDeleg float64)
 
+	BreakTheCycle(user *User)
+
 	RandomVote(user *User, i int)
 
 	ThresholdVote(user *User, i int, threshold int)
@@ -52,6 +54,8 @@ type VotingInstance interface {
 	ResponsibleVote(user *User, i int)
 
 	CandidateVote(user *User, i int, votingPower float64)
+
+	BreakTheCycleCandidate(user *User, i int, votingPower float64)
 
 	IndecisiveVoteCandidate(user *User, i int, quantityToDeleg float64)
 

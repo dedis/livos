@@ -75,7 +75,7 @@ func Simulation_list_delegation(out io.Writer) {
 	ThresholdNumber := 5
 	NonResponsibleNumber := 5
 	ResponsibleNumber := 5
-	TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
+	TotalNumber := ResponsibleNumber + NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
 	for i = 0; i < YesNumber; i++ {

@@ -10,6 +10,7 @@ import (
 	"github.com/dedis/livos/storage"
 	"github.com/dedis/livos/voting"
 	"github.com/mazen160/go-random"
+	"github.com/yourbasic/graph"
 	"golang.org/x/xerrors"
 )
 
@@ -611,29 +612,166 @@ func (vi *VotingInstance) CandidateVote(user *voting.User, i int, votingPower fl
 	fmt.Println(user.UserID, " a voté pour tout son voting power car il est ", user.TypeOfUser)
 }
 
-func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, quantityToDeleg float64) {
-
-	//random index creation (must NOT be == to index of current user)
-	randomDelegateToIndex, err := random.IntRange(0, len(vi.GetConfig().Voters))
+func (vi *VotingInstance) BreakTheCycleCandidate(user *voting.User, i int, votingPower float64) {
+	RandomAction, err := random.IntRange(0, 101)
 	if err != nil {
-		fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
+		fmt.Println(err.Error(), "fail to do RandomAction first time")
 	}
-	for ok := true; ok; ok = (randomDelegateToIndex == i) {
-		randomDelegateToIndex, err = random.IntRange(0, len(vi.GetConfig().Voters))
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
+	switch {
+	case RandomAction < 62:
+		//forced to vote
+		vi.CandidateVote(user, i, user.VotingPower)
+	default:
+		//delegate to another person
+		for votingPower > 0 {
+			//random number for the split of voting power
+			quantity, err := random.IntRange(1, (int(votingPower)/10)+1)
+			if err != nil {
+				fmt.Println(err.Error(), "Fail to generate random number.")
+			}
+
+			//the proportion of the voting power to deleg
+			quantity_to_deleg, err := NewLiquid(float64(quantity * 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			indexBelongToDelegatedToList := func(idx int) bool {
+				for name, _ := range user.DelegatedTo {
+					if vi.GetConfig().Voters[idx].UserID == name {
+						return true
+					}
+				}
+				return false
+			}
+
+			//random index creation (must NOT be == to index of current user or to index of already delegated people)
+			randomDelegateToIndex, err := random.IntRange(0, len(vi.GetConfig().Voters))
+			if err != nil {
+				fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
+			}
+			for ok := true; ok; ok = (randomDelegateToIndex == i || indexBelongToDelegatedToList(randomDelegateToIndex)) {
+				randomDelegateToIndex, err = random.IntRange(0, len(vi.GetConfig().Voters))
+				if err != nil {
+					fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
+				}
+			}
+
+			err = vi.DelegTo(user, vi.GetConfig().Voters[randomDelegateToIndex], quantity_to_deleg)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			votingPower -= quantity_to_deleg.Percentage
+		}
+
+	}
+
+}
+
+func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, votingPower float64) {
+
+	UsersMappedPercentage := make(map[string]float64)
+
+	if len(user.HistoryOfChoice) != 0 || len(user.DelegatedTo) != 0 {
+		//the user already voted => must distribute the new voting in the same manner
+
+		//construction du grpah de delegation
+		findIndexInListOfUser := func(list []*voting.User, user *voting.User) int {
+			for i, u := range list {
+				if u == user {
+					return i
+				}
+			}
+			return -1
+		}
+
+		//construct the graph of delegation, run acyclic detection algorithm to detect cycles
+		g := graph.New(len(vi.GetConfig().Voters))
+
+		contructPartialGraphWithDelegatedToList := func(curr_user *voting.User, i int, g *graph.Mutable) {
+			for other, _ := range curr_user.DelegatedTo {
+				otherObject, err := vi.GetUser(other)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				j := findIndexInListOfUser(vi.GetConfig().Voters, otherObject)
+				g.Add(i, j)
+			}
+		}
+
+		for idx, u := range vi.GetConfig().Voters {
+			contructPartialGraphWithDelegatedToList(u, idx, g)
+		}
+
+		IsThereCycle := !graph.Acyclic(g)
+
+		if IsThereCycle {
+			vi.BreakTheCycleCandidate(user, i, votingPower)
+		} else {
+			total_votingPower_delegated := 0.
+			for _, value := range user.DelegatedTo {
+				total_votingPower_delegated += value.Percentage
+			}
+
+			//create a map USERS_NAME => PERCENTAGE VOTED FOR
+			for name, value := range user.DelegatedTo {
+				UsersMappedPercentage[name] = UsersMappedPercentage[name] + (value.Percentage / total_votingPower_delegated)
+			}
+
+			//re-delegate the right amount of the new voting power given the percentage of previous delegation
+			for other, percentage := range UsersMappedPercentage {
+				quantity_to_deleg, err := NewLiquid(votingPower * percentage)
+				if err != nil {
+					fmt.Println(err.Error(), "fail to do quantity to deleg")
+				}
+
+				otherObject, err := vi.GetUser(other)
+
+				err = vi.DelegTo(user, otherObject, quantity_to_deleg)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
+		}
+
+	} else {
+		//loop to empty the quantityToVote
+		for votingPower > 0 {
+			//random number for the split of voting power
+			quantity, err := random.IntRange(1, (int(votingPower)/10)+1)
+			if err != nil {
+				fmt.Println(err.Error(), "Fail to generate random number.")
+			}
+
+			//the proportion of the voting power to deleg
+			quantity_to_deleg, err := NewLiquid(float64(quantity * 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			//random index creation (must NOT be == to index of current user)
+			randomDelegateToIndex, err := random.IntRange(0, len(vi.GetConfig().Voters))
+			if err != nil {
+				fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
+			}
+			for ok := true; ok; ok = (randomDelegateToIndex == i) {
+				randomDelegateToIndex, err = random.IntRange(0, len(vi.GetConfig().Voters))
+				if err != nil {
+					fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
+				}
+			}
+
+			err = vi.DelegTo(user, vi.GetConfig().Voters[randomDelegateToIndex], quantity_to_deleg)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			votingPower -= quantity_to_deleg.Percentage
 		}
 	}
-	quantity_to_deleg, err := NewLiquid(user.VotingPower)
-	if err != nil {
-		fmt.Println(err.Error(), "fail to do quantity to deleg")
-	}
-	err = vi.DelegTo(user, vi.GetConfig().Voters[randomDelegateToIndex], quantity_to_deleg)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 
-	fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", vi.GetConfig().Voters[randomDelegateToIndex].UserID, "il était", user.TypeOfUser)
+	fmt.Println(user.UserID, " a delegué tout son votingPower car il était", user.TypeOfUser)
 }
 
 func (vi *VotingInstance) RandomVoteCandidate(user *voting.User, i int) {
@@ -800,15 +938,15 @@ func (vi *VotingInstance) ResponsibleVoteCandidate(user *voting.User, i int, vot
 		//while the user still have some voting power, vote amongst different candidates and delegate :
 
 		//split between proportion to delegate and proportion to vote (can be 30/70 or 50/50 etc...)
-		quantityDeleg, err := random.IntRange(1, (int(votingPower)/10)+1)
+		quantityVote, err := random.IntRange(1, (int(votingPower)/10)+1)
 		if err != nil {
 			fmt.Println(err.Error(), "Fail to generate random number.")
 		}
-		quantityVote := (int(votingPower) / 10) - quantityDeleg
+		quantityDeleg := (int(votingPower) / 10) - quantityVote
 
 		//*10 to be a voting power
-		quantityDelegFloat := float64(quantityDeleg * 10)
 		quantityVoteFloat := float64(quantityVote * 10)
+		quantityDelegFloat := float64(quantityDeleg * 10)
 
 		//loop to empty the quantityToVote
 		for quantityVoteFloat > 0 {
