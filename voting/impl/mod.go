@@ -639,7 +639,7 @@ func (vi *VotingInstance) RandomVoteCandidate(user *voting.User, i int) {
 		//Vote action
 
 		quantity := user.VotingPower
-		vi.CandidateVote(user, quantity)
+		vi.CandidateVote(user, i, quantity)
 
 	}
 }
@@ -654,7 +654,7 @@ func (vi *VotingInstance) ThresholdVoteCandidate(user *voting.User, i int, thres
 
 	if thresholdComparator > float64(threshold) {
 		//Delegation action
-		vi.IndecisiveVoteCandidate(user, i)
+		vi.IndecisiveVoteCandidate(user, i, user.VotingPower)
 
 	} else {
 		//Vote action
