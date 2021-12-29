@@ -149,9 +149,9 @@ func Simulation_candidats(out io.Writer) {
 			if user.VotingPower > 0 {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
-					VoteInstance.CandidateVote(user, user.VotingPower)
+					VoteInstance.CandidateVote(user, i, user.VotingPower)
 				case voting.IndecisiveVoter:
-					VoteInstance.IndecisiveVoteCandidate(user, i)
+					VoteInstance.IndecisiveVoteCandidate(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
 					var threshold = 600
 					VoteInstance.ThresholdVoteCandidate(user, i, threshold)

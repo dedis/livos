@@ -164,7 +164,7 @@ func Simulation_RealData_Yes_No(out io.Writer) {
 				case voting.NoVoter:
 					VoteInstance.NoVote(user, user.VotingPower)
 				case voting.IndecisiveVoter:
-					VoteInstance.IndecisiveVote(user, i)
+					VoteInstance.IndecisiveVote(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
 					var threshold = 600
 					VoteInstance.ThresholdVote(user, i, threshold)
