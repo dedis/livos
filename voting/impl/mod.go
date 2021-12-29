@@ -240,9 +240,11 @@ func (vi *VotingInstance) SetVote(user *voting.User, choice voting.Choice) error
 
 //DIFFERENT FUNCTIONS FOR THE VOTE SIMULATIONS
 
+//YES OR NO VOTE FUNCTIONS ----------------------------------------------------------------------------------------
+
 func (vi *VotingInstance) YesVote(user *voting.User, votingPower float64) {
 	quantity := votingPower
-	quantity_to_Vote, err := NewLiquid(float64(quantity))
+	quantity_to_Vote, err := NewLiquid(quantity)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -271,7 +273,7 @@ func (vi *VotingInstance) YesVote(user *voting.User, votingPower float64) {
 
 func (vi *VotingInstance) NoVote(user *voting.User, votingPower float64) {
 	quantity := votingPower
-	quantity_to_Vote, err := NewLiquid(float64(quantity))
+	quantity_to_Vote, err := NewLiquid(quantity)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -587,7 +589,7 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, quan
 			fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
 		}
 	}
-	quantity_to_deleg, err := NewLiquid(float64(user.VotingPower))
+	quantity_to_deleg, err := NewLiquid(user.VotingPower)
 	if err != nil {
 		fmt.Println(err.Error(), "fail to do quantity to deleg")
 	}
@@ -639,7 +641,7 @@ func (vi *VotingInstance) RandomVoteCandidate(user *voting.User, i int) {
 		//Vote action
 
 		quantity := user.VotingPower
-		vi.CandidateVote(user, quantity)
+		vi.CandidateVote(user, i, quantity)
 
 	}
 }
@@ -654,7 +656,7 @@ func (vi *VotingInstance) ThresholdVoteCandidate(user *voting.User, i int, thres
 
 	if thresholdComparator > float64(threshold) {
 		//Delegation action
-		vi.IndecisiveVoteCandidate(user, i)
+		vi.IndecisiveVoteCandidate(user, i, user.VotingPower)
 
 	} else {
 		//Vote action
