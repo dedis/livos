@@ -80,7 +80,7 @@ func Simulation(out io.Writer) {
 						fmt.Println(err.Error(), "fail to do randomQuantityToDelegate")
 					}
 					randomQuantityToDelegate *= 10
-					quantity_to_deleg, err := impl.NewLiquid(float64(randomQuantityToDelegate))
+					quantity_to_deleg, err := impl.NewLiquid(randomQuantityToDelegate)
 					if err != nil {
 						fmt.Println(err.Error(), "fail to do quantity to deleg")
 					}
@@ -95,7 +95,7 @@ func Simulation(out io.Writer) {
 					//Vote action
 
 					quantity := user.VotingPower
-					quantity_to_Vote, err := impl.NewLiquid(float64(quantity))
+					quantity_to_Vote, err := impl.NewLiquid(quantity)
 					if err != nil {
 						fmt.Println(err.Error())
 					}

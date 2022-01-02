@@ -159,7 +159,7 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) {
 				case voting.ResponsibleVoter:
 					VoteInstance.ResponsibleVoteCandidate(user, i, user.VotingPower)
 				case voting.None:
-					VoteInstance.RandomVoteCandidate(user, i)
+					VoteInstance.DefaultVoteCandidate(user, i)
 				}
 			}
 		}

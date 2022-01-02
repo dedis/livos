@@ -173,7 +173,7 @@ func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Req
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
-			liquidYes, err = impl.NewLiquid(temp)
+			liquidYes, err = impl.NewLiquid(int(temp))
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
@@ -192,7 +192,7 @@ func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Req
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
-			liquidNo, err = impl.NewLiquid(temp)
+			liquidNo, err = impl.NewLiquid(int(temp))
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
@@ -269,7 +269,7 @@ func (c Controller) HandleShowElectionYesNo(w http.ResponseWriter, req *http.Req
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			liquidQuantity, err = impl.NewLiquid(temp)
+			liquidQuantity, err = impl.NewLiquid(int(temp))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
@@ -556,7 +556,7 @@ func (c Controller) HandleShowElectionCandidate(w http.ResponseWriter, req *http
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
-			liquidVote, err = impl.NewLiquid(temp)
+			liquidVote, err = impl.NewLiquid(int(temp))
 			if err != nil {
 				http.Error(w, "Creation of liquid is incorrect.", http.StatusInternalServerError)
 			}
@@ -632,7 +632,7 @@ func (c Controller) HandleShowElectionCandidate(w http.ResponseWriter, req *http
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			liquidQuantity, err = impl.NewLiquid(temp)
+			liquidQuantity, err = impl.NewLiquid(int(temp))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}

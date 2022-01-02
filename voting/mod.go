@@ -37,11 +37,15 @@ type VotingInstance interface {
 
 	ConstructTextForGraphCandidates(out io.Writer, results map[string]float64)
 
-	YesVote(user *User, votingPower float64)
+	SplitVPintoActions(user *User, i int, votingPowerToSplit int)
 
-	NoVote(user *User, votingPower float64)
+	RandomDelegate(user *User, i int, votingPower int)
 
-	IndecisiveVote(user *User, i int, quantityToDeleg float64)
+	YesVote(user *User, votingPower int)
+
+	NoVote(user *User, votingPower int)
+
+	IndecisiveVote(user *User, i int, quantityToDeleg int)
 
 	RandomVote(user *User, i int)
 
@@ -51,17 +55,21 @@ type VotingInstance interface {
 
 	ResponsibleVote(user *User, i int)
 
-	CandidateVote(user *User, i int, votingPower float64)
+	CandidateVote(user *User, i int, votingPower int)
 
-	IndecisiveVoteCandidate(user *User, i int, quantityToDeleg float64)
+	BreakTheCycleCandidate(user *User, i int, votingPower int)
 
-	RandomVoteCandidate(user *User, i int)
+	IndecisiveVoteCandidate(user *User, i int, quantityToDeleg int)
 
-	ThresholdVoteCandidate(user *User, i int, threshold int, votingPower float64)
+	DefaultVoteCandidate(user *User, i int)
 
-	NonResponsibleVoteCandidate(user *User, i int, votingPower float64)
+	ThresholdVoteCandidate(user *User, i int, threshold int, votingPower int)
 
-	ResponsibleVoteCandidate(user *User, i int, votingPower float64)
+	NonResponsibleVoteCandidate(user *User, i int, votingPower int)
+
+	ResponsibleVoteCandidate(user *User, i int, votingPower int)
+
+	RandomWithProbabilities(user *User) int
 
 	SetStatus(status string) error
 
@@ -120,7 +128,7 @@ type Choice struct {
 
 //for liquidity and delegation
 type Liquid struct {
-	Percentage float64
+	Percentage int
 }
 
 type User struct {
@@ -134,7 +142,7 @@ type User struct {
 	DelegatedFrom map[string]Liquid
 
 	//the amount of voting still left to split btw votes or delegations
-	VotingPower float64
+	VotingPower int
 
 	//history of choices that were cast
 	HistoryOfChoice []Choice
