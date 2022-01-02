@@ -77,12 +77,12 @@ func Simulation_candidats(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 1
-	NoNumber := 1
-	IndecisiveNumber := 1
-	ThresholdNumber := 1
-	NonResponsibleNumber := 1
-	ResponsibleNumber := 1
+	YesNumber := 3
+	NoNumber := 3
+	IndecisiveNumber := 0
+	ThresholdNumber := 0
+	NonResponsibleNumber := 0
+	ResponsibleNumber := 0
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -128,6 +128,8 @@ func Simulation_candidats(out io.Writer) {
 		}
 		voters = append(voters, &user)
 	}
+
+	fmt.Println("voters list is : ", voters)
 
 	//candidats inputs
 	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
