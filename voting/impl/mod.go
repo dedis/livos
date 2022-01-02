@@ -1213,6 +1213,22 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 	for _, user := range vi.GetConfig().Voters {
 
 		colorDeleg := "#8A2BE2"
+		colorOfUser := "black"
+		if user.TypeOfUser == "YesVoter" { //YesVoter
+			colorOfUser = "darkolivegreen"
+		} else if user.TypeOfUser == "NoVoter" { //NoVoter
+			colorOfUser = "darkorange1"
+		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
+			colorOfUser = "seashell4"
+		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
+			colorOfUser = "gold2"
+		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
+			colorOfUser = "hotpink1"
+		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
+			colorOfUser = "deepskyblue3"
+		} else { //NormalVoter
+			colorOfUser = "black"
+		}
 
 		//bruteforce tab with all different possible colors
 		var color = []string{"#12B2F5", "#2AEF56", "#FF78EC", "#EAC224", "#F53024", "#A107DE", "#112AE8", "#FF8F00"}
@@ -1238,17 +1254,33 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 		for index, cand := range vi.GetConfig().Candidates {
 			for _, choice := range cumulativeHistoryOfChoice {
 				if choice.VoteValue[cand.CandidateID].Percentage != 0. {
+					sizeArrow := 1
+					if choice.VoteValue[cand.CandidateID].Percentage > 400 {
+						sizeArrow = 400
+					} else if choice.VoteValue[cand.CandidateID].Percentage < 20 {
+						sizeArrow = 20
+					} else {
+						sizeArrow = choice.VoteValue[cand.CandidateID].Percentage
+					}
 					fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
-						"[ label = < <font color='#cf1111'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-						user.UserID, cand.CandidateID, choice.VoteValue[cand.CandidateID].Percentage, color[index%len(color)], choice.VoteValue[cand.CandidateID].Percentage/60)
+						"[ label = < <font color='%v'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
+						user.UserID, cand.CandidateID, colorOfUser, choice.VoteValue[cand.CandidateID].Percentage, color[index%len(color)], sizeArrow/20)
 				}
 			}
 		}
 
 		for other, quantity := range user.DelegatedTo {
+			sizeArrow := 1
+			if quantity.Percentage > 400 {
+				sizeArrow = 400
+			} else if quantity.Percentage < 20 {
+				sizeArrow = 20
+			} else {
+				sizeArrow = quantity.Percentage
+			}
 			fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
 				"[ label = < <font color='#8A2BE2'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-				user.UserID, other, quantity.Percentage, colorDeleg, quantity.Percentage/60)
+				user.UserID, other, quantity.Percentage, colorDeleg, sizeArrow/20)
 		}
 	}
 
