@@ -77,12 +77,12 @@ func Simulation_candidats(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 3
-	NoNumber := 3
-	IndecisiveNumber := 0
-	ThresholdNumber := 0
-	NonResponsibleNumber := 0
-	ResponsibleNumber := 0
+	YesNumber := 10
+	NoNumber := 0
+	IndecisiveNumber := 10
+	ThresholdNumber := 10
+	NonResponsibleNumber := 10
+	ResponsibleNumber := 10
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -171,7 +171,7 @@ func Simulation_candidats(out io.Writer) {
 				case voting.ResponsibleVoter:
 					VoteInstance.ResponsibleVoteCandidate(user, i, user.VotingPower)
 				case voting.None:
-					VoteInstance.RandomVoteCandidate(user, i)
+					VoteInstance.DefaultVoteCandidate(user, i)
 				}
 			}
 		}
