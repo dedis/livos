@@ -7,7 +7,6 @@ import (
 
 	"github.com/dedis/livos/voting"
 	"github.com/dedis/livos/voting/impl"
-	"github.com/mazen160/go-random"
 	"golang.org/x/xerrors"
 )
 
@@ -21,10 +20,12 @@ func Simulation_candidats(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 
-	var randomNumOfUser, err = random.IntRange(10, 11)
-	if err != nil {
-		xerrors.Errorf(err.Error())
-	}
+	var voters = make([]*voting.User, 0)
+
+	// var randomNumOfUser, err = random.IntRange(10, 11)
+	// if err != nil {
+	// 	xerrors.Errorf(err.Error())
+	// }
 
 	//Random creating of a user and adds it to the list of voters
 
@@ -76,12 +77,12 @@ func Simulation_candidats(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 10
-	NoNumber := 0
-	IndecisiveNumber := 10
-	ThresholdNumber := 10
-	NonResponsibleNumber := 10
-	ResponsibleNumber := 10
+	YesNumber := 3
+	NoNumber := 3
+	IndecisiveNumber := 0
+	ThresholdNumber := 0
+	NonResponsibleNumber := 0
+	ResponsibleNumber := 0
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -90,92 +91,45 @@ func Simulation_candidats(out io.Writer) {
 		if err != nil {
 			xerrors.Errorf(err.Error())
 		}
-		switch {
-		case chooseType < 5:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		case chooseType < 50:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		case chooseType < 70:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		case chooseType < 80:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		case chooseType < 90:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ResponsibleVoter, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		default:
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
+		voters = append(voters, &user)
+	}
+	for ; i < NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
 		}
-
+		voters = append(voters, &user)
+	}
+	for ; i < IndecisiveNumber+NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
+		}
+		voters = append(voters, &user)
+	}
+	for ; i < ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
+		}
+		voters = append(voters, &user)
+	}
+	for ; i < NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
+		}
+		voters = append(voters, &user)
+	}
+	for ; i < ResponsibleNumber+NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
+		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ResponsibleVoter, make([]*voting.User, 0))
+		if err != nil {
+			xerrors.Errorf(err.Error())
+		}
+		voters = append(voters, &user)
 	}
 
-	/*
-		YesNumber := 10
-		NoNumber := 10
-		IndecisiveNumber := 10
-		ThresholdNumber := 10
-		NonResponsibleNumber := 10
-		TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
-
-		i := 0
-		for i = 0; i < YesNumber; i++ {
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter, make([]*voting.User, 0))
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		}
-		for i = i; i < NoNumber+YesNumber; i++ {
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, make([]*voting.User, 0))
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		}
-		for i = i; i < IndecisiveNumber+NoNumber+YesNumber; i++ {
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, make([]*voting.User, 0))
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		}
-		for i = i; i < ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, make([]*voting.User, 0))
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		}
-		for i = i; i < NonResponsibleNumber+ThresholdNumber+IndecisiveNumber+NoNumber+YesNumber; i++ {
-			var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, make([]*voting.User, 0))
-			if err != nil {
-				xerrors.Errorf(err.Error())
-			}
-			voters = append(voters, &user)
-		}
-	*/
+	fmt.Println("voters list is : ", voters)
 
 	//candidats inputs
 	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
