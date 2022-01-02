@@ -79,10 +79,10 @@ func Simulation_candidats(out io.Writer) {
 
 	YesNumber := 3
 	NoNumber := 3
-	IndecisiveNumber := 0
-	ThresholdNumber := 0
-	NonResponsibleNumber := 0
-	ResponsibleNumber := 0
+	IndecisiveNumber := 3
+	ThresholdNumber := 3
+	NonResponsibleNumber := 3
+	ResponsibleNumber := 3
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -160,6 +160,8 @@ func Simulation_candidats(out io.Writer) {
 			if user.VotingPower > 0 {
 				switch user.TypeOfUser {
 				case voting.YesVoter:
+					VoteInstance.CandidateVote(user, i, user.VotingPower)
+				case voting.NoVoter:
 					VoteInstance.CandidateVote(user, i, user.VotingPower)
 				case voting.IndecisiveVoter:
 					VoteInstance.IndecisiveVoteCandidate(user, i, user.VotingPower)

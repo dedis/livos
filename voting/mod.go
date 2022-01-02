@@ -39,6 +39,8 @@ type VotingInstance interface {
 
 	SplitVPintoActions(user *User, i int, votingPowerToSplit int)
 
+	SplitVotingPower(user *User, i int, votingPowerToSplit int) (int, int, int)
+
 	RandomDelegate(user *User, i int, votingPower int)
 
 	YesVote(user *User, votingPower int)
