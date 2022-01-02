@@ -705,108 +705,7 @@ func (vi *VotingInstance) NonResponsibleVoteCandidate(user *voting.User, i int, 
 		//the user already voted => must delegate all (SHY VOTER)
 		vi.IndecisiveVoteCandidate(user, i, votingPower)
 	} else {
-		//the user hasn't voted yet =>
-		//while the user still have some voting power, vote amongst different candidates and delegate
 
-		//split between proportion to delegate and proportion to vote (can be 30/70 or 50/50 etc...)
-		quantity := 0
-		quantity2 := 0
-		quantity3 := 0
-		votingPower := 100
-		var err error
-		nbOfAction := vi.RandomWithProbabilities(user)
-		if nbOfAction == 1 {
-			//You must for a candidate and therefore you must vote for him for 100
-			quantity = int(user.VotingPower / 10)
-		} else if nbOfAction == 2 {
-			//You must for a candidate
-			quantity, err = random.IntRange(1, (int(votingPower) / 10))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			//Later we will choose what to do with this quantity either deleg or vote for another candidate
-			quantity2 = votingPower - quantity
-		} else {
-			//You must for a candidate
-			quantity, err = random.IntRange(1, ((int(votingPower) - 1) / 10))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			//Later we will choose what to do with this quantity either deleg or vote for another candidate
-			quantity2, err = random.IntRange(1, ((int(votingPower) - quantity - 1) / 10))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			//Later we will choose what to do with this quantity either deleg or vote for another candidate
-			quantity3 = votingPower - quantity - quantity2
-		}
-
-		//the proportion of the voting power to vote
-		quantity_to_Vote, err := NewLiquid(float64(quantity * 10))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		//index of which candidate does the voter vote for
-		candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		if quantity2 != 0 {
-			quantity_to_Vote2, err := NewLiquid(float64(quantity2 * 10))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			chooseBetweenVoteAndDeleg, err := random.IntRange(1, 11)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			//you have 60% chance to vote as your second choice for a candidate
-			if chooseBetweenVoteAndDeleg < 7 {
-				//index of which candidate does the voter vote for
-				candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-
-				choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote2)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-			} else { //you delegate your vote
-				vi.IndecisiveVoteCandidate(user, i, float64(quantity2))
-			}
-		}
-		if quantity3 != 0 { // same as quantity2
-			quantity_to_Vote3, err := NewLiquid(float64(quantity3 * 10))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			chooseBetweenVoteAndDeleg, err := random.IntRange(1, 11)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			if chooseBetweenVoteAndDeleg < 7 {
-				//index of which candidate does the voter vote for
-				candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-
-				choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote3)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-			} else {
-				vi.IndecisiveVoteCandidate(user, i, float64(quantity3))
-			}
-		}
 	}
 	//create choice
 	choice, err := NewChoice(choiceTab)
@@ -888,49 +787,106 @@ func (vi *VotingInstance) ResponsibleVoteCandidate(user *voting.User, i int, vot
 
 	} else {
 		//the user hasn't voted yet =>
-		//while the user still have some voting power, vote amongst different candidates and delegate :
+		//while the user still have some voting power, vote amongst different candidates and delegate
 
 		//split between proportion to delegate and proportion to vote (can be 30/70 or 50/50 etc...)
-		quantityDeleg, err := random.IntRange(1, (int(votingPower)/10)+1)
+
+		quantity := 0
+		quantity2 := 0
+		quantity3 := 0
+		var err error
+		nbOfAction := vi.RandomWithProbabilities(user)
+		if nbOfAction == 1 {
+			//You must for a candidate and therefore you must vote for him for 100
+			quantity = int(user.VotingPower / 10)
+		} else if nbOfAction == 2 {
+			//You must for a candidate
+			quantity, err = random.IntRange(1, (int(votingPower) / 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			//Later we will choose what to do with this quantity either deleg or vote for another candidate
+			quantity2 = int(votingPower - float64(quantity))
+		} else {
+			//You must for a candidate
+			quantity, err = random.IntRange(1, ((int(votingPower) - 1) / 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			//Later we will choose what to do with this quantity either deleg or vote for another candidate
+			quantity2, err = random.IntRange(1, ((int(votingPower) - quantity - 1) / 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			//Later we will choose what to do with this quantity either deleg or vote for another candidate
+			quantity3 = int(votingPower - float64(quantity) - float64(quantity2))
+		}
+
+		//the proportion of the voting power to vote
+		quantity_to_Vote, err := NewLiquid(float64(quantity * 10))
 		if err != nil {
-			fmt.Println(err.Error(), "Fail to generate random number.")
-		}
-		quantityVote := (int(votingPower) / 10) - quantityDeleg
-
-		//*10 to be a voting power
-		quantityDelegFloat := float64(quantityDeleg * 10)
-		quantityVoteFloat := float64(quantityVote * 10)
-
-		//loop to empty the quantityToVote
-		for quantityVoteFloat > 0 {
-			//random number for the split of voting power
-			quantity, err := random.IntRange(1, (int(quantityVoteFloat)/10)+1)
-			if err != nil {
-				fmt.Println(err.Error(), "Fail to generate random number.")
-			}
-
-			//the proportion of the voting power to vote
-			quantity_to_Vote, err := NewLiquid(float64(quantity * 10))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			//index of which candidate does the voter vote for
-			candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-
-			quantityVoteFloat -= quantity_to_Vote.Percentage
+			fmt.Println(err.Error())
 		}
 
-		//to empty the quantityToDeleg
-		vi.IndecisiveVoteCandidate(user, i, quantityDelegFloat)
+		//index of which candidate does the voter vote for
+		candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		if quantity2 != 0 {
+			quantity_to_Vote2, err := NewLiquid(float64(quantity2 * 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			chooseBetweenVoteAndDeleg, err := random.IntRange(1, 11)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			//you have 60% chance to vote as your second choice for a candidate
+			if chooseBetweenVoteAndDeleg < 7 {
+				//index of which candidate does the voter vote for
+				candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote2)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			} else { //you delegate your vote
+				vi.IndecisiveVoteCandidate(user, i, float64(quantity2))
+			}
+		}
+		if quantity3 != 0 { // same as quantity2
+			quantity_to_Vote3, err := NewLiquid(float64(quantity3 * 10))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			chooseBetweenVoteAndDeleg, err := random.IntRange(1, 11)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			if chooseBetweenVoteAndDeleg < 7 {
+				//index of which candidate does the voter vote for
+				candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], err = AddLiquid(choiceTab[vi.GetConfig().Candidates[candidateChoice].CandidateID], quantity_to_Vote3)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			} else {
+				vi.IndecisiveVoteCandidate(user, i, float64(quantity3))
+			}
+		}
 	}
 
 	//create choice
