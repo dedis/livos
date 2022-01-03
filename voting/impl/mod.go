@@ -539,7 +539,7 @@ func (vi *VotingInstance) ResponsibleVote(user *voting.User, i int, votingPower 
 		//the user hasn't voted yet =>
 		//while the user still have some voting power, vote amongst different candidates and delegate :
 		//split between proportion to delegate and proportion to vote (can be 30/70 or 50/50 etc...)
-		vi.SplitVPintoActions(user, i, user.VotingPower)
+		vi.SplitVPintoActionsYesNo(user, i, user.VotingPower)
 	}
 }
 
