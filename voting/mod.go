@@ -27,6 +27,8 @@ type VotingSystem interface {
 type VotingInstance interface {
 	GetConfig() VotingConfig
 
+	SetConfig(config VotingConfig)
+
 	CloseVoting()
 
 	GetResults() map[string]float64
@@ -170,6 +172,7 @@ type TypeOfUser string
 const (
 	YesVoter            TypeOfUser = "YesVoter"
 	NoVoter             TypeOfUser = "NoVoter"
+	CandVoter           TypeOfUser = "CandVoter"
 	IndecisiveVoter     TypeOfUser = "IndecisiveVoter"
 	ThresholdVoter      TypeOfUser = "ThresholdVoter"
 	NonResponsibleVoter TypeOfUser = "NonResponsibleVoter"
@@ -177,27 +180,9 @@ const (
 	None                TypeOfUser = "None"
 )
 
-// func (t TypeOfUser) String() string {
-// 	switch t {
-// 	case YesVoter:
-// 		return "YesVoter"
-// 	case NoVoter:
-// 		return "NoVoter"
-// 	case IndeciseVoter:
-// 		return "IndeciseVoter"
-// 	case ThresholdVoter:
-// 		return "ThresholdVoter"
-// 	default:
-// 		return "None"
-// 	}
-// }
+//VOTING CONFIG FUNCTIONS :::::
 
-// type User interface {
-// 	CheckVotingPower() bool
-
-// 	SetChoice(choice Choice) error
-
-// 	DelegTo(user *User, quantity Liquid) error
-
-// 	DelegFrom(user *User, quantity Liquid) error
-// }
+func (vc VotingConfig) SetCandidates(new_candidates []*Candidate) VotingConfig {
+	vc.Candidates = new_candidates
+	return vc
+}
