@@ -78,11 +78,11 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 
 	//Manually entering the number of each categories
 
-	CandVoterNumber := 10
-	IndecisiveNumber := 0
-	ThresholdNumber := 10
-	NonResponsibleNumber := 10
-	ResponsibleNumber := 10
+	CandVoterNumber := 25
+	IndecisiveNumber := 22
+	ThresholdNumber := 18
+	NonResponsibleNumber := 5
+	ResponsibleNumber := 43
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -157,7 +157,11 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 				case voting.IndecisiveVoter:
 					VoteInstance.IndecisiveVote(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
-					var threshold = 600
+					var thresholdPourcentage, err = impl.GenerateRandomThreshold()
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+					var threshold int = thresholdPourcentage * len(voters)
 					VoteInstance.ThresholdVoteCandidate(user, i, threshold, user.VotingPower)
 				case voting.NonResponsibleVoter:
 					VoteInstance.NonResponsibleVoteCandidate(user, i, user.VotingPower)

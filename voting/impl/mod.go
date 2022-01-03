@@ -228,7 +228,7 @@ func (vi *VotingInstance) CheckVotingPower(user *voting.User) error {
 //Check if all the voters have used all their voting power (usefull for simulation)
 func (vi *VotingInstance) CheckVotingPowerOfVoters() bool {
 	for _, user := range vi.Config.Voters {
-		if user.VotingPower != 0. {
+		if user.VotingPower > 1 {
 			return true
 		}
 	}
@@ -533,7 +533,7 @@ func (vi *VotingInstance) ResponsibleVote(user *voting.User, i int, votingPower 
 			var total_Percentage_Delegated int = 100 - total_Percentage_Voted
 
 			if total_Percentage_Delegated != 0 {
-				vi.IndecisiveVote(user, i, total_Percentage_Delegated/100*votingPower)
+				vi.IndecisiveVote(user, i, int(float64(total_Percentage_Delegated*votingPower)/100.))
 			}
 		}
 
@@ -732,7 +732,7 @@ func (vi *VotingInstance) BreakTheCycle(user *voting.User, i int, votingPower in
 			fmt.Println(err.Error())
 		}
 
-		fmt.Println(user.UserID, " a délégué pour ", votingPower, "à", vi.GetConfig().Voters[randomDelegateToIndex].UserID, "car il est ", user.TypeOfUser, "(break the cycle)")
+		fmt.Println(user.UserID, " a délégué pour ", quantity_to_deleg, "à", vi.GetConfig().Voters[randomDelegateToIndex].UserID, "car il est ", user.TypeOfUser, "(break the cycle)")
 	}
 }
 
@@ -1040,7 +1040,7 @@ func (vi *VotingInstance) ResponsibleVoteCandidate(user *voting.User, i int, vot
 			var total_Percentage_Delegated int = 100 - total_Percentage_Voted
 
 			if total_Percentage_Delegated != 0 {
-				vi.IndecisiveVote(user, i, total_Percentage_Delegated/100*votingPower)
+				vi.IndecisiveVote(user, i, int(float64(total_Percentage_Delegated*votingPower)/100.))
 			}
 		}
 
@@ -1439,6 +1439,27 @@ func (vi *VotingInstance) ConstructTextForGraph(out io.Writer) {
 	}
 
 	fmt.Fprintf(out, "}\n")
+}
+
+func GenerateRandomThreshold() (int, error) {
+	var rand, err = random.IntRange(1, 101)
+	if err != nil {
+		return 0, xerrors.Errorf(err.Error())
+	}
+	switch {
+	case rand <= 24:
+		return 10, nil
+	case rand <= 52:
+		return 20, nil
+	case rand <= 72:
+		return 30, nil
+	case rand <= 85:
+		return 40, nil
+	case rand <= 100:
+		return 50, nil
+	default:
+		return 0, nil
+	}
 }
 
 //Transfer of voting power between 2 users
