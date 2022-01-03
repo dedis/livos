@@ -17,7 +17,6 @@ import (
 //VOTING IMPLEMENTATION
 
 const PERCENTAGE = 100
-
 const InitialVotingPower = 100.
 
 type VotingInstance struct {
@@ -92,6 +91,10 @@ func (vi *VotingInstance) GetConfig() voting.VotingConfig {
 	return vi.Config
 }
 
+func (vi *VotingInstance) SetConfig(config voting.VotingConfig) {
+	vi.Config = config
+}
+
 func (vi *VotingInstance) RandomWithProbabilities(user *voting.User) int {
 	randomAction, err := random.IntRange(1, 3)
 	if err != nil {
@@ -161,7 +164,6 @@ func (vi *VotingInstance) GetResultsQuadraticVoting() map[string]float64 {
 				noPower += choice.VoteValue["no"].Percentage
 			}
 		}
-		//in order to get 4 and not 4.6666666... for example
 		// var temp1 = float64(int(yesPower/float64(counter))*100) / 100
 		// var temp2 = float64(int(noPower/float64(counter))*100) / 100
 		results["yes"] = float64(yesPower / len(vi.Config.Voters))
@@ -1136,7 +1138,7 @@ func (vi *VotingInstance) RandomVoteCandidate(user *voting.User, i int, votingPo
 
 func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results map[string]float64) {
 
-	counterYesVoter := 0
+	counterCandidateVoter := 0
 	counterNoVoter := 0
 	counterIndecisiveVoter := 0
 	counterThresholdVoter := 0
@@ -1145,8 +1147,8 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 	counterResponsibleVoter := 0
 	for _, user := range vi.GetConfig().Voters {
 		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
-		if user.TypeOfUser == "YesVoter" {
-			counterYesVoter++
+		if user.TypeOfUser == "CandVoter" {
+			counterCandidateVoter++
 		} else if user.TypeOfUser == "NoVoter" {
 			counterNoVoter++
 		} else if user.TypeOfUser == "IndecisiveVoter" {
@@ -1169,7 +1171,7 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 	for _, cand := range vi.GetConfig().Candidates {
 		fmt.Fprintf(out, "%s = %.4v %s,", cand.CandidateID, results[cand.CandidateID], s)
 	}
-	fmt.Fprintf(out, "<font point-size='10'><br/>(generated: %s)<br/> Il y a %v YesVoter, %v Threshold Voters, %v Non responsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", time.Now(), counterYesVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
+	fmt.Fprintf(out, "<font point-size='10'><br/>(generated: %s)<br/> Il y a %v CandidateVoter, %v Threshold Voters, %v NonResponsibleVoter, %v ResponsibleVoter, %v IndecisiveVoter and %v NormalVoter</font>>; ", time.Now(), counterCandidateVoter, counterThresholdVoter, counterNonResponsibleVoter, counterResponsibleVoter, counterIndecisiveVoter, counterNormalVoter)
 	fmt.Fprintf(out, "graph [fontname = \"helvetica\"];\n")
 	fmt.Fprintf(out, "{\n")
 	fmt.Fprintf(out, "node [fontname = \"helvetica\" area = 10 style= filled]\n")
