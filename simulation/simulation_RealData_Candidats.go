@@ -3,6 +3,7 @@ package simulation
 import (
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 
 	"github.com/dedis/livos/voting"
@@ -77,11 +78,11 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 
 	//Manually entering the number of each categories
 
-	CandVoterNumber := 2
-	IndecisiveNumber := 2
-	ThresholdNumber := 2
-	NonResponsibleNumber := 2
-	ResponsibleNumber := 2
+	CandVoterNumber := 10
+	IndecisiveNumber := 0
+	ThresholdNumber := 10
+	NonResponsibleNumber := 10
+	ResponsibleNumber := 10
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -197,17 +198,15 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 
 	VoteInstance.ConstructTextForGraphCandidates(out_liquid, VoteInstance.GetResults())
 
+	LiquidResults := VoteInstance.GetResults()
+
 	//modify the intern choices of the users (history of choice) to replace them with non liquid decisions.
 
 	//adding the "new" choice that is BLANK CHOICE
 	var blankCandidate, _ = VoteSystem.NewCandidate("Blank")
 	new_candidates := append(candidats, &blankCandidate)
 
-	fmt.Println("BEFORE CHANGING : ", VoteInstance.GetConfig().Candidates)
-
 	VoteInstance.SetConfig(VoteInstance.GetConfig().SetCandidates(new_candidates))
-
-	fmt.Println("AFTER  CHANGING : ", VoteInstance.GetConfig().Candidates)
 
 	for _, user := range voters {
 		//creation fo the liquid 100 that will be needed always
@@ -287,4 +286,17 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 	//at this state all the historyOfChoice of the users are modified (simplified) for the normal version.
 	//When calling GetResults we obtain results that are traditionnal
 	VoteInstance.ConstructTextForGraphCandidates(out_normal, VoteInstance.GetResults())
+
+	NormalResults := VoteInstance.GetResults()
+
+	totalSumOfDifference := 0.
+	fmt.Println("==========================================")
+	fmt.Println("DIFFERENCES PRECISION : ")
+	for _, cand := range candidats {
+		difference := math.Abs(LiquidResults[cand.CandidateID] - NormalResults[cand.CandidateID])
+		totalSumOfDifference += difference
+		fmt.Println(difference, " => ", cand.CandidateID)
+	}
+	fmt.Println("Total difference : ", totalSumOfDifference)
+	fmt.Println("==========================================")
 }
