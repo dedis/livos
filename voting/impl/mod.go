@@ -143,7 +143,7 @@ func (vi *VotingInstance) GetResults() map[string]float64 {
 					candidateResult += choice.VoteValue[candidate.CandidateID].Percentage
 				}
 			}
-			resultsCandidate[candidate.CandidateID] = float64(candidateResult / len(vi.Config.Voters))
+			resultsCandidate[candidate.CandidateID] = float64(candidateResult) / float64(len(vi.Config.Voters))
 		}
 		return resultsCandidate
 	}
@@ -854,7 +854,9 @@ func (vi *VotingInstance) BreakTheCycle(user *voting.User, i int, votingPower in
 
 func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, votingPower int) {
 
-	if len(user.HistoryOfChoice) != 0 || len(user.DelegatedTo) != 0 {
+	UsersMappedPercentage := make(map[string]float64)
+
+	if len(user.DelegatedTo) != 0 {
 		//the user already voted => must distribute the new voting in the same manner
 
 		//construction du graph de delegation
@@ -890,7 +892,59 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, voti
 		if IsThereCycle {
 			vi.BreakTheCycle(user, i, votingPower)
 		} else {
+			//redelegate in the same manner as before
+			total_votingPower_delegated := 0
+			for _, value := range user.DelegatedTo {
+				total_votingPower_delegated += value.Percentage
+			}
 
+			//create a map USERS_NAME => PERCENTAGE VOTED FOR
+			for name, value := range user.DelegatedTo {
+				UsersMappedPercentage[name] = UsersMappedPercentage[name] + (float64(value.Percentage)/float64(total_votingPower_delegated))*100
+			}
+
+			//the case where user have less that 10 voting power, we just redirect it onto his favorite precedent choice
+			if votingPower <= 10 {
+				var prefered_user string
+				var max = 0.
+				for name, val := range UsersMappedPercentage {
+					if val > max {
+						max = val
+						prefered_user = name
+					}
+				}
+
+				prefered_user_object, err := vi.GetUser(prefered_user)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				quantity_to_deleg, err := NewLiquid(votingPower)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				err = vi.DelegTo(user, prefered_user_object, quantity_to_deleg)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				fmt.Println(user.UserID, " a délégué pour ", quantity_to_deleg.Percentage, "à", prefered_user_object.UserID, "car il est ", user.TypeOfUser, "et qu'il as moins de 10 de voting power (redelegate)")
+
+			} else {
+				//re-delegate the right amount of the new voting power given the percentage of previous delegation
+				for other, percentage := range UsersMappedPercentage {
+					quantity_to_deleg, err := NewLiquid(int(votingPower * int(percentage) / 100))
+					if err != nil {
+						fmt.Println(err.Error(), "fail to do quantity to deleg")
+					}
+
+					otherObject, err := vi.GetUser(other)
+
+					err = vi.DelegTo(user, otherObject, quantity_to_deleg)
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+					fmt.Println(user.UserID, " a délégué pour ", quantity_to_deleg.Percentage, "à", otherObject.UserID, "car il est ", user.TypeOfUser, "(redelegate)")
+				}
+			}
 		}
 
 	} else {

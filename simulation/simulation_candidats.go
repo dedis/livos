@@ -77,12 +77,12 @@ func Simulation_candidats(out io.Writer) {
 
 	//Manually entering the number of each categories
 
-	YesNumber := 10
-	NoNumber := 10
-	IndecisiveNumber := 20
-	ThresholdNumber := 10
-	NonResponsibleNumber := 20
-	ResponsibleNumber := 20
+	YesNumber := 0
+	NoNumber := 0
+	IndecisiveNumber := 10
+	ThresholdNumber := 0
+	NonResponsibleNumber := 0
+	ResponsibleNumber := 0
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
