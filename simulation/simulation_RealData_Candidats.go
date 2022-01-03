@@ -154,7 +154,7 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 				case voting.CandVoter:
 					VoteInstance.CandidateVote(user, i, user.VotingPower)
 				case voting.IndecisiveVoter:
-					VoteInstance.IndecisiveVoteCandidate(user, i, user.VotingPower)
+					VoteInstance.IndecisiveVote(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
 					var threshold = 600
 					VoteInstance.ThresholdVoteCandidate(user, i, threshold, user.VotingPower)

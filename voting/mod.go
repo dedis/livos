@@ -49,21 +49,23 @@ type VotingInstance interface {
 
 	NoVote(user *User, votingPower int)
 
-	IndecisiveVote(user *User, i int, quantityToDeleg int)
-
 	RandomVote(user *User, i int)
 
-	ThresholdVote(user *User, i int, threshold int)
+	ThresholdVote(user *User, i int, threshold int, votingPower int)
 
-	NonResponsibleVote(user *User, i int)
+	NonResponsibleVote(user *User, i int, votingPower int)
 
-	ResponsibleVote(user *User, i int)
+	ResponsibleVote(user *User, i int, votingPower int)
+
+	RandomVoteYesNo(user *User, i int, votingPower int)
+
+	SplitVPintoActionsYesNo(user *User, i int, votingPowerToSplit int)
 
 	CandidateVote(user *User, i int, votingPower int)
 
-	BreakTheCycleCandidate(user *User, i int, votingPower int)
+	BreakTheCycle(user *User, i int, votingPower int)
 
-	IndecisiveVoteCandidate(user *User, i int, quantityToDeleg int)
+	IndecisiveVote(user *User, i int, quantityToDeleg int)
 
 	DefaultVoteCandidate(user *User, i int)
 

@@ -268,8 +268,8 @@ func (vi *VotingInstance) SetVote(user *voting.User, choice voting.Choice) error
 //YES OR NO VOTE FUNCTIONS ----------------------------------------------------------------------------------------
 
 func (vi *VotingInstance) YesVote(user *voting.User, votingPower int) {
-	quantity := votingPower
-	quantity_to_Vote, err := NewLiquid(quantity)
+
+	quantity_to_Vote, err := NewLiquid(votingPower)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -293,12 +293,11 @@ func (vi *VotingInstance) YesVote(user *voting.User, votingPower int) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
+	fmt.Println(user.UserID, " a voté pour ", votingPower, "%", "il était", user.TypeOfUser)
 }
 
 func (vi *VotingInstance) NoVote(user *voting.User, votingPower int) {
-	quantity := votingPower
-	quantity_to_Vote, err := NewLiquid(quantity)
+	quantity_to_Vote, err := NewLiquid(votingPower)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -322,69 +321,7 @@ func (vi *VotingInstance) NoVote(user *voting.User, votingPower int) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(user.UserID, " a voté pour ", quantity, "%", "il était", user.TypeOfUser)
-}
-
-func (vi *VotingInstance) IndecisiveVote(user *voting.User, i int, quantityToDeleg int) {
-	//Delegation action
-	//random index creation (must NOT be == to index of current user)
-
-	randomDelegateToIndex, err := random.IntRange(0, len(vi.GetConfig().Voters))
-	if err != nil {
-		fmt.Println(err.Error(), "fail to do randomDelegateToIndex first time")
-	}
-	if len(user.DelegatedTo) != 0 {
-		for nameDelegat := range user.DelegatedTo {
-			for index, nameVoter := range vi.Config.Voters {
-				if nameDelegat == nameVoter.UserID {
-					randomDelegateToIndex = index
-				}
-			}
-		}
-	} else {
-		for ok := true; ok; ok = (randomDelegateToIndex == i) {
-			randomDelegateToIndex, err = random.IntRange(0, len(vi.GetConfig().Voters))
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
-			}
-		}
-	}
-
-	quantity_to_deleg, err := NewLiquid(quantityToDeleg)
-	if err != nil {
-		fmt.Println(err.Error(), "fail to do quantity to deleg")
-	}
-	err = vi.DelegTo(user, vi.GetConfig().Voters[randomDelegateToIndex], quantity_to_deleg)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	fmt.Println(user.UserID, " a delegué ", quantity_to_deleg, " à : ", vi.GetConfig().Voters[randomDelegateToIndex].UserID, "il était", user.TypeOfUser)
-}
-
-func (vi *VotingInstance) BreakTheCycle(user *voting.User) {
-	RandomAction, err := random.IntRange(0, 100)
-	if err != nil {
-		fmt.Println(err.Error(), "fail to do RandomAction first time")
-	}
-	switch {
-	case RandomAction < 52:
-		RandomActionToChooseWhatToVote, err := random.IntRange(0, 3)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do RandomActionToChooseWhatToVote first time")
-		}
-		if RandomActionToChooseWhatToVote == 0 {
-			vi.YesVote(user, user.VotingPower)
-		} else {
-			vi.NoVote(user, user.VotingPower)
-		}
-	case RandomAction < 84:
-		//delegate to another person
-	case RandomAction < 98:
-		//vote blanc
-	default:
-		//do nothing as don't vote
-	}
+	fmt.Println(user.UserID, " a voté pour ", votingPower, "%", "il était", user.TypeOfUser)
 }
 
 func (vi *VotingInstance) RandomVote(user *voting.User, i int) {
@@ -447,7 +384,7 @@ func (vi *VotingInstance) RandomVote(user *voting.User, i int) {
 	}
 }
 
-func (vi *VotingInstance) ThresholdVote(user *voting.User, i int, threshold int) {
+func (vi *VotingInstance) ThresholdVote(user *voting.User, i int, threshold int, votingPower int) {
 
 	var thresholdComparator = 0
 	for i := range user.HistoryOfChoice {
@@ -457,104 +394,209 @@ func (vi *VotingInstance) ThresholdVote(user *voting.User, i int, threshold int)
 
 	if thresholdComparator > threshold {
 		//Delegation action
-		vi.IndecisiveVote(user, i, user.VotingPower)
+		vi.IndecisiveVote(user, i, votingPower)
 
+	} else if thresholdComparator+votingPower > threshold { //if you already voted 500, you have 300 and your threshold is 600
+		vi.IndecisiveVote(user, i, thresholdComparator+votingPower-threshold) //then you delegate 200
+		vi.ResponsibleVote(user, i, thresholdComparator-threshold)            //and you vote threshold-alreadyvoted = 600-500=100
 	} else {
-		//Vote action
-		quantity, err := random.IntRange(1, (int(user.VotingPower)/10)+1)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do quantity to voteAction")
-		}
-		quantity_to_deleg, err := NewLiquid(int(user.VotingPower - quantity*10))
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do quantity to deleg")
-		}
+		vi.ResponsibleVote(user, i, votingPower)
+	}
+}
 
-		if len(user.HistoryOfChoice) == 0 {
-			yesOrNo, err := random.IntRange(1, 3)
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do yesOrNo ")
+func (vi *VotingInstance) NonResponsibleVote(user *voting.User, i int, votingPower int) {
+	if len(user.HistoryOfChoice) != 0 || len(user.DelegatedTo) != 0 {
+		//the user already voted => must delegate all (SHY VOTER)
+		vi.IndecisiveVote(user, i, votingPower)
+	} else {
+		//the user hasn't voted yet =>
+		//while the user still have some voting power, vote amongst different candidates and delegate
+		//split between proportion to delegate and proportion to vote (can be 30/70 or 50/50 etc...)
+		vi.SplitVPintoActionsYesNo(user, i, 100)
+	}
+}
+
+func (vi *VotingInstance) ResponsibleVote(user *voting.User, i int, votingPower int) {
+
+	choiceTab := make(map[string]voting.Liquid)
+	YesNoMappedPercentage := make(map[string]float64)
+
+	if len(user.HistoryOfChoice) != 0 || len(user.DelegatedTo) != 0 {
+
+		if votingPower <= 10 {
+
+			YesNoMappedValue := make(map[string]int)
+
+			var prefered string
+			var max = 0
+			for name, val := range user.DelegatedTo {
+				if val.Percentage > max {
+					max = val.Percentage
+					prefered = name
+				}
 			}
 
-			if yesOrNo == 1 {
-				vi.YesVote(user, quantity*10)
+			//create a map CANDIDATE_NAME =>  CUMUL VALUE VOTED FOR
+			for _, choice := range user.HistoryOfChoice {
+				for name, value := range choice.VoteValue {
+					YesNoMappedValue[name] = YesNoMappedValue[name] + (value.Percentage)
+				}
+			} //trump => 120, macron => 40
+
+			for name, val := range YesNoMappedValue {
+				if val > max {
+					max = val
+					prefered = name
+				}
+			}
+
+			var err error
+			//at this state 'prefered' contains the name of the candidate or voter that the user gave the most votingpower
+
+			prefered_obj, err := vi.GetUser(prefered)
+			if prefered_obj == nil {
+				//case where 'prefered' is a candidate
+				choiceTab[prefered], err = NewLiquid(votingPower)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				//create choice
+				choice, err := NewChoice(choiceTab)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				//set the choice
+				err = vi.SetVote(user, choice)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				fmt.Println(user.UserID, " a voté pour ", votingPower, "à", prefered, "car il est ", user.TypeOfUser, "moins de 10 voting power, case where prefered is a candidate (revote)")
 			} else {
-				vi.NoVote(user, quantity*10)
+				//case where 'prefered' is a voter
+				quantity_to_deleg, err := NewLiquid(votingPower)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				err = vi.DelegTo(user, prefered_obj, quantity_to_deleg)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				fmt.Println(user.UserID, " a délégué pour ", quantity_to_deleg.Percentage, "à", prefered_obj.UserID, "car il est ", user.TypeOfUser, "moins de 10 voting power, case where prefered is a voter (redelege)")
 			}
-			vi.IndecisiveVote(user, i, quantity_to_deleg.Percentage)
-		} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-			vi.NoVote(user, quantity*10)
-			vi.IndecisiveVote(user, i, quantity_to_deleg.Percentage)
 		} else {
-			vi.YesVote(user, quantity*10)
-			vi.IndecisiveVote(user, i, quantity_to_deleg.Percentage)
-		}
-	}
-}
+			//the user already voted for some candidates => must distribute the new voting in the same manner
+			total_votingPower_spent := 0
+			for _, choice := range user.HistoryOfChoice {
+				for _, value := range choice.VoteValue {
+					total_votingPower_spent += value.Percentage
+				}
+			}
+			for _, value := range user.DelegatedTo {
+				total_votingPower_spent += value.Percentage
+			}
 
-func (vi *VotingInstance) NonResponsibleVote(user *voting.User, i int) {
-	if len(user.HistoryOfChoice) == 0 {
-		var randomNumberToChooseYesOrNo, err = random.IntRange(0, 2)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do randomDelegateToIndex")
+			//create a map CANDIDATE_NAME => PERCENTAGE VOTED FOR
+			for _, choice := range user.HistoryOfChoice {
+				for name, value := range choice.VoteValue {
+					YesNoMappedPercentage[name] = YesNoMappedPercentage[name] + (float64(value.Percentage)/float64(total_votingPower_spent))*100
+				}
+			} //trump => 45, Marcon => 35, user0 => 20
+
+			var total_Percentage_Voted int = 0
+
+			//re-vote the right amount of the new voting power given the percentage
+			for yesOrNo, percentage := range YesNoMappedPercentage {
+				var err error
+				choiceTab[yesOrNo], err = NewLiquid(int(votingPower * int(percentage) / 100))
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				total_Percentage_Voted += int(percentage)
+				fmt.Println(user.UserID, " a voté pour ", choiceTab[yesOrNo].Percentage, "à", yesOrNo, "car il est ", user.TypeOfUser, "(revote)")
+			}
+
+			//create choice
+			choice, err := NewChoice(choiceTab)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			//set the choice
+			err = vi.SetVote(user, choice)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			//how many percentage to delegate
+			var total_Percentage_Delegated int = 100 - total_Percentage_Voted
+
+			if total_Percentage_Delegated != 0 {
+				vi.IndecisiveVote(user, i, total_Percentage_Delegated/100*votingPower)
+			}
 		}
-		if randomNumberToChooseYesOrNo == 0 {
-			vi.YesVote(user, InitialVotingPower)
-		} else {
-			vi.NoVote(user, InitialVotingPower)
-		}
+
 	} else {
-		//Delegation action
-		vi.IndecisiveVote(user, i, user.VotingPower)
+		//the user hasn't voted yet =>
+		//while the user still have some voting power, vote amongst different candidates and delegate :
+		//split between proportion to delegate and proportion to vote (can be 30/70 or 50/50 etc...)
+		vi.SplitVPintoActions(user, i, user.VotingPower)
 	}
 }
 
-func (vi *VotingInstance) ResponsibleVote(user *voting.User, i int) {
-	randomAction, err := random.IntRange(1, 4)
+func (vi *VotingInstance) RandomVoteYesNo(user *voting.User, i int, votingPower int) {
+
+	choiceTab := make(map[string]voting.Liquid)
+
+	//index of which candidate does the voter vote for
+	yesOrNo, err := random.IntRange(0, 2)
 	if err != nil {
-		fmt.Println(err.Error(), "fail to do randomAction")
+		fmt.Println(err.Error())
 	}
 
-	if len(user.HistoryOfChoice) != 0 {
-		randomAction = 2
-	} else if len(user.DelegatedTo) != 0 {
-		randomAction = 1
+	quantity_to_Vote, err := NewLiquid(votingPower)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
-	if randomAction == 1 {
-		//Delegation action
-		vi.IndecisiveVote(user, i, user.VotingPower)
+	stringToVote := ""
+	if yesOrNo == 0 {
+		choiceTab["yes"] = quantity_to_Vote
+		stringToVote = "yes"
+	} else {
+		choiceTab["no"] = quantity_to_Vote
+		stringToVote = "no"
+	}
 
-	} else if randomAction == 2 || randomAction == 3 {
-		//Vote action
-		quantity, err := random.IntRange(1, (int(user.VotingPower)/10)+1)
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do quantity to voteAction")
-		}
-		quantity_to_deleg, err := NewLiquid(int(user.VotingPower - quantity*10))
-		if err != nil {
-			fmt.Println(err.Error(), "fail to do quantity to deleg")
-		}
+	//create choice
+	choice, err := NewChoice(choiceTab)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
-		if len(user.HistoryOfChoice) == 0 {
-			yesOrNo, err := random.IntRange(1, 3)
-			if err != nil {
-				fmt.Println(err.Error(), "fail to do yesOrNo ")
-			}
+	//set the choice
+	err = vi.SetVote(user, choice)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
-			if yesOrNo == 1 {
-				vi.YesVote(user, quantity*10)
-			} else {
-				vi.NoVote(user, quantity*10)
-			}
-			vi.IndecisiveVote(user, i, quantity_to_deleg.Percentage)
-		} else if user.HistoryOfChoice[0].VoteValue["no"].Percentage != 0. {
-			vi.NoVote(user, quantity*10)
-			vi.IndecisiveVote(user, i, quantity_to_deleg.Percentage)
-		} else {
-			vi.YesVote(user, quantity*10)
-			vi.IndecisiveVote(user, i, quantity_to_deleg.Percentage)
-		}
+	fmt.Println(user.UserID, " a voté ", votingPower, " à : ", stringToVote, "il était", user.TypeOfUser, "vote to a random")
+}
+
+func (vi *VotingInstance) SplitVPintoActionsYesNo(user *voting.User, i int, votingPowerToSplit int) {
+
+	//at this state we have split in 1, 2 or 3 way the voting power inital (100)
+	quantity1, quantity2, quantity3 := vi.SplitVotingPower(user, i, votingPowerToSplit)
+
+	vi.RandomVoteYesNo(user, i, quantity1*10)
+
+	if quantity2 != 0 {
+		vi.RandomDelegate(user, i, quantity2*10)
+	}
+
+	if quantity3 != 0 { // same as quantity2
+		vi.RandomDelegate(user, i, quantity3*10)
 	}
 }
 
@@ -641,7 +683,7 @@ func (vi *VotingInstance) CandidateVote(user *voting.User, i int, votingPower in
 	}
 }
 
-func (vi *VotingInstance) BreakTheCycleCandidate(user *voting.User, i int, votingPower int) {
+func (vi *VotingInstance) BreakTheCycle(user *voting.User, i int, votingPower int) {
 	RandomAction, err := random.IntRange(0, 101)
 	if err != nil {
 		fmt.Println(err.Error(), "fail to do RandomAction first time")
@@ -649,7 +691,12 @@ func (vi *VotingInstance) BreakTheCycleCandidate(user *voting.User, i int, votin
 	switch {
 	case RandomAction < 62:
 		//forced to vote
-		vi.CandidateVote(user, i, user.VotingPower)
+		if vi.Config.TypeOfVotingConfig == "CandidateQuestion" {
+			vi.CandidateVote(user, i, user.VotingPower)
+		} else {
+			vi.RandomVoteYesNo(user, i, votingPower)
+		}
+
 	default:
 		//delegate to ANOTHER person
 
@@ -689,7 +736,7 @@ func (vi *VotingInstance) BreakTheCycleCandidate(user *voting.User, i int, votin
 	}
 }
 
-func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, votingPower int) {
+func (vi *VotingInstance) IndecisiveVote(user *voting.User, i int, quantityToDeleg int) {
 
 	UsersMappedPercentage := make(map[string]float64)
 
@@ -727,7 +774,7 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, voti
 		IsThereCycle := !graph.Acyclic(g)
 
 		if IsThereCycle {
-			vi.BreakTheCycleCandidate(user, i, votingPower)
+			vi.BreakTheCycle(user, i, quantityToDeleg)
 		} else {
 			//redelegate in the same manner as before
 			total_votingPower_delegated := 0
@@ -741,7 +788,7 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, voti
 			}
 
 			//the case where user have less that 10 voting power, we just redirect it onto his favorite precedent choice
-			if votingPower <= 10 {
+			if quantityToDeleg <= 10 {
 				var prefered_user string
 				var max = 0.
 				for name, val := range UsersMappedPercentage {
@@ -755,7 +802,7 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, voti
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				quantity_to_deleg, err := NewLiquid(votingPower)
+				quantity_to_deleg, err := NewLiquid(quantityToDeleg)
 				if err != nil {
 					fmt.Println(err.Error())
 				}
@@ -768,7 +815,7 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, voti
 			} else {
 				//re-delegate the right amount of the new voting power given the percentage of previous delegation
 				for other, percentage := range UsersMappedPercentage {
-					quantity_to_deleg, err := NewLiquid(int(votingPower * int(percentage) / 100))
+					quantity_to_deleg, err := NewLiquid(int(quantityToDeleg * int(percentage) / 100))
 					if err != nil {
 						fmt.Println(err.Error(), "fail to do quantity to deleg")
 					}
@@ -785,7 +832,7 @@ func (vi *VotingInstance) IndecisiveVoteCandidate(user *voting.User, i int, voti
 		}
 
 	} else {
-		quantity1, quantity2, quantity3 := vi.SplitVotingPower(user, i, votingPower)
+		quantity1, quantity2, quantity3 := vi.SplitVotingPower(user, i, quantityToDeleg)
 
 		vi.RandomDelegate(user, i, quantity1*10)
 
@@ -854,7 +901,10 @@ func (vi *VotingInstance) ThresholdVoteCandidate(user *voting.User, i int, thres
 
 	if total_votingPower_spent > threshold {
 		//Delegation action
-		vi.IndecisiveVoteCandidate(user, i, votingPower)
+		vi.IndecisiveVote(user, i, votingPower)
+	} else if total_votingPower_spent+votingPower > threshold {
+		vi.IndecisiveVote(user, i, total_votingPower_spent+votingPower-threshold)
+		vi.ResponsibleVoteCandidate(user, i, total_votingPower_spent-threshold)
 	} else {
 		//Vote action
 		vi.ResponsibleVoteCandidate(user, i, votingPower)
@@ -864,7 +914,7 @@ func (vi *VotingInstance) ThresholdVoteCandidate(user *voting.User, i int, thres
 func (vi *VotingInstance) NonResponsibleVoteCandidate(user *voting.User, i int, votingPower int) {
 	if len(user.HistoryOfChoice) != 0 || len(user.DelegatedTo) != 0 {
 		//the user already voted => must delegate all (SHY VOTER)
-		vi.IndecisiveVoteCandidate(user, i, votingPower)
+		vi.IndecisiveVote(user, i, votingPower)
 	} else {
 		//the user hasn't voted yet =>
 		//while the user still have some voting power, vote amongst different candidates and delegate
@@ -990,7 +1040,7 @@ func (vi *VotingInstance) ResponsibleVoteCandidate(user *voting.User, i int, vot
 			var total_Percentage_Delegated int = 100 - total_Percentage_Voted
 
 			if total_Percentage_Delegated != 0 {
-				vi.IndecisiveVoteCandidate(user, i, total_Percentage_Delegated/100*votingPower)
+				vi.IndecisiveVote(user, i, total_Percentage_Delegated/100*votingPower)
 			}
 		}
 
@@ -1279,7 +1329,6 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 	}
 
 	fmt.Fprintf(out, "}\n")
-
 }
 
 //Write the necessary information for GraphViz in the buffer given in parameter
@@ -1390,7 +1439,6 @@ func (vi *VotingInstance) ConstructTextForGraph(out io.Writer) {
 	}
 
 	fmt.Fprintf(out, "}\n")
-
 }
 
 //Transfer of voting power between 2 users

@@ -150,7 +150,7 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) {
 				case voting.YesVoter:
 					VoteInstance.CandidateVote(user, i, user.VotingPower)
 				case voting.IndecisiveVoter:
-					VoteInstance.IndecisiveVoteCandidate(user, i, user.VotingPower)
+					VoteInstance.IndecisiveVote(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
 					var threshold = 600
 					VoteInstance.ThresholdVoteCandidate(user, i, threshold, user.VotingPower)
