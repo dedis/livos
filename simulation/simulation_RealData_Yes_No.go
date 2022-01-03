@@ -3,6 +3,7 @@ package simulation
 import (
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 
 	"github.com/dedis/livos/voting"
@@ -12,7 +13,7 @@ import (
 
 // GenerateItemsGraphviz creates a graphviz representation of the items. One can
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
-func Simulation_RealData_Yes_No(out io.Writer) {
+func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) {
 
 	const InitialVotingPower = 100.
 
@@ -20,68 +21,6 @@ func Simulation_RealData_Yes_No(out io.Writer) {
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 	var voters = make([]*voting.User, 0)
-
-	//Random creating of a user and adds it to the list of voters
-
-	// var randomNumOfUser, err = random.IntRange(15, 20)
-	// if err != nil {
-	// 	xerrors.Errorf(err.Error())
-	// }
-
-	// for i := 0; i < randomNumOfUser; i++ {
-	// 	var chooseType, err1 = random.IntRange(1, 101)
-	// 	if err1 != nil {
-	// 		xerrors.Errorf(err.Error())
-	// 	}
-	// 	switch {
-	// 	case chooseType < 5:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.YesVoter, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-	// 	case chooseType < 10:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NoVoter, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-
-	// 	case chooseType < 60:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.IndecisiveVoter, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-	// 	case chooseType < 70:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ThresholdVoter, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-	// 	case chooseType < 80:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.NonResponsibleVoter, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-	// 	case chooseType < 90:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.ResponsibleVoter, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-	// 	default:
-	// 		var user, err = VoteSystem.NewUser("user"+strconv.FormatInt(int64(i), 10), make(map[string]voting.Liquid), make(map[string]voting.Liquid), histoChoice, voting.None, nil)
-	// 		if err != nil {
-	// 			xerrors.Errorf(err.Error())
-	// 		}
-	// 		voters = append(voters, &user)
-	// 	}
-
-	// }
-
-	//Manually entering the number of each categories
 
 	YesNumber := 10
 	NoNumber := 10
@@ -207,6 +146,102 @@ func Simulation_RealData_Yes_No(out io.Writer) {
 	fmt.Println("There is ", counterYesVoter, "yesVoter,", counterNoVoter, "noVoter,", counterThresholdVoter, "Threshold Voter,", counterNonResponsibleVoter, "NonresponsibleVoter,", counterResponsibleVoter, "ResponsibleVoter,", counterIndecisiveVoter, "IndecisiveVoter and", counterNormalVoter, "normalVoter")
 
 	//call de la fonction qui ecrit toutes les infos dans le fichier texte.
-	VoteInstance.ConstructTextForGraph(out)
+	VoteInstance.ConstructTextForGraph(out_liquid)
+	LiquidResults := VoteInstance.GetResults()
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	VoteInstance.SetConfig(VoteInstance.GetConfig())
+
+	for _, user := range VoteInstance.GetConfig().Voters {
+		//creation fo the liquid 100 that will be needed always
+		liquid_100, err := impl.NewLiquid(InitialVotingPower)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+		if len(user.HistoryOfChoice) != 0 {
+			//he voted for at least 1 person
+
+			//build the cumulative of the user to help find the max
+			//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
+			cumulativeHistoryOfChoice := make([]voting.Choice, 0)
+			new_vote_value := make(map[string]voting.Liquid)
+			for _, choice := range user.HistoryOfChoice {
+				for name, value := range choice.VoteValue {
+					var err error
+					new_vote_value[name], err = impl.AddLiquid(new_vote_value[name], value)
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+				}
+			}
+			new_choice, err := impl.NewChoice(new_vote_value)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			cumulativeHistoryOfChoice = append(cumulativeHistoryOfChoice, new_choice)
+
+			//find the max amongs the candidats (in max name)
+			var max_name string
+			var max_value int = 0
+			for _, choiceCumul := range cumulativeHistoryOfChoice {
+				for name, value := range choiceCumul.VoteValue {
+					if value.Percentage > max_value {
+						max_value = value.Percentage
+						max_name = name
+					}
+				}
+			}
+
+			//we construct new historyOfChoice with 100 given to the max_name candidate (the prefered one)
+			new_vote_value = make(map[string]voting.Liquid)
+			new_vote_value[max_name] = liquid_100
+
+			new_choice, err = impl.NewChoice(new_vote_value)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			new_HistoryOfChoice := make([]voting.Choice, 0)
+			new_HistoryOfChoice = append(new_HistoryOfChoice, new_choice)
+
+			user.HistoryOfChoice = new_HistoryOfChoice
+		} else {
+			//the case where the user only delegated : we construct new historyOfChoice with 100 given to the BLANK_candidate
+
+			new_vote_value := make(map[string]voting.Liquid)
+			new_vote_value["blank"] = liquid_100
+
+			new_choice, err := impl.NewChoice(new_vote_value)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			new_HistoryOfChoice := make([]voting.Choice, 0)
+			new_HistoryOfChoice = append(new_HistoryOfChoice, new_choice)
+
+			user.HistoryOfChoice = new_HistoryOfChoice
+		}
+
+		//need to erase the delegatedTo and delegatedFrom
+		EmptyDelegatadMap := make(map[string]voting.Liquid, 0)
+		user.DelegatedTo = EmptyDelegatadMap
+		user.DelegatedFrom = EmptyDelegatadMap
+	}
+
+	//at this state all the historyOfChoice of the users are modified (simplified) for the normal version.
+	//When calling GetResults we obtain results that are traditionnal
+	VoteInstance.ConstructTextForGraph(out_normal)
+
+	NormalResults := VoteInstance.GetResults()
+
+	totalSumOfDifference := 0.
+	fmt.Println("==========================================")
+	fmt.Println("DIFFERENCES PRECISION : ")
+	differenceyes := math.Abs(LiquidResults["yes"] - NormalResults["yes"])
+	differenceno := math.Abs(LiquidResults["no"] - NormalResults["no"])
+	fmt.Println(differenceyes, " => ", "yes")
+	fmt.Println(differenceno, " => ", "no")
+	totalSumOfDifference = differenceno + differenceyes
+	fmt.Println("Total difference : ", totalSumOfDifference)
+	fmt.Println("==========================================")
 }
