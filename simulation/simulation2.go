@@ -112,11 +112,11 @@ func Simulation2(out io.Writer) {
 					VoteInstance.IndecisiveVote(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
 					var threshold = 600
-					VoteInstance.ThresholdVote(user, i, threshold)
+					VoteInstance.ThresholdVote(user, i, threshold, user.VotingPower)
 				case voting.NonResponsibleVoter:
-					VoteInstance.NonResponsibleVote(user, i)
+					VoteInstance.NonResponsibleVote(user, i, user.VotingPower)
 				case voting.ResponsibleVoter:
-					VoteInstance.ResponsibleVote(user, i)
+					VoteInstance.ResponsibleVote(user, i, user.VotingPower)
 				case voting.None:
 					VoteInstance.RandomVote(user, i)
 				}
