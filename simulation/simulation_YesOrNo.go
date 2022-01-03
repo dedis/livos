@@ -13,7 +13,7 @@ import (
 
 // GenerateItemsGraphviz creates a graphviz representation of the items. One can
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
-func Simulation2(out io.Writer) {
+func Simulation_YesOrNo(out io.Writer) {
 
 	const InitialVotingPower = 100.
 
