@@ -178,7 +178,7 @@ func (vi *VotingInstance) GetResultsQuadraticVoting() map[string]float64 {
 			for _, user := range vi.Config.Voters {
 				for _, choice := range user.HistoryOfChoice {
 					intermediateUserResult := float64(choice.VoteValue[candidate.CandidateID].Percentage)
-					rootedUserResult := math.Sqrt(intermediateUserResult/20) * 20
+					rootedUserResult := math.Sqrt(intermediateUserResult) //math.Sqrt(intermediateUserResult/20) * 20
 					candidateResult += rootedUserResult
 				}
 			}
@@ -550,7 +550,7 @@ func (vi *VotingInstance) RandomVoteYesNo(user *voting.User, i int, votingPower 
 	choiceTab := make(map[string]voting.Liquid)
 
 	//index of which candidate does the voter vote for
-	yesOrNo, err := random.IntRange(0, 2)
+	yesOrNo, err := random.IntRange(0, 5) //here 0, 1, 2, 3, 4 => gives 80% chances to pick no and 20% to pick yes
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -1155,11 +1155,28 @@ func (vi *VotingInstance) RandomVoteCandidate(user *voting.User, i int, votingPo
 
 	choiceTab := make(map[string]voting.Liquid)
 
-	//index of which candidate does the voter vote for
+	//index of which candidate does the voter vote for => TO HAVE A BALANCED VOTE !!!!!!!!!!!
 	candidateChoice, err := random.IntRange(0, len(vi.GetConfig().Candidates))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	//non balanced random : 40%, 30%, 20%, 10% => TO HAVE A NON BALANCED VOTE ............
+	// rand, err := random.IntRange(0, 100)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+	// var candidateChoice int
+	// switch {
+	// case rand < 40:
+	// 	candidateChoice = 0
+	// case rand < 70:
+	// 	candidateChoice = 1
+	// case rand < 90:
+	// 	candidateChoice = 2
+	// default:
+	// 	candidateChoice = 3
+	// }
 
 	quantity_to_Vote, err := NewLiquid(votingPower)
 	if err != nil {
@@ -1246,7 +1263,7 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 		s := strconv.FormatInt(int64(j), 10)
 		fmt.Fprintf(out, "user%s [fillcolor=\"%s\" label=\"user%s\"]\n", s, colorOfUser, s)
 	}
-	listOfCOlorCand := []string{"", "magenta", "firebrick", "darkseagreen", "darkolivegreen"}
+	listOfCOlorCand := []string{"", "magenta", "firebrick", "darkseagreen", "darkolivegreen", "blue", "yellow", "green", "red"}
 	for k, cand := range vi.GetConfig().Candidates {
 		colorOfCand := listOfCOlorCand[int(math.Ceil(float64(k+1)/2))] + strconv.FormatInt(int64(2*k%4)+1, 10)
 		fmt.Fprintf(out, "%s [fillcolor=\"%s\" label=\"%s\"]\n", cand.CandidateID, colorOfCand, cand.CandidateID)

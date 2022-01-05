@@ -13,21 +13,31 @@ import (
 
 // GenerateItemsGraphviz creates a graphviz representation of the items. One can
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
-func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) {
+func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) float64 {
 
-	const InitialVotingPower = 100.
+	const InitialVotingPower = 100
 
 	var VoteList = make(map[string]voting.VotingInstance)
 	var VoteSystem = impl.NewVotingSystem(nil, VoteList)
 	var histoChoice = make([]voting.Choice, 0)
 	var voters = make([]*voting.User, 0)
 
-	YesNumber := 10
-	NoNumber := 10
-	IndecisiveNumber := 33
-	ThresholdNumber := 13
-	NonResponsibleNumber := 4
-	ResponsibleNumber := 30
+	const MULTIPLICATOR = 100
+
+	// YesNumber := 11 * MULTIPLICATOR
+	// NoNumber := 11 * MULTIPLICATOR
+	// IndecisiveNumber := 21 * MULTIPLICATOR
+	// ThresholdNumber := 16 * MULTIPLICATOR
+	// NonResponsibleNumber := 1 * MULTIPLICATOR
+	// ResponsibleNumber := 40 * MULTIPLICATOR
+
+	YesNumber := 15 * MULTIPLICATOR
+	NoNumber := 15 * MULTIPLICATOR
+	IndecisiveNumber := 0 * MULTIPLICATOR
+	ThresholdNumber := 19 * MULTIPLICATOR
+	NonResponsibleNumber := 1 * MULTIPLICATOR
+	ResponsibleNumber := 50 * MULTIPLICATOR
+
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -105,7 +115,11 @@ func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) {
 				case voting.IndecisiveVoter:
 					VoteInstance.IndecisiveVote(user, i, user.VotingPower)
 				case voting.ThresholdVoter:
-					var threshold = 600
+					var thresholdPourcentage, err = impl.GenerateRandomThreshold()
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+					var threshold int = thresholdPourcentage * len(voters)
 					VoteInstance.ThresholdVote(user, i, threshold, user.VotingPower)
 				case voting.NonResponsibleVoter:
 					VoteInstance.NonResponsibleVote(user, i, user.VotingPower)
@@ -194,7 +208,7 @@ func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) {
 				}
 			}
 
-			//we construct new historyOfChoice with 100 given to the max_name candidate (the prefered one)
+			//we construct new historyOfChoice with 100 given to the max_name yes/no (the prefered one)
 			new_vote_value = make(map[string]voting.Liquid)
 			new_vote_value[max_name] = liquid_100
 
@@ -207,7 +221,7 @@ func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) {
 
 			user.HistoryOfChoice = new_HistoryOfChoice
 		} else {
-			//the case where the user only delegated : we construct new historyOfChoice with 100 given to the BLANK_candidate
+			//the case where the user only delegated : we construct new historyOfChoice with 100 given to the blank voting
 
 			new_vote_value := make(map[string]voting.Liquid)
 			new_vote_value["blank"] = liquid_100
@@ -237,11 +251,13 @@ func Simulation_RealData_Yes_No(out_liquid io.Writer, out_normal io.Writer) {
 	totalSumOfDifference := 0.
 	fmt.Println("==========================================")
 	fmt.Println("DIFFERENCES PRECISION : ")
-	differenceyes := math.Abs(LiquidResults["yes"] - NormalResults["yes"])
-	differenceno := math.Abs(LiquidResults["no"] - NormalResults["no"])
-	fmt.Println(differenceyes, " => ", "yes")
-	fmt.Println(differenceno, " => ", "no")
-	totalSumOfDifference = differenceno + differenceyes
+	difference_Yes := math.Abs(LiquidResults["yes"] - NormalResults["yes"])
+	difference_No := math.Abs(LiquidResults["no"] - NormalResults["no"])
+	fmt.Println(difference_Yes, " => ", "yes")
+	fmt.Println(difference_No, " => ", "no")
+	totalSumOfDifference = difference_No + difference_Yes
 	fmt.Println("Total difference : ", totalSumOfDifference)
 	fmt.Println("==========================================")
+
+	return totalSumOfDifference
 }

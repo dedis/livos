@@ -13,7 +13,7 @@ import (
 
 // GenerateItemsGraphviz creates a graphviz representation of the items. One can
 // generate a graphical representation with `dot -Tpdf graph.dot -o graph.pdf`
-func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
+func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) float64 {
 
 	const InitialVotingPower = 100
 
@@ -78,11 +78,22 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 
 	//Manually entering the number of each categories
 
-	CandVoterNumber := 25
-	IndecisiveNumber := 22
-	ThresholdNumber := 18
-	NonResponsibleNumber := 5
-	ResponsibleNumber := 43
+	const MULTIPLICATOR = 1
+
+	//Realist data
+	// CandVoterNumber := 23 * MULTIPLICATOR
+	// IndecisiveNumber := 20 * MULTIPLICATOR
+	// ThresholdNumber := 16 * MULTIPLICATOR
+	// NonResponsibleNumber := 1 * MULTIPLICATOR
+	// ResponsibleNumber := 40 * MULTIPLICATOR
+
+	//Realist Data (without indecisive)
+	CandVoterNumber := 29 * MULTIPLICATOR
+	IndecisiveNumber := 0
+	ThresholdNumber := 20 * MULTIPLICATOR
+	NonResponsibleNumber := 1 * MULTIPLICATOR
+	ResponsibleNumber := 50 * MULTIPLICATOR
+
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
 	i := 0
@@ -122,15 +133,19 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 		voters = append(voters, &user)
 	}
 
-	fmt.Println("voters list is : ", voters)
+	//fmt.Println("voters list is : ", voters)
 
 	//candidats inputs
 	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
 	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
 	var candidatJeanMi, _ = VoteSystem.NewCandidate("JeanMi")
 	var candidatMacron, _ = VoteSystem.NewCandidate("Macron")
+	var candidatAlice, _ = VoteSystem.NewCandidate("Alice")
+	var candidatBob, _ = VoteSystem.NewCandidate("Bob")
+	var candidatCharlie, _ = VoteSystem.NewCandidate("Charlie")
+	var candidatDaniel, _ = VoteSystem.NewCandidate("Daniel")
 
-	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatJeanMi, &candidatMacron}
+	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatJeanMi, &candidatMacron, &candidatAlice, &candidatBob, &candidatCharlie, &candidatDaniel}
 
 	//empty list of votes
 	//var votes = make(map[string]voting.Choice)
@@ -303,4 +318,6 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) {
 	}
 	fmt.Println("Total difference : ", totalSumOfDifference)
 	fmt.Println("==========================================")
+
+	return totalSumOfDifference
 }
