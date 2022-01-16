@@ -78,11 +78,11 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) float64 {
 	const MULTIPLICATOR = 1
 
 	//Realist data
-	CandVoterNumber := 23 * MULTIPLICATOR
-	IndecisiveNumber := 20 * MULTIPLICATOR
-	ThresholdNumber := 16 * MULTIPLICATOR
-	NonResponsibleNumber := 1 * MULTIPLICATOR
-	ResponsibleNumber := 40 * MULTIPLICATOR
+	// CandVoterNumber := 23 * MULTIPLICATOR
+	// IndecisiveNumber := 20 * MULTIPLICATOR
+	// ThresholdNumber := 16 * MULTIPLICATOR
+	// NonResponsibleNumber := 1 * MULTIPLICATOR
+	// ResponsibleNumber := 40 * MULTIPLICATOR
 
 	//Realist Data (without indecisive)
 	// CandVoterNumber := 29 * MULTIPLICATOR
@@ -90,6 +90,13 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) float64 {
 	// ThresholdNumber := 20 * MULTIPLICATOR
 	// NonResponsibleNumber := 1 * MULTIPLICATOR
 	// ResponsibleNumber := 50 * MULTIPLICATOR
+
+	//data for graphic simulation
+	CandVoterNumber := 4
+	IndecisiveNumber := 4
+	ThresholdNumber := 3
+	NonResponsibleNumber := 1
+	ResponsibleNumber := 5
 
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
@@ -134,16 +141,16 @@ func Simulation_candidats_QV(out io.Writer, outQV io.Writer) float64 {
 	//candidats
 	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
 	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
-	var candidatJeanMi, _ = VoteSystem.NewCandidate("JeanMi")
+	var candidatBiden, _ = VoteSystem.NewCandidate("Biden")
 	var candidatMacron, _ = VoteSystem.NewCandidate("Macron")
 
-	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatJeanMi, &candidatMacron}
+	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatBiden, &candidatMacron}
 
 	//empty list of votes
 	//var votes = make(map[string]voting.Choice)
 
 	//creation of votingConfig
-	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Who are you gonna elect as a President ?", candidats, "CandidateQuestion")
+	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Which are you gonna elect as a President ?", candidats, "CandidateQuestion")
 	if err != nil {
 		fmt.Println(err.Error())
 	}

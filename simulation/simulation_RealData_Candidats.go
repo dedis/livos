@@ -78,7 +78,7 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) f
 
 	//Manually entering the number of each categories
 
-	const MULTIPLICATOR = 1
+	const MULTIPLICATOR = 50
 
 	//Realist data
 	// CandVoterNumber := 23 * MULTIPLICATOR
@@ -88,11 +88,18 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) f
 	// ResponsibleNumber := 40 * MULTIPLICATOR
 
 	//Realist Data (without indecisive)
-	CandVoterNumber := 29 * MULTIPLICATOR
-	IndecisiveNumber := 0
-	ThresholdNumber := 20 * MULTIPLICATOR
-	NonResponsibleNumber := 1 * MULTIPLICATOR
-	ResponsibleNumber := 50 * MULTIPLICATOR
+	// CandVoterNumber := 29 * MULTIPLICATOR
+	// IndecisiveNumber := 0
+	// ThresholdNumber := 20 * MULTIPLICATOR
+	// NonResponsibleNumber := 1 * MULTIPLICATOR
+	// ResponsibleNumber := 50 * MULTIPLICATOR
+
+	//data for graphic simulation
+	CandVoterNumber := 3
+	IndecisiveNumber := 4
+	ThresholdNumber := 3
+	NonResponsibleNumber := 1
+	ResponsibleNumber := 4
 
 	//TotalNumber := NonResponsibleNumber + YesNumber + NoNumber + IndecisiveNumber + ThresholdNumber
 
@@ -135,23 +142,19 @@ func Simulation_RealData_Candidats(out_liquid io.Writer, out_normal io.Writer) f
 
 	//fmt.Println("voters list is : ", voters)
 
-	//candidats inputs
-	var candidatTrump, _ = VoteSystem.NewCandidate("Trump")
-	var candidatObama, _ = VoteSystem.NewCandidate("Obama")
-	var candidatJeanMi, _ = VoteSystem.NewCandidate("JeanMi")
-	var candidatMacron, _ = VoteSystem.NewCandidate("Macron")
-	var candidatAlice, _ = VoteSystem.NewCandidate("Alice")
-	var candidatBob, _ = VoteSystem.NewCandidate("Bob")
-	var candidatCharlie, _ = VoteSystem.NewCandidate("Charlie")
-	var candidatDaniel, _ = VoteSystem.NewCandidate("Daniel")
+	//candidats
+	var candidatIC, _ = VoteSystem.NewCandidate("IC")
+	var candidatSV, _ = VoteSystem.NewCandidate("SV")
+	var candidatMECA, _ = VoteSystem.NewCandidate("MECA")
+	var candidatMICRO, _ = VoteSystem.NewCandidate("MICRO")
 
-	var candidats = []*voting.Candidate{&candidatObama, &candidatTrump, &candidatJeanMi, &candidatMacron, &candidatAlice, &candidatBob, &candidatCharlie, &candidatDaniel}
+	var candidats = []*voting.Candidate{&candidatIC, &candidatSV, &candidatMECA, &candidatMICRO}
 
 	//empty list of votes
 	//var votes = make(map[string]voting.Choice)
 
 	//creation of votingConfig
-	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Who are you gonna elect as a President ?", candidats, "CandidateQuestion")
+	voteConfig, err := impl.NewVotingConfig(voters, "Simulation 1", "Which EPFL faculty is the best ?", candidats, "CandidateQuestion")
 	if err != nil {
 		fmt.Println(err.Error())
 	}

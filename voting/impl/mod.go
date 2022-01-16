@@ -1206,7 +1206,6 @@ func (vi *VotingInstance) RandomVoteCandidate(user *voting.User, i int, votingPo
 func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results map[string]float64) {
 
 	counterCandidateVoter := 0
-	counterNoVoter := 0
 	counterIndecisiveVoter := 0
 	counterThresholdVoter := 0
 	counterNormalVoter := 0
@@ -1216,8 +1215,6 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 		//fmt.Println("Voting power of ", user.UserID, " = ", user.VotingPower, "il était de type", user.TypeOfUser)
 		if user.TypeOfUser == "CandVoter" {
 			counterCandidateVoter++
-		} else if user.TypeOfUser == "NoVoter" {
-			counterNoVoter++
 		} else if user.TypeOfUser == "IndecisiveVoter" {
 			counterIndecisiveVoter++
 		} else if user.TypeOfUser == "ThresholdVoter" {
@@ -1245,27 +1242,28 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 
 	for j, user := range vi.GetConfig().Voters {
 		colorOfUser := "black"
-		if user.TypeOfUser == "YesVoter" { //YesVoter
-			colorOfUser = "darkolivegreen"
-		} else if user.TypeOfUser == "NoVoter" { //NoVoter
-			colorOfUser = "darkorange1"
+		if user.TypeOfUser == "CandVoter" { //CandVoter
+			colorOfUser = "darkolivegreen2"
 		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
-			colorOfUser = "seashell4"
+			colorOfUser = "gold"
 		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
-			colorOfUser = "gold2"
+			colorOfUser = "orchid2"
 		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
-			colorOfUser = "hotpink1"
+			colorOfUser = "darkgoldenrod1"
 		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
-			colorOfUser = "deepskyblue3"
+			colorOfUser = "lightskyblue"
 		} else { //NormalVoter
 			colorOfUser = "white"
 		}
 		s := strconv.FormatInt(int64(j), 10)
 		fmt.Fprintf(out, "user%s [fillcolor=\"%s\" label=\"user%s\"]\n", s, colorOfUser, s)
 	}
-	listOfCOlorCand := []string{"", "magenta", "firebrick", "darkseagreen", "darkolivegreen", "blue", "yellow", "green", "red"}
+
+	listOfCOlorCand := []string{"orange2", "salmon", "tomato2", "chocolate"}
+
 	for k, cand := range vi.GetConfig().Candidates {
-		colorOfCand := listOfCOlorCand[int(math.Ceil(float64(k+1)/2))] + strconv.FormatInt(int64(2*k%4)+1, 10)
+		//colorOfCand := listOfCOlorCand[int(math.Ceil(float64(k+1)/2))] + strconv.FormatInt(int64(2*k%4)+1, 10)
+		colorOfCand := listOfCOlorCand[k%len(listOfCOlorCand)]
 		fmt.Fprintf(out, "%s [fillcolor=\"%s\" label=\"%s\"]\n", cand.CandidateID, colorOfCand, cand.CandidateID)
 	}
 	fmt.Fprintf(out, "}\n")
@@ -1275,24 +1273,23 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 
 		colorDeleg := "#8A2BE2"
 		colorOfUser := "black"
-		if user.TypeOfUser == "YesVoter" { //YesVoter
-			colorOfUser = "darkolivegreen"
-		} else if user.TypeOfUser == "NoVoter" { //NoVoter
-			colorOfUser = "darkorange1"
+		if user.TypeOfUser == "CandVoter" { //CandVoter
+			colorOfUser = "darkolivegreen2"
 		} else if user.TypeOfUser == "IndecisiveVoter" { //IndecisiveVoter
-			colorOfUser = "seashell4"
+			colorOfUser = "gold"
 		} else if user.TypeOfUser == "ThresholdVoter" { //ThresholdVoter
-			colorOfUser = "gold2"
+			colorOfUser = "orchid2"
 		} else if user.TypeOfUser == "NonResponsibleVoter" { //NonResponsibleVoter
-			colorOfUser = "hotpink1"
+			colorOfUser = "darkgoldenrod1"
 		} else if user.TypeOfUser == "ResponsibleVoter" { //ResponsibleVoter
-			colorOfUser = "deepskyblue3"
+			colorOfUser = "lightskyblue"
 		} else { //NormalVoter
-			colorOfUser = "black"
+			colorOfUser = "white"
 		}
 
-		//bruteforce tab with all different possible colors
-		var color = []string{"#12B2F5", "#2AEF56", "#FF78EC", "#EAC224", "#F53024", "#A107DE", "#112AE8", "#FF8F00"}
+		//bruteforce tab with all different possible colors of ARROWS
+		//var color = []string{"#12B2F5", "#2AEF56", "#FF78EC", "#EAC224", "#F53024", "#A107DE", "#112AE8", "#FF8F00"}
+		var color = []string{"orange2", "salmon", "tomato2", "chocolate"}
 
 		//creation d'un tableau qui a les cumulative values (plus simple pour le graph)
 		cumulativeHistoryOfChoice := make([]voting.Choice, 0)
@@ -1325,7 +1322,7 @@ func (vi *VotingInstance) ConstructTextForGraphCandidates(out io.Writer, results
 					}
 					fmt.Fprintf(out, "\"%v\" -> \"%v\" "+
 						"[ label = < <font color='%v'><b>%v</b></font><br/>> color=\"%s\" penwidth=%v];\n",
-						user.UserID, cand.CandidateID, colorOfUser, choice.VoteValue[cand.CandidateID].Percentage, color[index%len(color)], sizeArrow/20)
+						user.UserID, cand.CandidateID, colorOfUser, choice.VoteValue[cand.CandidateID].Percentage, color[(index)%len(color)], sizeArrow/20)
 				}
 			}
 		}
