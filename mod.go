@@ -144,7 +144,7 @@ func main() {
 
 	/* fmt.Println("RESULTS OF THE VOTE ====> ", vi.GetResults()) */
 
-	mux.HandleFunc("/", ctrl.HandleHome)
+	mux.HandleFunc("/", ctrl.HandleHomePage)
 	mux.HandleFunc("/homepage", ctrl.HandleHomePage)
 	mux.HandleFunc("/electionCandidateQuestion", ctrl.HandleShowElectionCandidate)
 	mux.HandleFunc("/electionYesOrNoQuestion", ctrl.HandleShowElectionYesNo)
