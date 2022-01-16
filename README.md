@@ -15,18 +15,23 @@ To start it, run in the terminal
 
 ## Website application
 The webpackage contains all the frontend implementation.
+
 ![This is the Homepage](/web/images/HomepageEmpty.PNG)
 ![This is the Homepage with rooms](/web/images/HomePageManyRooms.PNG)
 
 You can create Voting rooms, enter by clicking on the room number, manage the voting session to change the parameters and vote/delegate choosing the user and the candidates/referendum choice the user votes for or the voter the user delegates to.
+
 ![This is the Creation page](/web/images/CreationPage.PNG)
 ![This is the Voting room](/web/images/ElectionRoomEmpty.PNG)
 ![This is the Managing page](/web/images/ManageOneRoom.PNG)
 
 In order to see the results of the election/referendum, you need close the room and enter it.
+
 ![This is the Result page](/web/images/ResultsOfRoom.PNG)
 
+
 You also need to already have installed viz.js in order to be able to displays the graphs of the current state of the vote.
+
 ![This is the graph of the state of the vote](/web/images/GraphRenderedOnWebSite.PNG)
 
 ## Simulations
@@ -38,6 +43,7 @@ Then run the command in the terminal
 If you run only one simulation, this will generate an output text file that needs to be fed to graphviz (you need to have imported Graphviz before) with the command :
 > dot -Tpdf outpuSimulation -o outputSimulation.pdf
 This will generate a pdf representing the graph of the vote.
+
 ![This is a example of the final graph of the vote](/web/images/Graph_best_faculty.PNG)
 
 You can learn more about our project in our [Report](/LIVOSProjectReport.pdf)
